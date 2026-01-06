@@ -64,10 +64,10 @@
             width: 100%;
             padding: 12px;
             background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border-light);
+            border:1px solid var(--border-light);
             border-radius: 8px;
             color: white;
-            margin-bottom: 1rem;
+            margin-bottom:1rem;
             font-family: inherit;
             box-sizing: border-box;
             transition: 0.2s;
@@ -173,7 +173,7 @@
             -webkit-overflow-scrolling: touch;
             border-radius: 12px;
             background: var(--bg-card);
-            border: 1px solid var(--border-light);
+            border:1px solid var(--border-light);
         }
         table {
             width: 100%;
@@ -196,6 +196,10 @@
             font-weight: 700;
             display: inline-block;
         }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .status-paid, .status-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .status-open { background: rgba(59, 130, 246, 0.2); color: var(--accent-primary); }
         .role-badge {
             padding: 4px 10px;
             border-radius: 4px;
@@ -230,6 +234,7 @@
         .admin-card h3 { margin-bottom: 1rem; color: white; font-size: 1rem; margin-top: 0; }
         .form-row { margin-bottom: 1rem; text-align: left; }
         .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
+        .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
 
         /* ALERTS */
         .alert-box {
@@ -241,7 +246,7 @@
         }
         .alert-text { font-size: 0.9rem; color: white; font-weight: 600; }
 
-        /* MODAL */
+        /* MODAL (EDIT USER) */
         .modal {
             display: none;
             position: fixed;
@@ -403,7 +408,7 @@
             <div id="tab-users" class="tab-content">
                 <div class="section-header">
                     <h2>User Management</h2>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Upgrade users to Admin role.</p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Edit users and change roles here.</p>
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -613,29 +618,33 @@
         </div>
     </div>
 
-    <!-- TICKET MODAL -->
-    <div id="ticketModal" class="modal">
+    <!-- EDIT USER MODAL (Added back) -->
+    <div id="editUserModal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Update Ticket</h3>
-                <i class="ri-close-line" onclick="closeModal('ticketModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+                <h3 style="margin:0;">Manage User Role</h3>
+                <i class="ri-close-line" onclick="closeModal('editUserModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
             </div>
-            <input type="hidden" id="ticket-id">
+            <input type="hidden" id="edit-uid">
             <div class="form-row">
-                <label>New Status</label>
-                <select id="ticket-status-select" style="width: 100%;">
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Resolved">Resolved</option>
+                <label>Full Name</label>
+                <input type="text" id="edit-name" placeholder="John Doe">
+            </div>
+            <div class="form-row">
+                <label>Phone Number</label>
+                <input type="tel" id="edit-phone" placeholder="0123456789">
+            </div>
+            <div class="form-row">
+                <label>Role (Permissions)</label>
+                <!-- THIS IS THE DROPDOWN TO "EDIT USER AS ADMIN" -->
+                <select id="edit-role" style="width: 100%;">
+                    <option value="user">Standard User</option>
+                    <option value="admin">Admin (Full Access)</option>
                 </select>
             </div>
-            <div class="form-row">
-                <label>Admin Note</label>
-                <textarea id="ticket-admin-note" rows="3" placeholder="Add a note for customer..."></textarea>
-            </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
-                <button onclick="saveTicket()" style="background: var(--success);">Update Ticket</button>
-                <button class="secondary" onclick="closeModal('ticketModal')">Cancel</button>
+                <button onclick="saveUser()" style="background: var(--success);">Update User</button>
+                <button class="secondary" onclick="closeModal('editUserModal')">Cancel</button>
             </div>
         </div>
     </div>
@@ -681,28 +690,26 @@
             ]
         };
 
-        // AUTH LOGIC (ROLE CHECK)
-        // ==========================================
-        // IMPORTANT: We use 'onSnapshot' (Real-time listener) instead of 'get' (one-time).
-        // This ensures that if the role is updated by the Login button,
-        // this listener catches it INSTANTLY and opens the dashboard.
-        // ==========================================
+        // AUTH LOGIC (ROLE CHECK + SUPER ADMIN BOOTSTRAP)
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Real-time listener for Role
-                db.collection("users").doc(user.uid).onSnapshot((doc) => {
+                // Fetch user data to check role
+                db.collection("users").doc(user.uid).get().then((doc) => {
                     if (doc.exists && doc.data().role === 'admin') {
-                        // User is Admin
+                        // User is admin
                         document.getElementById('login-screen').style.display = 'none';
                         document.getElementById('dashboard').style.display = 'flex';
                         loadDashboardData();
                     } else {
                         // User is not admin
                         auth.signOut();
+                        alert("ACCESS DENIED: You do not have permission to access this portal.");
                         document.getElementById('login-screen').style.display = 'flex';
                         document.getElementById('dashboard').style.display = 'none';
-                        alert("ACCESS DENIED: You do not have permission to access this portal.");
                     }
+                }).catch((err) => {
+                    console.error("Error checking role:", err);
+                    alert("Error verifying permissions.");
                 });
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -712,7 +719,7 @@
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('admin-email').value.trim().toLowerCase();
+            const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
             
             auth.signInWithEmailAndPassword(email, password)
@@ -722,26 +729,29 @@
                     // ==========================================
                     // ONE-TIME SETUP LOGIC (BOOTSTRAP)
                     // ==========================================
-                    // If this is the main owner account, we FORCE update their role to 'admin'
-                    // This happens BEFORE the auth state change listener checks.
+                    // If this is the main owner account (ddnetwork.one@outlook.com)
+                    // ensure they have the 'admin' role in the database automatically.
                     if (user.email.toLowerCase() === ADMIN_EMAIL) {
                         console.log("Main Admin detected. Bootstrapping Admin Role...");
                         
                         const userRef = db.collection("users").doc(user.uid);
                         
                         // 'update' specifically overwrites the 'role' field.
-                        // We use merge: true to keep existing name/phone if they exist, 
-                        // but the 'role' field is forcibly set to 'admin'.
+                        // We use { merge: true } so we don't overwrite existing name/phone if you've used the site before.
                         userRef.update({
-                            role: 'admin'
-                        })
-                        .then(() => {
-                            alert("SUCCESS: Admin Role Updated Automatically! Logging in...");
-                            // We do NOT sign out here. We let the onSnapshot listener handle the transition.
-                        })
-                        .catch((err) => {
+                            role: 'admin',
+                            name: doc.exists ? (doc.data().name || "Admin") : "Admin",
+                            phone: doc.exists ? (doc.data().phone || "") : "",
+                            email: user.email
+                        }, { merge: true }).then(() => {
+                            // We do NOT sign out here. The onAuthStateChanged listener (above) will see the role update 
+                            // and automatically grant access.
+                            alert("SUCCESS: Admin Role Applied Automatically! \n\nYou now have Admin privileges.");
+                            // Force refresh UI
+                            window.location.reload();
+                        }).catch((err) => {
                             console.error("Bootstrap Error:", err);
-                            alert("Error updating role: " + err.message);
+                            alert("Error applying admin role: " + err.message);
                         });
                     } else {
                         // Not main admin
@@ -1055,14 +1065,14 @@
 
         // --- ORDER MANAGEMENT ---
         function openOrderModal(orderId, currentStatus, note) {
-            document.getElementById('status-order-id').value = orderId;
+            document.getElementById('ticket-id').value = orderId;
             document.getElementById('ticket-status-select').value = currentStatus;
             document.getElementById('ticket-admin-note').value = note || '';
             document.getElementById('ticketModal').classList.add('open');
         }
 
         function saveTicket() {
-            const id = document.getElementById('status-order-id').value;
+            const id = document.getElementById('ticket-id').value;
             const status = document.getElementById('ticket-status-select').value;
             const note = document.getElementById('ticket-admin-note').value;
             
