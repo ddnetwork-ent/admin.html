@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DDNetwork Internal Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -21,6 +21,8 @@
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
+            --alert-bg: rgba(245, 158, 11, 0.1);
+            --alert-border: #f59e0b;
         }
         body {
             background-color: var(--bg-deep);
@@ -30,7 +32,7 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; 
+            overflow: hidden;
         }
 
         /* LOGIN SCREEN */
@@ -44,7 +46,7 @@
             top: 0;
             left: 0;
             background: var(--bg-deep);
-            z-index: 300; /* Higher than Dock */
+            z-index: 200;
         }
         .login-card {
             background: var(--bg-card);
@@ -58,7 +60,7 @@
         }
         .login-card h2 { margin-bottom: 1.5rem; color: white; text-transform: uppercase; letter-spacing: 1px; }
         
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             background: rgba(255,255,255,0.05);
@@ -70,7 +72,8 @@
             box-sizing: border-box;
             transition: 0.2s;
         }
-        input:focus, select:focus { border-color: var(--accent-primary); outline: none; background: rgba(59, 130, 246, 0.05); }
+        textarea { height: 150px; resize: vertical; } /* Taller for list editing */
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-primary); outline: none; background: rgba(59, 130, 246, 0.05); }
         
         button {
             width: 100%;
@@ -95,20 +98,19 @@
             height: 100vh;
             width: 100%;
             display: flex;
-            flex-direction: row; 
+            flex-direction: row;
         }
         
-        /* SIDEBAR (Desktop Default) */
+        /* SIDEBAR (Desktop) */
         .sidebar {
             width: 260px;
             background: var(--bg-card);
-            border-right: 1px solid var(--border-light);
+            border-right:1px solid var(--border-light);
             padding: 2rem 1rem;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             z-index: 10;
-            transition: transform 0.3s ease;
         }
         .brand {
             font-size: 1.1rem;
@@ -147,7 +149,6 @@
             padding: 2rem;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 100px;
         }
 
         /* TABS & TABLES */
@@ -177,13 +178,13 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px; /* Force scroll on small screens */
+            min-width: 700px;
         }
         th, td {
             text-align: left;
             padding: 1rem;
             border-bottom: 1px solid var(--border-light);
-            white-space: nowrap; /* Prevent text wrapping inside cells */
+            white-space: nowrap;
         }
         th { background: rgba(255,255,255,0.02); font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
         tr:last-child td { border-bottom: none; }
@@ -198,6 +199,7 @@
         .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
         .status-paid, .status-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
         .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .status-open { background: rgba(59, 130, 246, 0.2); color: var(--accent-primary); }
 
         .action-btn {
             background: none;
@@ -212,13 +214,36 @@
         }
         .action-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: var(--text-secondary); }
 
+        /* ADMIN CARDS */
+        .admin-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+        }
+        .admin-card h3 { margin-bottom: 1rem; color: white; font-size: 1rem; margin-top: 0; }
+        .form-row { margin-bottom: 1rem; text-align: left; }
+        .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
+        .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+        /* ALERTS */
+        .alert-box {
+            padding: 1rem;
+            border-radius: 8px;
+            background: var(--alert-bg);
+            border-left: 4px solid var(--alert-border);
+            margin-bottom: 1rem;
+        }
+        .alert-text { font-size: 0.9rem; color: white; font-weight: 600; }
+
         /* MODAL */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
-            z-index: 1000; /* Higher than Dock */
+            z-index: 1000;
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(5px);
@@ -232,97 +257,60 @@
             max-width: 500px;
             border: 1px solid var(--border-light);
             box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            animation: scaleIn 0.2s ease;
         }
         .modal-content h3 { margin-top: 0; color: white; margin-bottom: 1.5rem; }
-        .form-row { margin-bottom: 1rem; text-align: left; }
-        .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
-
-        /* PROMO FORM SPECIFIC */
-        .promo-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;}
-
-        /* --- MOBILE RESPONSIVENESS (MAC DOCK STYLE) --- */
+        
+        /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 768px) {
             #dashboard {
                 flex-direction: column;
             }
 
-            /* 1. HIDE DESKTOP SIDEBAR */
             .sidebar {
-                display: none; 
-            }
-
-            /* 2. SHOW MAC DOCK STYLE NAVIGATION */
-            .mac-dock-container {
-                display: flex !important;
-                z-index: 200; /* Above Login, below Modal */
-            }
-
-            /* DOCK STYLING */
-            .mac-dock {
+                width: 100%;
+                height: auto;
+                padding: 0.8rem;
+                flex-direction: row;
                 position: fixed;
-                bottom: 25px; /* Float from bottom */
-                left: 50%;    /* Center horizontally */
-                transform: translateX(-50%);
-                display: flex;
-                gap: 20px;
-                background: rgba(20, 20, 20, 0.75); /* Dark glass */
-                backdrop-filter: blur(15px); /* Heavy blur */
-                -webkit-backdrop-filter: blur(15px);
-                padding: 10px 25px;
-                border-radius: 30px; /* Very rounded */
-                border: 1px solid rgba(255,255,255,0.15);
-                box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-                width: auto; /* Fit content */
-                transition: all 0.3s ease;
+                bottom: 0;
+                left: 0;
+                top: auto;
+                right: 0;
+                border-right: none;
+                border-top: 1px solid var(--border-light);
+                overflow-x: auto;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+                z-index: 50;
             }
 
-            /* ICON STYLING */
-            .dock-item {
-                position: relative;
-                display: flex;
+            .brand { display: none; }
+            .logout-btn { display: none; }
+
+            .nav-item {
+                flex: 0 0 auto;
                 flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                width: 50px;
-                height: 50px;
-                cursor: pointer;
-                transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Apple spring */
-                color: var(--text-secondary);
-                font-size: 1.4rem;
+                gap: 4px;
+                margin-bottom: 0;
+                padding: 8px 12px;
+                font-size: 0.7rem;
+                border-radius: 6px;
+                border-left: 2px solid transparent;
             }
-
-            /* Hide text labels on mobile, keep icons */
-            .dock-item span { display: none; }
-
-            /* HOVER EFFECT */
-            .dock-item:hover {
+            .nav-item:hover, .nav-item.active {
+                background: rgba(255,255,255,0.05);
                 color: white;
-                transform: scale(1.1);
+                border-left: 2px solid var(--accent-primary);
+            }
+            .nav-item i { font-size: 1.3rem; color: var(--text-secondary); }
+            .nav-item.active i { color: var(--accent-primary); }
+
+            .main-content {
+                padding: 1.5rem 1rem;
+                margin-bottom: 70px;
             }
 
-            /* ACTIVE EFFECT (Mac Dock Jump) */
-            .dock-item.active {
-                color: var(--accent-primary);
-                transform: scale(1.3) translateY(-15px); /* Jump up */
-                text-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
-            }
-
-            /* Active Dot Indicator (Optional) */
-            .dock-item.active::after {
-                content: '';
-                position: absolute;
-                bottom: -5px;
-                width: 4px;
-                height: 4px;
-                background: var(--accent-primary);
-                border-radius: 50%;
-            }
-
-            /* Logout Icon in Dock (Special placement) */
-            .dock-item.logout {
-                color: var(--danger);
-            }
+            .section-header h2 { font-size: 1.2rem; }
+            button { font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -346,8 +334,6 @@
 
     <!-- DASHBOARD -->
     <div id="dashboard" style="display: none;">
-        
-        <!-- SIDEBAR (Desktop Only) -->
         <div class="sidebar">
             <div class="brand"><i class="ri-shield-user-fill"></i> DDN Admin</div>
             
@@ -357,34 +343,24 @@
             <div class="nav-item" onclick="switchTab('users')">
                 <i class="ri-group-line"></i> <span>Users</span>
             </div>
+            <div class="nav-item" onclick="switchTab('support')">
+                <i class="ri-customer-service-2-line"></i> <span>Support</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('vouchers')">
+                <i class="ri-gift-line"></i> <span>Assign Vouchers</span>
+            </div>
             <div class="nav-item" onclick="switchTab('promos')">
-                <i class="ri-ticket-2-line"></i> <span>Promo Codes</span>
+                <i class="ri-coupon-3-line"></i> <span>Promo</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('maintenance')">
+                <i class="ri-settings-4-line"></i> <span>Config</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('content')">
+                <i class="ri-file-list-3-line"></i> <span>Content</span>
             </div>
             
             <div class="nav-item logout-btn" onclick="handleLogout()">
                 <i class="ri-logout-box-r-line"></i> <span>Logout</span>
-            </div>
-        </div>
-
-        <!-- MAC DOCK (Mobile Only) -->
-        <div class="mac-dock-container" style="display: none;">
-            <div class="mac-dock">
-                <div class="dock-item active" onclick="switchTab('orders')">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    <span>Orders</span>
-                </div>
-                <div class="dock-item" onclick="switchTab('users')">
-                    <i class="ri-group-line"></i>
-                    <span>Users</span>
-                </div>
-                <div class="dock-item" onclick="switchTab('promos')">
-                    <i class="ri-ticket-2-line"></i>
-                    <span>Promo</span>
-                </div>
-                <div class="dock-item logout" onclick="handleLogout()">
-                    <i class="ri-logout-box-r-line"></i>
-                    <span>Logout</span>
-                </div>
             </div>
         </div>
 
@@ -411,7 +387,6 @@
                             </tr>
                         </thead>
                         <tbody id="orders-table-body">
-                            <!-- JS will populate this -->
                             <tr>
                                 <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading orders...</td>
                             </tr>
@@ -424,9 +399,6 @@
             <div id="tab-users" class="tab-content">
                 <div class="section-header">
                     <h2>Users</h2>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                        <i class="ri-user-settings-line"></i> Manage Accounts
-                    </div>
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -439,10 +411,89 @@
                             </tr>
                         </thead>
                         <tbody id="users-table-body">
-                            <!-- JS will populate this -->
-                             <tr>
+                            <tr>
                                 <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading users...</td>
                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SUPPORT TAB -->
+            <div id="tab-support" class="tab-content">
+                <div class="section-header">
+                    <h2>Support Tickets</h2>
+                </div>
+
+                <div class="table-responsive" style="margin-bottom: 2rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Issue Type</th>
+                                <th>Customer</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tickets-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VOUCHERS TAB -->
+            <div id="tab-vouchers" class="tab-content">
+                <div class="section-header">
+                    <h2>Assign Voucher</h2>
+                </div>
+                
+                <div class="voucher-form">
+                    <h3 style="margin-bottom: 1rem; color: white; font-size: 1rem;">Send Gift Voucher</h3>
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                        <div style="grid-column: 1 / -1;">
+                            <label>Select Customer</label>
+                            <select id="voucher-user-select" style="margin-bottom: 0;">
+                                <option value="" disabled selected>Loading Users...</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label>Voucher Code</label>
+                            <input type="text" id="voucher-code" placeholder="e.g. GIFT50">
+                        </div>
+                        <div>
+                            <label>Value</label>
+                            <div style="display: flex; gap: 5px;">
+                                <input type="number" id="voucher-val" placeholder="50" step="1">
+                                <select id="voucher-type" style="width: auto;">
+                                    <option value="fixed">RM</option>
+                                    <option value="percent">%</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="assignVoucher()" style="margin-top: 1rem;">Assign Voucher to User</button>
+                </div>
+
+                <div class="table-responsive" style="margin-top: 2rem;">
+                    <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Recent Voucher Assignments</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Code</th>
+                                <th>Value</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voucher-table-body">
+                            <!-- Populated by JS -->
                         </tbody>
                     </table>
                 </div>
@@ -454,19 +505,13 @@
                     <h2>Promo Codes</h2>
                 </div>
                 
-                <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--border-light);">
-                    <h3 style="margin-bottom: 1rem; color: white; font-size: 1rem;">Create New Promo</h3>
-                    
-                    <span class="promo-label">Current system uses Percentage Discounts (e.g. type 50 for 50% off).</span>
-
+                <div class="admin-card">
+                    <h3>Create Global Promo</h3>
                     <form onsubmit="event.preventDefault(); createPromo();">
-                        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;">
-                            <!-- Updated: Type whole numbers like "50" instead of "0.5" -->
-                            <input type="number" id="new-promo-val" placeholder="e.g. 50 for 50%" style="margin:0;" required min="0" max="100" step="1">
-                            <button type="submit" style="width: auto; white-space: nowrap;">Add Code</button>
-                        </div>
-                        <div style="grid-column: span 3;">
-                             <input type="text" id="new-promo-code" placeholder="Code (e.g. SUMMER)" style="margin-top: 10px; margin-bottom:0;" required>
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;">
+                            <input type="text" id="new-promo-code" placeholder="Code (e.g. SUMMER)" style="margin:0;" required>
+                            <input type="number" id="new-promo-val" placeholder="0.5 (50%)" step="0.01" style="margin:0;" required>
+                            <button type="submit" style="width: auto; white-space: nowrap;">Add</button>
                         </div>
                     </form>
                 </div>
@@ -481,7 +526,6 @@
                             </tr>
                         </thead>
                         <tbody id="promo-table-body">
-                            <!-- JS will populate this -->
                              <tr>
                                 <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading promos...</td>
                             </tr>
@@ -490,58 +534,108 @@
                 </div>
             </div>
 
+            <!-- MAINTENANCE TAB -->
+            <div id="tab-maintenance" class="tab-content">
+                <div class="section-header">
+                    <h2>Site Configuration</h2>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Maintenance Mode</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">When enabled, users see a warning banner on main site.</p>
+                    <div class="form-row">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <label>Enable Maintenance Mode</label>
+                            <div style="width: 50px; height: 26px; background: #333; border-radius: 13px; position: relative; cursor: pointer;" onclick="toggleMaintenanceStatus()">
+                                <div id="maintenance-toggle-circle" style="width: 20px; height: 20px; background: #555; border-radius: 50%; position: absolute; left: 3px; top: 3px; transition: 0.3s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Maintenance Message (Red Banner)</label>
+                        <input type="text" id="maintenance-msg" placeholder="e.g. Site Down for scheduled update.">
+                    </div>
+                    
+                    <button onclick="saveMaintenanceConfig()" style="margin-top: 1rem;">Save Configuration</button>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Dynamic Pricing (Optional)</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Override base package prices without changing code.</p>
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label>HTML Price (RM)</label>
+                            <input type="number" id="price-html" placeholder="199">
+                        </div>
+                        <div>
+                            <label>Frontend Price (RM)</label>
+                            <input type="number" id="price-frontend" placeholder="599">
+                        </div>
+                    </div>
+                    <button onclick="savePricingConfig()" style="margin-top: 1rem;">Update Prices</button>
+                </div>
+            </div>
+
+            <!-- CONTENT TAB (NEW) -->
+            <div id="tab-content" class="tab-content">
+                <div class="section-header">
+                    <h2>Package Details (Features)</h2>
+                </div>
+
+                <div class="admin-card">
+                    <h3>Frontend Website Details</h3>
+                    <p class="helper-text">Enter one feature per line.</p>
+                    <div class="form-row">
+                        <label>Features List</label>
+                        <textarea id="details-frontend" placeholder="e.g. Up to 5 Pages"></textarea>
+                    </div>
+                    <button onclick="saveContentConfig()" style="margin-top: 1rem;">Save Details</button>
+                </div>
+
+                <div class="admin-card">
+                    <h3>AI Powered Details</h3>
+                    <p class="helper-text">Enter one feature per line.</p>
+                    <div class="form-row">
+                        <label>Features List</label>
+                        <textarea id="details-ai" placeholder="e.g. AI Chatbot Integration"></textarea>
+                    </div>
+                    <button onclick="saveContentConfig()" style="margin-top: 1rem;">Save Details</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- EDIT USER MODAL -->
-    <div id="editUserModal" class="modal">
+    <!-- TICKET MODAL -->
+    <div id="ticketModal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0; color: white;">Edit User</h3>
-                <i class="ri-close-line" onclick="closeModal('editUserModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+                <h3 style="margin:0;">Update Ticket</h3>
+                <i class="ri-close-line" onclick="closeModal('ticketModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
             </div>
-            <input type="hidden" id="edit-uid">
-            <div class="form-row">
-                <label>Full Name</label>
-                <input type="text" id="edit-name">
-            </div>
-            <div class="form-row">
-                <label>Phone Number</label>
-                <input type="text" id="edit-phone">
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
-                <button onclick="saveUser()" style="background: var(--success);">Save Changes</button>
-                <button class="secondary" onclick="closeModal('editUserModal')">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ORDER STATUS MODAL -->
-    <div id="orderStatusModal" class="modal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0; color: white;">Update Order</h3>
-                <i class="ri-close-line" onclick="closeModal('orderStatusModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
-            </div>
-            <input type="hidden" id="status-order-id">
+            <input type="hidden" id="ticket-id">
             <div class="form-row">
                 <label>New Status</label>
-                <select id="order-status-select" style="width: 100%;">
-                    <option value="Pending">Pending</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
+                <select id="ticket-status-select" style="width: 100%;">
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
                 </select>
             </div>
+            <div class="form-row">
+                <label>Admin Note</label>
+                <textarea id="ticket-admin-note" rows="3" placeholder="Add a note for customer..."></textarea>
+            </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
-                <button onclick="saveOrderStatus()" style="background: var(--success);">Update Status</button>
-                <button class="secondary" onclick="closeModal('orderStatusModal')">Cancel</button>
+                <button onclick="saveTicket()" style="background: var(--success);">Update Ticket</button>
+                <button class="secondary" onclick="closeModal('ticketModal')">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // FIREBASE CONFIG (Must match main site)
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyAwf31b-wpYQwPbd-3DxnqGVRw8g3xq938",
             authDomain: "ddnetwork-database.firebaseapp.com",
@@ -562,22 +656,37 @@
         }
 
         const ADMIN_EMAIL = "ddnetwork.one@outlook.com";
+        let allUsers = []; // Cache users for voucher dropdown
+        let siteConfig = { maintenance_active: false, message: '', prices: { html: 199, frontend: 599 }, packageDetails: {} };
+
+        // Default Details (Used as fallback)
+        const DEFAULT_DETAILS = {
+            frontend: [
+                "Up to 5 Pages",
+                "Animations & Interactions",
+                "Contact Forms",
+                "WhatsApp Integration"
+            ],
+            ai: [
+                "All Front-End Features",
+                "AI Chatbot Integration",
+                "Lead Auto-Response",
+                "Smart Analytics"
+            ]
+        };
 
         // AUTH LOGIC
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // SECURITY CHECK: Only allow specific email
                 if (user.email !== ADMIN_EMAIL) {
                     alert("ACCESS DENIED: You are not authorized.");
                     auth.signOut();
                     return;
                 }
-                // Success: Show Dashboard
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'flex';
-                loadData();
+                loadDashboardData();
             } else {
-                // Logged out: Show Login
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('dashboard').style.display = 'none';
             }
@@ -589,9 +698,7 @@
             const password = document.getElementById('admin-password').value;
             
             auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    // Auth state change handles redirection
-                })
+                .then(() => {})
                 .catch((error) => {
                     const errBox = document.getElementById('login-error');
                     errBox.innerText = error.message;
@@ -605,8 +712,18 @@
             }
         }
 
-        function loadData() {
-            // --- LOAD ORDERS ---
+        function loadDashboardData() {
+            // Load Config
+            db.collection("config").doc("site_settings").onSnapshot(doc => {
+                if(doc.exists) {
+                    siteConfig = doc.data();
+                    updateMaintenanceUI();
+                    updatePricingUI();
+                    updateContentUI(); // NEW: Load details
+                }
+            });
+
+            // Load Orders
             db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('orders-table-body');
                 tbody.innerHTML = '';
@@ -618,7 +735,6 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
-                    
                     let statusClass = 'status-pending';
                     if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
                     if(data.status === 'Cancelled') statusClass = 'status-cancelled';
@@ -642,17 +758,20 @@
                 });
             });
 
-            // --- LOAD USERS ---
+            // Load Users & Populate Dropdown
             db.collection("users").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('users-table-body');
+                const select = document.getElementById('voucher-user-select');
+                
+                allUsers = []; 
+                let optionsHTML = '<option value="" disabled selected>Select a User</option>';
                 tbody.innerHTML = '';
-                if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem;">No users found.</td></tr>';
-                    return;
-                }
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
+                    const userObj = { id: doc.id, ...data };
+                    allUsers.push(userObj);
+
                     const row = `
                         <tr>
                             <td>${data.name}</td>
@@ -665,10 +784,47 @@
                         </tr>
                     `;
                     tbody.innerHTML += row;
+                    optionsHTML += `<option value="${doc.id}">${data.name} (${data.email})</option>`;
+                });
+                select.innerHTML = optionsHTML;
+                refreshVoucherTable();
+            });
+
+            // Load Tickets
+            db.collection("tickets").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                const tbody = document.getElementById('tickets-table-body');
+                tbody.innerHTML = '';
+                if(snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No support tickets found.</td></tr>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
+                    let statusClass = 'status-open';
+                    if(data.status === 'Resolved') statusClass = 'status-paid';
+
+                    const row = `
+                        <tr>
+                            <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
+                            <td style="font-weight:700;">${data.type}</td>
+                            <td>
+                                <div style="font-weight:600;">${data.name}</div>
+                                <div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div>
+                            </td>
+                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data.message}</td>
+                            <td><span class="status-badge ${statusClass}">${data.status}</span></td>
+                            <td>
+                                <button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
                 });
             });
 
-            // --- LOAD PROMOS ---
+            // Load Global Promos
             db.collection("promo_codes").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('promo-table-body');
                 tbody.innerHTML = '';
@@ -676,12 +832,9 @@
                     tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">No promo codes found.</td></tr>';
                     return;
                 }
-
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    // Convert multiplier to percentage for display (e.g. 0.5 -> 50%)
                     const discountPct = (data.discount * 100).toFixed(0);
-                    
                     const row = `
                         <tr>
                             <td style="font-weight:700; color: var(--accent-primary); font-size:1.1rem;">${doc.id}</td>
@@ -696,39 +849,118 @@
             });
         }
 
-        // TAB NAVIGATION
-        function switchTab(tabId) {
-            // Hide all contents
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            
-            // Desktop Sidebar Update
-            const desktopNavs = document.querySelectorAll('.sidebar .nav-item');
-            desktopNavs.forEach(el => el.classList.remove('active'));
-            
-            // Mobile Dock Update
-            const mobileNavs = document.querySelectorAll('.dock-item');
-            mobileNavs.forEach(el => el.classList.remove('active'));
-            
-            // Show selected content
-            const activeContent = document.getElementById('tab-' + tabId);
-            if(activeContent) activeContent.classList.add('active');
+        // --- CONTENT LOGIC (NEW) ---
+        function updateContentUI() {
+            if(siteConfig.packageDetails) {
+                // Fill Textareas
+                const frontData = siteConfig.packageDetails.frontend || DEFAULT_DETAILS.frontend;
+                const aiData = siteConfig.packageDetails.ai || DEFAULT_DETAILS.ai;
 
-            // Highlight Nav Items (Dual Support)
-            if(tabId === 'orders') {
-                if(document.querySelector('.sidebar')) document.querySelector('.sidebar .nav-item:nth-child(1)').classList.add('active');
-                document.querySelector('.dock-item:nth-child(1)').classList.add('active');
-            }
-            if(tabId === 'users') {
-                if(document.querySelector('.sidebar')) document.querySelector('.sidebar .nav-item:nth-child(2)').classList.add('active');
-                document.querySelector('.dock-item:nth-child(2)').classList.add('active');
-            }
-            if(tabId === 'promos') {
-                if(document.querySelector('.sidebar')) document.querySelector('.sidebar .nav-item:nth-child(3)').classList.add('active');
-                document.querySelector('.dock-item:nth-child(3)').classList.add('active');
+                document.getElementById('details-frontend').value = frontData.join('\n');
+                document.getElementById('details-ai').value = aiData.join('\n');
+            } else {
+                // Use defaults
+                document.getElementById('details-frontend').value = DEFAULT_DETAILS.frontend.join('\n');
+                document.getElementById('details-ai').value = DEFAULT_DETAILS.ai.join('\n');
             }
         }
 
-        // USER MANAGEMENT
+        function saveContentConfig() {
+            const frontText = document.getElementById('details-frontend').value;
+            const aiText = document.getElementById('details-ai').value;
+
+            // Convert newlines to arrays
+            const frontArray = frontText.split('\n').filter(line => line.trim() !== '');
+            const aiArray = aiText.split('\n').filter(line => line.trim() !== '');
+
+            siteConfig.packageDetails = {
+                frontend: frontArray,
+                ai: aiArray
+            };
+
+            db.collection("config").doc("site_settings").set({
+                packageDetails: siteConfig.packageDetails
+            }).then(() => {
+                alert("Package Details Updated Successfully!");
+            }).catch(err => alert("Error: " + err.message));
+        }
+
+        // --- MAINTENANCE LOGIC ---
+        function updateMaintenanceUI() {
+            const toggleCircle = document.getElementById('maintenance-toggle-circle');
+            const inputMsg = document.getElementById('maintenance-msg');
+            
+            if(siteConfig.maintenance_active) {
+                toggleCircle.style.left = '27px';
+                toggleCircle.style.background = '#10b981';
+                inputMsg.value = siteConfig.message || "Site is currently under maintenance.";
+            } else {
+                toggleCircle.style.left = '3px';
+                toggleCircle.style.background = '#555';
+                inputMsg.value = "";
+            }
+        }
+
+        function toggleMaintenanceStatus() {
+            siteConfig.maintenance_active = !siteConfig.maintenance_active;
+            updateMaintenanceUI();
+        }
+
+        function saveMaintenanceConfig() {
+            const msg = document.getElementById('maintenance-msg').value;
+            siteConfig.message = msg;
+            
+            db.collection("config").doc("site_settings").set({
+                maintenance_active: siteConfig.maintenance_active,
+                message: msg
+            }).then(() => {
+                alert("Configuration Saved Successfully!");
+            });
+        }
+
+        // --- PRICING LOGIC ---
+        function updatePricingUI() {
+            if(siteConfig.prices) {
+                document.getElementById('price-html').value = siteConfig.prices.html || 199;
+                document.getElementById('price-frontend').value = siteConfig.prices.frontend || 599;
+            }
+        }
+
+        function savePricingConfig() {
+            const htmlPrice = parseFloat(document.getElementById('price-html').value);
+            const frontendPrice = parseFloat(document.getElementById('price-frontend').value);
+
+            siteConfig.prices = {
+                html: htmlPrice,
+                frontend: frontendPrice
+            };
+
+            db.collection("config").doc("site_settings").update({
+                prices: siteConfig.prices
+            }).then(() => {
+                alert("Prices updated successfully!");
+            });
+        }
+
+        // --- TAB NAVIGATION ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            // Highlight nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            if(tabId === 'orders') navItems[0].classList.add('active');
+            if(tabId === 'users') navItems[1].classList.add('active');
+            if(tabId === 'support') navItems[2].classList.add('active');
+            if(tabId === 'vouchers') navItems[3].classList.add('active');
+            if(tabId === 'promos') navItems[4].classList.add('active');
+            if(tabId === 'maintenance') navItems[5].classList.add('active');
+            if(tabId === 'content') navItems[6].classList.add('active');
+        }
+
+        // --- USER MANAGEMENT ---
         function openEditUser(uid, name, phone) {
             document.getElementById('edit-uid').value = uid;
             document.getElementById('edit-name').value = name;
@@ -759,45 +991,103 @@
             }
         }
 
-        // ORDER MANAGEMENT
-        function openOrderModal(orderId, currentStatus) {
+        // --- ORDER MANAGEMENT ---
+        function openOrderModal(orderId, currentStatus, note) {
             document.getElementById('status-order-id').value = orderId;
-            document.getElementById('order-status-select').value = currentStatus;
-            document.getElementById('orderStatusModal').classList.add('open');
+            document.getElementById('ticket-status-select').value = currentStatus;
+            document.getElementById('ticket-admin-note').value = note || '';
+            document.getElementById('ticketModal').classList.add('open');
         }
 
-        function saveOrderStatus() {
+        function saveTicket() {
             const id = document.getElementById('status-order-id').value;
-            const status = document.getElementById('order-status-select').value;
+            const status = document.getElementById('ticket-status-select').value;
+            const note = document.getElementById('ticket-admin-note').value;
             
-            db.collection("orders").doc(id).update({ status })
-                .then(() => {
-                    closeModal('orderStatusModal');
-                    alert("Order status updated");
-                })
-                .catch(err => alert("Error updating: " + err.message));
+            db.collection("tickets").doc(id).update({ 
+                status: status,
+                adminNote: note
+            })
+            .then(() => {
+                closeModal('ticketModal');
+                alert("Ticket status updated");
+            })
+            .catch(err => alert("Error updating: " + err.message));
         }
 
-        // PROMO MANAGEMENT (UPDATED LOGIC)
+        // --- VOUCHER LOGIC ---
+        function assignVoucher() {
+            const uid = document.getElementById('voucher-user-select').value;
+            const code = document.getElementById('voucher-code').value.trim().toUpperCase();
+            const val = parseFloat(document.getElementById('voucher-val').value);
+            const type = document.getElementById('voucher-type').value;
+
+            if(!uid) return alert("Please select a user.");
+            if(!code || isNaN(val)) return alert("Invalid Voucher Details.");
+
+            const voucherData = {
+                code: code,
+                value: val,
+                type: type
+            };
+
+            db.collection("users").doc(uid).update({ 
+                personalVoucher: voucherData 
+            }).then(() => {
+                alert(`Voucher ${code} assigned to user!`);
+                refreshVoucherTable();
+            }).catch(err => alert("Error: " + err.message));
+        }
+
+        function refreshVoucherTable() {
+            const tbody = document.getElementById('voucher-table-body');
+            tbody.innerHTML = '';
+
+            const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
+
+            if(usersWithVouchers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No personal vouchers assigned yet.</td></tr>';
+                return;
+            }
+
+            usersWithVouchers.forEach(u => {
+                const v = u.personalVoucher;
+                const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
+                const row = `
+                    <tr>
+                        <td style="font-weight:600;">${u.name}</td>
+                        <td style="color:var(--accent-primary);">${v.code}</td>
+                        <td style="color:var(--success);">${displayVal}</td>
+                        <td>
+                            <button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function deleteUserVoucher(uid) {
+            if(confirm("Remove this voucher from user?")) {
+                db.collection("users").doc(uid).update({
+                    personalVoucher: firebase.firestore.FieldValue.delete()
+                });
+            }
+        }
+
+        // --- PROMO MANAGEMENT ---
         function createPromo() {
             const code = document.getElementById('new-promo-code').value.trim().toUpperCase();
-            // Get value as whole number (e.g., "50")
-            const rawVal = parseInt(document.getElementById('new-promo-val').value);
+            const val = parseFloat(document.getElementById('new-promo-val').value);
 
-            if(!code || isNaN(rawVal)) return alert("Invalid input");
-            
-            // Logic: Input "50" -> System saves "0.5" (50% multiplier)
-            // Validation: Check between 0 and 100
-            if(rawVal < 0 || rawVal > 100) return alert("Percentage must be between 0 and 100");
+            if(!code || isNaN(val)) return alert("Invalid input");
+            if(val <= 0 || val >= 1) return alert("Discount must be between 0 and 1");
 
-            // Convert percentage to multiplier
-            const finalMultiplier = rawVal / 100;
-
-            db.collection("promo_codes").doc(code).set({ discount: finalMultiplier })
+            db.collection("promo_codes").doc(code).set({ discount: val })
                 .then(() => {
                     document.getElementById('new-promo-code').value = '';
                     document.getElementById('new-promo-val').value = '';
-                    alert("Promo Code Created! (Type " + rawVal + " to give " + rawVal + "% discount)");
+                    alert("Promo Code Created!");
                 })
                 .catch(err => alert("Error: " + err.message));
         }
@@ -808,10 +1098,9 @@
             }
         }
 
-        // UTILS
+        // --- UTILS ---
         function closeModal(id) {
-            const modal = document.getElementById(id);
-            if(modal) modal.classList.remove('open');
+            document.getElementById(id).classList.remove('open');
         }
     </script>
 </body>
