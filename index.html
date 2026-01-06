@@ -64,10 +64,10 @@
             width: 100%;
             padding: 12px;
             background: rgba(255,255,255,0.05);
-            border:1px solid var(--border-light);
+            border: 1px solid var(--border-light);
             border-radius: 8px;
             color: white;
-            margin-bottom:1rem;
+            margin-bottom: 1rem;
             font-family: inherit;
             box-sizing: border-box;
             transition: 0.2s;
@@ -173,7 +173,7 @@
             -webkit-overflow-scrolling: touch;
             border-radius: 12px;
             background: var(--bg-card);
-            border:1px solid var(--border-light);
+            border: 1px solid var(--border-light);
         }
         table {
             width: 100%;
@@ -196,10 +196,6 @@
             font-weight: 700;
             display: inline-block;
         }
-        .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .status-paid, .status-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .status-open { background: rgba(59, 130, 246, 0.2); color: var(--accent-primary); }
         .role-badge {
             padding: 4px 10px;
             border-radius: 4px;
@@ -234,7 +230,6 @@
         .admin-card h3 { margin-bottom: 1rem; color: white; font-size: 1rem; margin-top: 0; }
         .form-row { margin-bottom: 1rem; text-align: left; }
         .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
-        .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
 
         /* ALERTS */
         .alert-box {
@@ -404,7 +399,7 @@
                 </div>
             </div>
 
-            <!-- USERS TAB (UPDATED) -->
+            <!-- USERS TAB -->
             <div id="tab-users" class="tab-content">
                 <div class="section-header">
                     <h2>User Management</h2>
@@ -520,8 +515,8 @@
                     <h3>Create Global Promo</h3>
                     <form onsubmit="event.preventDefault(); createPromo();">
                         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;">
-                            <input type="text" id="new-promo-code" placeholder="Code (e.g. SUMMER)" style="margin:0;" required>
-                            <input type="number" id="new-promo-val" placeholder="0.5 (50%)" step="0.01" style="margin:0;" required>
+                            <input type="text" id="new-promo-code" placeholder="Code (e.g. SUMMER)" style="margin: 0;" required>
+                            <input type="number" id="new-promo-val" placeholder="0.5 (50%)" step="0.01" style="margin: 0;" required>
                             <button type="submit" style="width: auto; white-space: nowrap;">Add</button>
                         </div>
                     </form>
@@ -566,6 +561,11 @@
                     <div class="form-row">
                         <label>Maintenance Message (Red Banner)</label>
                         <input type="text" id="maintenance-msg" placeholder="e.g. Site Down for scheduled update.">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Estimated Time (Optional)</label>
+                        <input type="text" id="maintenance-time" placeholder="e.g. 2 hours, Tomorrow 10 AM">
                     </div>
                     
                     <button onclick="saveMaintenanceConfig()" style="margin-top: 1rem;">Save Configuration</button>
@@ -618,13 +618,14 @@
         </div>
     </div>
 
-    <!-- EDIT USER MODAL (Added back) -->
+    <!-- EDIT USER MODAL (RESTORED AND VERIFIED) -->
     <div id="editUserModal" class="modal">
         <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Manage User Role</h3>
-                <i class="ri-close-line" onclick="closeModal('editUserModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0;">Manage User Role</h3>
+                <i class="ri-close-line" onclick="closeModal('editUserModal')" style="cursor: pointer; color: var(--text-secondary); font-size: 1.5rem;"></i>
             </div>
+            <!-- Critical: Hidden ID for UID -->
             <input type="hidden" id="edit-uid">
             <div class="form-row">
                 <label>Full Name</label>
@@ -636,7 +637,7 @@
             </div>
             <div class="form-row">
                 <label>Role (Permissions)</label>
-                <!-- THIS IS THE DROPDOWN TO "EDIT USER AS ADMIN" -->
+                <!-- Critical: Dropdown to change Role -->
                 <select id="edit-role" style="width: 100%;">
                     <option value="user">Standard User</option>
                     <option value="admin">Admin (Full Access)</option>
@@ -672,7 +673,7 @@
 
         const ADMIN_EMAIL = "ddnetwork.one@outlook.com";
         let allUsers = []; 
-        let siteConfig = { maintenance_active: false, message: '', prices: { html: 199, frontend: 599 }, packageDetails: {} };
+        let siteConfig = { maintenance_active: false, message: '', estimated_time: '', prices: { html: 199, frontend: 599 }, packageDetails: {} };
 
         // Default Details (Used as fallback)
         const DEFAULT_DETAILS = {
@@ -693,8 +694,8 @@
         // AUTH LOGIC (ROLE CHECK + SUPER ADMIN BOOTSTRAP)
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Fetch user data to check role
-                db.collection("users").doc(user.uid).get().then((doc) => {
+                // Fetch user data to get ROLE
+                db.collection("users").doc(user.uid).onSnapshot((doc) => {
                     if (doc.exists && doc.data().role === 'admin') {
                         // User is admin
                         document.getElementById('login-screen').style.display = 'none';
@@ -703,13 +704,10 @@
                     } else {
                         // User is not admin
                         auth.signOut();
-                        alert("ACCESS DENIED: You do not have permission to access this portal.");
                         document.getElementById('login-screen').style.display = 'flex';
                         document.getElementById('dashboard').style.display = 'none';
+                        alert("ACCESS DENIED: You do not have permission to access this portal.");
                     }
-                }).catch((err) => {
-                    console.error("Error checking role:", err);
-                    alert("Error verifying permissions.");
                 });
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
@@ -719,7 +717,7 @@
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('admin-email').value;
+            const email = document.getElementById('admin-email').value.trim().toLowerCase();
             const password = document.getElementById('admin-password').value;
             
             auth.signInWithEmailAndPassword(email, password)
@@ -729,26 +727,17 @@
                     // ==========================================
                     // ONE-TIME SETUP LOGIC (BOOTSTRAP)
                     // ==========================================
-                    // If this is the main owner account (ddnetwork.one@outlook.com)
-                    // ensure they have the 'admin' role in the database automatically.
                     if (user.email.toLowerCase() === ADMIN_EMAIL) {
                         console.log("Main Admin detected. Bootstrapping Admin Role...");
                         
                         const userRef = db.collection("users").doc(user.uid);
                         
-                        // 'update' specifically overwrites the 'role' field.
-                        // We use { merge: true } so we don't overwrite existing name/phone if you've used the site before.
                         userRef.update({
-                            role: 'admin',
-                            name: doc.exists ? (doc.data().name || "Admin") : "Admin",
-                            phone: doc.exists ? (doc.data().phone || "") : "",
-                            email: user.email
-                        }, { merge: true }).then(() => {
-                            // We do NOT sign out here. The onAuthStateChanged listener (above) will see the role update 
-                            // and automatically grant access.
-                            alert("SUCCESS: Admin Role Applied Automatically! \n\nYou now have Admin privileges.");
-                            // Force refresh UI
-                            window.location.reload();
+                            role: 'admin'
+                        })
+                        .then(() => {
+                            // We do NOT sign out here. The onAuthStateChanged listener will handle the transition.
+                            alert("SUCCESS: Admin Role Updated Automatically! \n\nYou now have Admin privileges.");
                         }).catch((err) => {
                             console.error("Bootstrap Error:", err);
                             alert("Error applying admin role: " + err.message);
@@ -789,7 +778,7 @@
                 const tbody = document.getElementById('orders-table-body');
                 tbody.innerHTML = '';
                 if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">No orders found.</td></tr>';
                     return;
                 }
                 
@@ -802,13 +791,13 @@
 
                     const row = `
                         <tr>
-                            <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
+                            <td style="color: var(--text-secondary); font-size: 0.9rem;">${date}</td>
                             <td>
-                                <div style="font-weight:600;">${data.customerName}</div>
-                                <div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div>
+                                <div style="font-weight: 600;">${data.customerName}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">${data.customerEmail}</div>
                             </td>
                             <td>${data.package}</td>
-                            <td style="font-weight:700;">${data.total}</td>
+                            <td style="font-weight: 700;">${data.total}</td>
                             <td><span class="status-badge ${statusClass}">${data.status}</span></td>
                             <td>
                                 <button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}')">Manage</button>
@@ -841,9 +830,10 @@
                         <tr>
                             <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
                             <td>${data.name}</td>
-                            <td style="font-size:0.9rem;">${data.email}</td>
+                            <td style="font-size: 0.9rem;">${data.email}</td>
                             <td>${data.phone}</td>
                             <td>
+                                <!-- BUTTON TO OPEN MODAL -->
                                 <button class="action-btn" onclick="openEditUser('${doc.id}', '${data.name}', '${data.phone}', '${role}')">Edit / Role</button>
                                 <button class="action-btn" onclick="resetUserPass('${data.email}')">Pwd</button>
                             </td>
@@ -861,7 +851,7 @@
                 const tbody = document.getElementById('tickets-table-body');
                 tbody.innerHTML = '';
                 if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">No support tickets found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No support tickets found.</td></tr>';
                     return;
                 }
                 
@@ -873,11 +863,11 @@
 
                     const row = `
                         <tr>
-                            <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
-                            <td style="font-weight:700;">${data.type}</td>
+                            <td style="color: var(--text-secondary); font-size: 0.9rem;">${date}</td>
+                            <td style="font-weight: 700;">${data.type}</td>
                             <td>
-                                <div style="font-weight:600;">${data.name}</div>
-                                <div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div>
+                                <div style="font-weight: 600;">${data.name}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">${data.email}</div>
                             </td>
                             <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data.message}</td>
                             <td><span class="status-badge ${statusClass}">${data.status}</span></td>
@@ -895,7 +885,7 @@
                 const tbody = document.getElementById('promo-table-body');
                 tbody.innerHTML = '';
                 if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">No promo codes found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem;">No promo codes found.</td></tr>';
                     return;
                 }
                 snapshot.forEach(doc => {
@@ -903,8 +893,8 @@
                     const discountPct = (data.discount * 100).toFixed(0);
                     const row = `
                         <tr>
-                            <td style="font-weight:700; color: var(--accent-primary); font-size:1.1rem;">${doc.id}</td>
-                            <td style="font-weight:700; color: var(--success);">${discountPct}%</td>
+                            <td style="font-weight: 700; color: var(--accent-primary); font-size: 1.1rem;">${doc.id}</td>
+                            <td style="font-weight: 700; color: var(--success);">${discountPct}%</td>
                             <td>
                                 <button class="action-btn" style="color: var(--danger); border-color: var(--danger);" onclick="deletePromo('${doc.id}')">Del</button>
                             </td>
@@ -952,15 +942,22 @@
         function updateMaintenanceUI() {
             const toggleCircle = document.getElementById('maintenance-toggle-circle');
             const inputMsg = document.getElementById('maintenance-msg');
+            const inputTime = document.getElementById('maintenance-time');
             
             if(siteConfig.maintenance_active) {
                 toggleCircle.style.left = '27px';
                 toggleCircle.style.background = '#10b981';
+                
+                // Populate inputs with saved data
                 inputMsg.value = siteConfig.message || "Site is currently under maintenance.";
+                if(siteConfig.estimated_time) inputTime.value = siteConfig.estimated_time;
             } else {
                 toggleCircle.style.left = '3px';
                 toggleCircle.style.background = '#555';
+                
+                // Clear inputs if inactive
                 inputMsg.value = "";
+                inputTime.value = "";
             }
         }
 
@@ -971,14 +968,18 @@
 
         function saveMaintenanceConfig() {
             const msg = document.getElementById('maintenance-msg').value;
+            const time = document.getElementById('maintenance-time').value;
+            
             siteConfig.message = msg;
+            siteConfig.estimated_time = time;
             
             db.collection("config").doc("site_settings").set({
                 maintenance_active: siteConfig.maintenance_active,
-                message: msg
+                message: msg,
+                estimated_time: time
             }).then(() => {
                 alert("Configuration Saved Successfully!");
-            });
+            }).catch(err => alert("Error: " + err.message));
         }
 
         // --- PRICING LOGIC ---
@@ -1022,35 +1023,42 @@
             if(tabId === 'content') navItems[6].classList.add('active');
         }
 
-        // --- USER MANAGEMENT (ROLE LOGIC) ---
+        // --- USER MANAGEMENT (ROLE LOGIC - FULLY RESTORED) ---
         function openEditUser(uid, name, phone, role) {
+            // 1. Get Modal Element
+            const modal = document.getElementById('editUserModal');
+            
+            // 2. Populate Fields
             document.getElementById('edit-uid').value = uid;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-phone').value = phone;
             
+            // 3. Set Dropdown Value (Handle defaults)
             const roleSelect = document.getElementById('edit-role');
-            roleSelect.value = role || 'user'; // Default to user if not provided
+            roleSelect.value = role || 'user'; 
             
-            document.getElementById('editUserModal').classList.add('open');
+            // 4. Show Modal
+            modal.classList.add('open');
         }
 
         function saveUser() {
+            // 1. Get Values
             const uid = document.getElementById('edit-uid').value;
             const name = document.getElementById('edit-name').value;
             const phone = document.getElementById('edit-phone').value;
-            const role = document.getElementById('edit-role').value; // Get selected role
+            const role = document.getElementById('edit-role').value; 
 
             if(!name || !phone) return alert("Fields cannot be empty");
 
-            // Update User Document
+            // 2. Update Firestore (The Fix)
             db.collection("users").doc(uid).update({ 
                 name: name, 
                 phone: phone,
-                role: role
+                role: role // Updates the role in database
             })
                 .then(() => {
-                    closeModal('editUserModal');
-                    alert("User updated successfully");
+                    closeModal('editUserModal'); // Hide modal
+                    alert("User updated successfully"); // Success message
                 })
                 .catch(err => alert("Error updating: " + err.message));
         }
@@ -1118,7 +1126,7 @@
             const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
 
             if(usersWithVouchers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No personal vouchers assigned yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 1rem; color: var(--text-secondary);">No personal vouchers assigned yet.</td></tr>';
                 return;
             }
 
@@ -1127,11 +1135,11 @@
                 const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
                 const row = `
                     <tr>
-                        <td style="font-weight:600;">${u.name}</td>
-                        <td style="color:var(--accent-primary);">${v.code}</td>
-                        <td style="color:var(--success);">${displayVal}</td>
+                        <td style="font-weight: 600;">${u.name}</td>
+                        <td style="color: var(--accent-primary);">${v.code}</td>
+                        <td style="color: var(--success);">${displayVal}</td>
                         <td>
-                            <button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button>
+                            <button class="action-btn" style="color: var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button>
                         </td>
                     </tr>
                 `;
