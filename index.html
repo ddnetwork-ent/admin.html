@@ -72,7 +72,7 @@
             box-sizing: border-box;
             transition: 0.2s;
         }
-        textarea { height: 150px; resize: vertical; } /* Taller for list editing */
+        textarea { height: 150px; resize: vertical; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent-primary); outline: none; background: rgba(59, 130, 246, 0.05); }
         
         button {
@@ -91,6 +91,7 @@
         button.secondary { background: #333; }
         button.danger { background: var(--danger); }
         button.sm-btn { width: auto; padding: 6px 12px; font-size: 0.8rem; }
+        button.success { background: var(--success); }
 
         /* DASHBOARD LAYOUT */
         #dashboard {
@@ -101,7 +102,7 @@
             flex-direction: row;
         }
         
-        /* SIDEBAR (Desktop) */
+        /* SIDEBAR */
         .sidebar {
             width: 260px;
             background: var(--bg-card);
@@ -166,7 +167,6 @@
         }
         .section-header h2 { margin: 0; font-size: 1.5rem; color: white; }
 
-        /* Responsive Table Wrapper */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -196,10 +196,15 @@
             font-weight: 700;
             display: inline-block;
         }
-        .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .status-paid, .status-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .status-open { background: rgba(59, 130, 246, 0.2); color: var(--accent-primary); }
+        .role-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .role-admin { background: var(--warning); color: black; }
+        .role-user { background: #333; color: var(--text-secondary); }
 
         .action-btn {
             background: none;
@@ -225,7 +230,6 @@
         .admin-card h3 { margin-bottom: 1rem; color: white; font-size: 1rem; margin-top: 0; }
         .form-row { margin-bottom: 1rem; text-align: left; }
         .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
-        .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
 
         /* ALERTS */
         .alert-box {
@@ -291,7 +295,7 @@
                 flex-direction: column;
                 gap: 4px;
                 margin-bottom: 0;
-                padding: 8px 12px;
+                padding: 8px 16px;
                 font-size: 0.7rem;
                 border-radius: 6px;
                 border-left: 2px solid transparent;
@@ -341,7 +345,7 @@
                 <i class="ri-shopping-bag-3-line"></i> <span>Orders</span>
             </div>
             <div class="nav-item" onclick="switchTab('users')">
-                <i class="ri-group-line"></i> <span>Users</span>
+                <i class="ri-group-line"></i> <span>Users & Roles</span>
             </div>
             <div class="nav-item" onclick="switchTab('support')">
                 <i class="ri-customer-service-2-line"></i> <span>Support</span>
@@ -395,15 +399,17 @@
                 </div>
             </div>
 
-            <!-- USERS TAB -->
+            <!-- USERS TAB (UPDATED) -->
             <div id="tab-users" class="tab-content">
                 <div class="section-header">
-                    <h2>Users</h2>
+                    <h2>User Management</h2>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Upgrade users to Admin role.</p>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
+                                <th>Role</th>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
@@ -412,7 +418,7 @@
                         </thead>
                         <tbody id="users-table-body">
                             <tr>
-                                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading users...</td>
+                                <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading users...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -450,8 +456,8 @@
                     <h2>Assign Voucher</h2>
                 </div>
                 
-                <div class="voucher-form">
-                    <h3 style="margin-bottom: 1rem; color: white; font-size: 1rem;">Send Gift Voucher</h3>
+                <div class="admin-card">
+                    <h3>Send Gift Voucher</h3>
                     <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                         <div style="grid-column: 1 / -1;">
                             <label>Select Customer</label>
@@ -577,7 +583,7 @@
                 </div>
             </div>
 
-            <!-- CONTENT TAB (NEW) -->
+            <!-- CONTENT TAB -->
             <div id="tab-content" class="tab-content">
                 <div class="section-header">
                     <h2>Package Details (Features)</h2>
@@ -656,7 +662,7 @@
         }
 
         const ADMIN_EMAIL = "ddnetwork.one@outlook.com";
-        let allUsers = []; // Cache users for voucher dropdown
+        let allUsers = []; 
         let siteConfig = { maintenance_active: false, message: '', prices: { html: 199, frontend: 599 }, packageDetails: {} };
 
         // Default Details (Used as fallback)
@@ -675,17 +681,29 @@
             ]
         };
 
-        // AUTH LOGIC
+        // AUTH LOGIC (ROLE CHECK)
+        // ==========================================
+        // IMPORTANT: We use 'onSnapshot' (Real-time listener) instead of 'get' (one-time).
+        // This ensures that if the role is updated by the Login button,
+        // this listener catches it INSTANTLY and opens the dashboard.
+        // ==========================================
         auth.onAuthStateChanged((user) => {
             if (user) {
-                if (user.email !== ADMIN_EMAIL) {
-                    alert("ACCESS DENIED: You are not authorized.");
-                    auth.signOut();
-                    return;
-                }
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'flex';
-                loadDashboardData();
+                // Real-time listener for Role
+                db.collection("users").doc(user.uid).onSnapshot((doc) => {
+                    if (doc.exists && doc.data().role === 'admin') {
+                        // User is Admin
+                        document.getElementById('login-screen').style.display = 'none';
+                        document.getElementById('dashboard').style.display = 'flex';
+                        loadDashboardData();
+                    } else {
+                        // User is not admin
+                        auth.signOut();
+                        document.getElementById('login-screen').style.display = 'flex';
+                        document.getElementById('dashboard').style.display = 'none';
+                        alert("ACCESS DENIED: You do not have permission to access this portal.");
+                    }
+                });
             } else {
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('dashboard').style.display = 'none';
@@ -694,11 +712,44 @@
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('admin-email').value;
+            const email = document.getElementById('admin-email').value.trim().toLowerCase();
             const password = document.getElementById('admin-password').value;
             
             auth.signInWithEmailAndPassword(email, password)
-                .then(() => {})
+                .then((userCredential) => {
+                    const user = userCredential.user;
+
+                    // ==========================================
+                    // ONE-TIME SETUP LOGIC (BOOTSTRAP)
+                    // ==========================================
+                    // If this is the main owner account, we FORCE update their role to 'admin'
+                    // This happens BEFORE the auth state change listener checks.
+                    if (user.email.toLowerCase() === ADMIN_EMAIL) {
+                        console.log("Main Admin detected. Bootstrapping Admin Role...");
+                        
+                        const userRef = db.collection("users").doc(user.uid);
+                        
+                        // 'update' specifically overwrites the 'role' field.
+                        // We use merge: true to keep existing name/phone if they exist, 
+                        // but the 'role' field is forcibly set to 'admin'.
+                        userRef.update({
+                            role: 'admin'
+                        })
+                        .then(() => {
+                            alert("SUCCESS: Admin Role Updated Automatically! Logging in...");
+                            // We do NOT sign out here. We let the onSnapshot listener handle the transition.
+                        })
+                        .catch((err) => {
+                            console.error("Bootstrap Error:", err);
+                            alert("Error updating role: " + err.message);
+                        });
+                    } else {
+                        // Not main admin
+                        console.warn("Unauthorized login attempt.");
+                        alert("ACCESS DENIED: You do not have permission to access this portal.");
+                        auth.signOut();
+                    }
+                })
                 .catch((error) => {
                     const errBox = document.getElementById('login-error');
                     errBox.innerText = error.message;
@@ -719,7 +770,7 @@
                     siteConfig = doc.data();
                     updateMaintenanceUI();
                     updatePricingUI();
-                    updateContentUI(); // NEW: Load details
+                    updateContentUI();
                 }
             });
 
@@ -769,16 +820,21 @@
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
+                    const role = data.role || 'user'; // Default to user
+                    const roleClass = role === 'admin' ? 'role-admin' : 'role-user';
+                    const roleLabel = role === 'admin' ? 'Admin' : 'User';
+
                     const userObj = { id: doc.id, ...data };
                     allUsers.push(userObj);
 
                     const row = `
                         <tr>
+                            <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
                             <td>${data.name}</td>
                             <td style="font-size:0.9rem;">${data.email}</td>
                             <td>${data.phone}</td>
                             <td>
-                                <button class="action-btn" onclick="openEditUser('${doc.id}', '${data.name}', '${data.phone}')">Edit</button>
+                                <button class="action-btn" onclick="openEditUser('${doc.id}', '${data.name}', '${data.phone}', '${role}')">Edit / Role</button>
                                 <button class="action-btn" onclick="resetUserPass('${data.email}')">Pwd</button>
                             </td>
                         </tr>
@@ -795,7 +851,7 @@
                 const tbody = document.getElementById('tickets-table-body');
                 tbody.innerHTML = '';
                 if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No support tickets found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">No support tickets found.</td></tr>';
                     return;
                 }
                 
@@ -849,17 +905,15 @@
             });
         }
 
-        // --- CONTENT LOGIC (NEW) ---
+        // --- CONTENT LOGIC ---
         function updateContentUI() {
             if(siteConfig.packageDetails) {
-                // Fill Textareas
                 const frontData = siteConfig.packageDetails.frontend || DEFAULT_DETAILS.frontend;
                 const aiData = siteConfig.packageDetails.ai || DEFAULT_DETAILS.ai;
 
                 document.getElementById('details-frontend').value = frontData.join('\n');
                 document.getElementById('details-ai').value = aiData.join('\n');
             } else {
-                // Use defaults
                 document.getElementById('details-frontend').value = DEFAULT_DETAILS.frontend.join('\n');
                 document.getElementById('details-ai').value = DEFAULT_DETAILS.ai.join('\n');
             }
@@ -869,7 +923,6 @@
             const frontText = document.getElementById('details-frontend').value;
             const aiText = document.getElementById('details-ai').value;
 
-            // Convert newlines to arrays
             const frontArray = frontText.split('\n').filter(line => line.trim() !== '');
             const aiArray = aiText.split('\n').filter(line => line.trim() !== '');
 
@@ -949,7 +1002,6 @@
             
             document.getElementById('tab-' + tabId).classList.add('active');
             
-            // Highlight nav item
             const navItems = document.querySelectorAll('.nav-item');
             if(tabId === 'orders') navItems[0].classList.add('active');
             if(tabId === 'users') navItems[1].classList.add('active');
@@ -960,11 +1012,15 @@
             if(tabId === 'content') navItems[6].classList.add('active');
         }
 
-        // --- USER MANAGEMENT ---
-        function openEditUser(uid, name, phone) {
+        // --- USER MANAGEMENT (ROLE LOGIC) ---
+        function openEditUser(uid, name, phone, role) {
             document.getElementById('edit-uid').value = uid;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-phone').value = phone;
+            
+            const roleSelect = document.getElementById('edit-role');
+            roleSelect.value = role || 'user'; // Default to user if not provided
+            
             document.getElementById('editUserModal').classList.add('open');
         }
 
@@ -972,10 +1028,16 @@
             const uid = document.getElementById('edit-uid').value;
             const name = document.getElementById('edit-name').value;
             const phone = document.getElementById('edit-phone').value;
-            
+            const role = document.getElementById('edit-role').value; // Get selected role
+
             if(!name || !phone) return alert("Fields cannot be empty");
 
-            db.collection("users").doc(uid).update({ name, phone })
+            // Update User Document
+            db.collection("users").doc(uid).update({ 
+                name: name, 
+                phone: phone,
+                role: role
+            })
                 .then(() => {
                     closeModal('editUserModal');
                     alert("User updated successfully");
