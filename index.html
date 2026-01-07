@@ -191,7 +191,7 @@
         /* TABS & TABLES */
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .section-header {
             display: flex;
@@ -202,6 +202,7 @@
             gap: 1rem;
         }
         .section-header h2 { margin: 0; font-size: 1.5rem; color: white; }
+        .section-header-actions { display: flex; gap: 0.5rem; }
 
         /* --- FILTER BUTTONS --- */
         .ticket-filters {
@@ -328,6 +329,7 @@
         .log-action {
             flex: 1;
             font-size: 0.9rem;
+            color: white;
         }
         .log-detail {
             font-size: 0.8rem;
@@ -347,8 +349,13 @@
         .form-row { margin-bottom: 1rem; text-align: left; }
         .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
         .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .form-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
 
-        /* INTERNAL SUPPORT CARD SPECIFIC */
+        /* INTERNAL SUPPORT CARD SPECIFIC (Kept for potential reuse, but hidden via HTML removal) */
         .internal-support-card {
             background: rgba(59, 130, 246, 0.05);
             border: 1px solid var(--accent-primary);
@@ -437,6 +444,7 @@
                 padding: 1.5rem 1rem; 
                 margin-bottom: 70px; 
             }
+            .section-header { flex-direction: column; align-items: stretch; gap: 0.5rem; }
             .section-header h2 { font-size: 1.2rem; }
             button { font-size: 0.9rem; }
         }
@@ -487,7 +495,7 @@
             <div class="nav-item" onclick="switchTab('promos')">
                 <i class="ri-coupon-3-line"></i> <span>Promo</span>
             </div>
-            <!-- NEW LOGS TAB (ADMIN ONLY) -->
+            <!-- LOGS TAB -->
             <div class="nav-item" id="nav-logs" onclick="switchTab('logs')">
                 <i class="ri-file-history-line"></i> <span>System Logs</span>
             </div>
@@ -550,8 +558,7 @@
             <div id="tab-users" class="tab-content">
                 <div class="section-header">
                     <h2>User Management</h2>
-                    <!-- SUPERADMIN CONTROL: CREATE USER BUTTON -->
-                    <div id="superadmin-controls">
+                    <div class="section-header-actions">
                         <button class="action-btn success" style="color:white; border:none; width:auto;" onclick="openCreateUserModal()">
                             <i class="ri-user-add-line"></i> Create New User
                         </button>
@@ -582,56 +589,26 @@
             <div id="tab-support" class="tab-content">
                 <div class="section-header">
                     <h2>Support Desk</h2>
-                    <div class="ticket-filters">
-                        <button class="filter-btn active" onclick="filterTickets('all', this)">
-                            <i class="ri-list-check"></i> All
+                    <div class="section-header-actions">
+                         <button class="action-btn success" style="color:white; border:none; width:auto;" onclick="openInternalTicketModal()">
+                            <i class="ri-add-box-line"></i> Create Ticket
                         </button>
-                        <button class="filter-btn" onclick="filterTickets('internal', this)">
-                            <i class="ri-bug-line"></i> Internal
-                        </button>
-                        <button class="filter-btn" onclick="filterTickets('external', this)">
-                            <i class="ri-user-line"></i> External
-                        </button>
+                        <div class="ticket-filters">
+                            <button class="filter-btn active" onclick="filterTickets('all', this)">
+                                <i class="ri-list-check"></i> All
+                            </button>
+                            <button class="filter-btn" onclick="filterTickets('internal', this)">
+                                <i class="ri-bug-line"></i> Internal
+                            </button>
+                            <button class="filter-btn" onclick="filterTickets('external', this)">
+                                <i class="ri-user-line"></i> External
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- INTERNAL REPORT FORM -->
-                <div class="admin-card internal-support-card">
-                    <h3><i class="ri-bug-line"></i> Report Internal Issue</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
-                        Report bugs or IT requests here.
-                    </p>
-                    
-                    <form onsubmit="handleInternalTicketSubmit(event)">
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
-                            <div>
-                                <label>Admin Name</label>
-                                <input type="text" id="internal-name" placeholder="Your Name" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <label>Admin Email</label>
-                            <input type="email" id="internal-email" readonly style="background: rgba(0,0,0,0.3); cursor: not-allowed;">
-                        </div>
-                        <div class="form-row">
-                            <label>Issue Type</label>
-                            <select id="internal-type" required>
-                                <option value="Internal Bug">Internal Bug</option>
-                                <option value="Feature Request">Feature Request</option>
-                                <option value="System Error">System Error</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <label>Description</label>
-                            <textarea id="internal-message" placeholder="Describe issue..." required></textarea>
-                        </div>
-                        <button type="submit" class="success">Submit Ticket</button>
-                    </form>
-                </div>
-
-                <!-- TICKETS TABLE -->
+                <!-- TICKETS TABLE (Moved Up as the primary content) -->
                 <div class="table-responsive" style="margin-bottom: 2rem;">
-                    <h3 style="font-size: 1rem; color: var(--text-secondary); margin: 1rem 0 1rem 0;">Ticket List</h3>
                     <table>
                         <thead>
                             <tr>
@@ -744,7 +721,7 @@
                 </div>
             </div>
 
-            <!-- SYSTEM LOGS TAB (NEW) -->
+            <!-- SYSTEM LOGS TAB (UPDATED) -->
             <div id="tab-logs" class="tab-content">
                 <div class="section-header">
                     <h2>System Logs</h2>
@@ -753,10 +730,9 @@
 
                 <div class="admin-card">
                     <div style="display: flex; gap: 10px; margin-bottom: 1rem; overflow-x: auto;">
-                        <button class="sm-btn secondary" onclick="loadLogsTab('vouchers')">Vouchers</button>
-                        <button class="sm-btn secondary" onclick="loadLogsTab('tickets')">Tickets</button>
-                        <button class="sm-btn secondary" onclick="loadLogsTab('orders')">Orders</button>
-                        <button class="sm-btn secondary active" onclick="loadLogsTab('all')">All Activity</button>
+                        <button id="btn-log-all" class="sm-btn secondary active" onclick="loadLogsTab('all')">All Activity</button>
+                        <button id="btn-log-tickets" class="sm-btn secondary" onclick="loadLogsTab('tickets')">Tickets</button>
+                        <button id="btn-log-vouchers" class="sm-btn secondary" onclick="loadLogsTab('vouchers')">Vouchers</button>
                     </div>
                 </div>
 
@@ -772,7 +748,7 @@
                         </thead>
                         <tbody id="logs-table-body">
                             <tr>
-                                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Select a category to view logs.</td>
+                                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading logs...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -880,9 +856,9 @@
                     <option value="admin">Admin</option>
                     <option value="superadmin">Super Admin</option>
                 </select>
-                <p id="role-restricted-msg" style="color:var(--warning); font-size:0.8rem; margin-top:-5px; margin-bottom:1rem; display:none;">
-                    <i class="ri-lock-line"></i> Standard Admins cannot change roles.
-                </p>
+            </div>
+            <div id="role-restricted-msg" style="display:none; color:var(--warning); font-size:0.8rem; margin-bottom:1rem;">
+                <i class="ri-lock-line"></i> Only SuperAdmins can edit roles and job titles.
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveUser()" style="background: var(--success);">Update User</button>
@@ -891,7 +867,53 @@
         </div>
     </div>
 
-    <!-- CREATE USER MODAL (NEW) -->
+    <!-- INTERNAL TICKET MODAL (POPUP) -->
+    <div id="internalTicketModal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="margin:0;">Create Internal Ticket</h3>
+                <i class="ri-close-line" onclick="closeModal('internalTicketModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            </div>
+
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label>Type</label>
+                    <select id="ticket-type" style="width: 100%;">
+                        <option value="Internal Bug">Internal Bug</option>
+                        <option value="Feature Request">Feature Request</option>
+                        <option value="System Error">System Error</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Target User (Optional)</label>
+                    <select id="ticket-target-user-select" style="width: 100%;">
+                        <option value="">General (Myself)</option>
+                        <!-- Populated dynamically via JS -->
+                    </select>
+                    <input type="text" id="ticket-target-user-input" placeholder="Search user..." style="margin-top: 5px; display: none;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div>
+                    <label>Message</label>
+                    <textarea id="ticket-message" placeholder="Describe the issue or task..." required></textarea>
+                </div>
+                <div>
+                    <label>Target User Name</label>
+                    <input type="text" id="ticket-target-user-name" placeholder="Auto-filled if user selected" readonly style="background: rgba(0,0,0,0.3);">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                <button onclick="submitInternalTicket()" style="background: var(--success);">Create Ticket</button>
+                <button class="secondary" onclick="closeModal('internalTicketModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE USER MODAL -->
     <div id="createUserModal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -998,7 +1020,8 @@
         let ticketCache = []; 
         let currentAdminUID = ""; 
         let isSuperAdmin = false; 
-        let currentAdminEmail = ""; 
+        let currentAdminEmail = "";
+        let currentLogFilter = 'all'; // Default to All
 
         try {
             firebase.initializeApp(firebaseConfig);
@@ -1017,6 +1040,7 @@
             ai: ["All Frontend Features", "AI Chatbot", "Analytics"]
         };
 
+        // AUTH LOGIC
         auth.onAuthStateChanged((user) => {
             if (user) {
                 currentAdminUID = user.uid;
@@ -1030,7 +1054,6 @@
                         if (role === 'admin' || role === 'superadmin') {
                             document.getElementById('login-screen').style.display = 'none';
                             document.getElementById('dashboard').style.display = 'flex';
-                            document.getElementById('internal-email').value = user.email;
                             
                             isSuperAdmin = (role === 'superadmin');
 
@@ -1056,7 +1079,6 @@
         });
 
         function adjustUIForSuperAdmin() {
-            // SUPERADMIN: Show Logs Tab & Internal Notes & Created By
             if(isSuperAdmin) {
                 document.getElementById('th-internal-note').style.display = 'table-cell';
                 document.getElementById('th-created-by').style.display = 'table-cell';
@@ -1064,7 +1086,13 @@
             } else {
                 document.getElementById('th-internal-note').style.display = 'none';
                 document.getElementById('th-created-by').style.display = 'none';
+                // HIDE CREATE USER BUTTON
+                const createUserBtn = document.querySelector('button[onclick="openCreateUserModal()"]');
+                if(createUserBtn) createUserBtn.style.display = 'none';
+                
+                // RESTRICT LOGS TAB ENTIRELY
                 if(document.getElementById('nav-logs')) document.getElementById('nav-logs').style.display = 'none';
+                if(document.getElementById('tab-logs')) document.getElementById('tab-logs').style.display = 'none';
             }
         }
 
@@ -1123,6 +1151,73 @@
             document.getElementById('create-phone').value = '';
             document.getElementById('create-role').value = 'user';
             document.getElementById('createUserModal').classList.add('open');
+        }
+
+        function openInternalTicketModal() {
+            // Clear fields
+            document.getElementById('ticket-message').value = '';
+            document.getElementById('ticket-target-user-select').value = '';
+            document.getElementById('ticket-target-user-input').value = '';
+            document.getElementById('ticket-target-user-name').value = '';
+            document.getElementById('ticket-type').value = 'Internal Bug';
+
+            // Populate Target User Select
+            const select = document.getElementById('ticket-target-user-select');
+            let optionsHTML = '<option value="">General (Myself)</option>';
+            allUsers.forEach(u => {
+                optionsHTML += `<option value="${u.id}" data-name="${u.name}" data-email="${u.email}" data-phone="${u.phone}">${u.name}</option>`;
+            });
+            select.innerHTML = optionsHTML;
+
+            document.getElementById('internalTicketModal').classList.add('open');
+        }
+
+        // Sync Target User Name when Dropdown Changes
+        document.getElementById('ticket-target-user-select').addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const name = selectedOption.getAttribute('data-name');
+            document.getElementById('ticket-target-user-name').value = name || "";
+        });
+
+        function submitInternalTicket() {
+            const type = document.getElementById('ticket-type').value;
+            const message = document.getElementById('ticket-message').value;
+            const targetUserId = document.getElementById('ticket-target-user-select').value;
+            const targetName = document.getElementById('ticket-target-user-name').value;
+            
+            // If Target User is not empty, get their details
+            let targetEmail = currentAdminEmail; // Default self
+            let targetPhone = "";
+            let source = "internal";
+            
+            if (targetUserId) {
+                const targetUser = allUsers.find(u => u.id === targetUserId);
+                if(targetUser) {
+                    targetEmail = targetUser.email;
+                    targetPhone = targetUser.phone;
+                }
+            }
+
+            const ticketData = {
+                name: currentAdminEmail,
+                email: currentAdminEmail,
+                phone: "", 
+                type: type,
+                message: message,
+                status: 'Open',
+                source: "internal",
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                adminNote: '',
+                targetName: targetName || "",
+                targetEmail: targetEmail,
+                targetPhone: targetPhone,
+                adminEmail: currentAdminEmail 
+            };
+
+            db.collection("tickets").add(ticketData).then(() => {
+                closeModal('internalTicketModal');
+                alert("Internal Ticket Created Successfully!");
+            }).catch(err => alert("Error creating ticket: " + err.message));
         }
 
         function createNewUser() {
@@ -1224,12 +1319,20 @@
                 });
                 select.innerHTML = optionsHTML;
                 refreshVoucherTable();
+                // If Logs tab is active (or becomes active), refresh logs too as users might have changed
+                if(currentLogFilter && document.getElementById('tab-logs').classList.contains('active')) {
+                    renderLogsTable();
+                }
             });
 
             db.collection("tickets").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 ticketCache = []; 
                 snapshot.forEach(doc => ticketCache.push({ id: doc.id, data: doc.data() }));
-                renderTicketTable(); 
+                renderTicketTable();
+                // Refresh logs if tickets updated and logs tab is active
+                if(currentLogFilter && document.getElementById('tab-logs').classList.contains('active')) {
+                    renderLogsTable();
+                }
             });
 
             db.collection("promo_codes").onSnapshot((snapshot) => {
@@ -1262,8 +1365,8 @@
             const tbody = document.getElementById('tickets-table-body');
             tbody.innerHTML = '';
             let visibleTickets = ticketCache;
-            if (ticketFilter === 'internal') visibleTickets = ticketCache.filter(t => t.data.type.toLowerCase().startsWith("internal"));
-            else if (ticketFilter === 'external') visibleTickets = ticketCache.filter(t => !t.data.type.toLowerCase().startsWith("internal"));
+            if (ticketFilter === 'internal') visibleTickets = ticketCache.filter(t => t.data.source === "internal");
+            else if (ticketFilter === 'external') visibleTickets = ticketCache.filter(t => t.data.source !== "internal");
 
             if(visibleTickets.length === 0) {
                 const colspan = isSuperAdmin ? 9 : 8;
@@ -1275,23 +1378,109 @@
                 const data = item.data;
                 const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
                 let statusClass = data.status === 'Resolved' ? 'status-paid' : 'status-open';
-                const isInternal = data.type.toLowerCase().startsWith("internal");
+                
+                // Badges
+                const isInternal = data.source === "internal";
                 const rowClass = isInternal ? "row-internal" : "";
                 const sourceBadge = isInternal ? `<span class="source-badge badge-internal">Team</span>` : `<span class="source-badge badge-external">User</span>`;
+                
+                // Target Info
+                const targetInfo = data.targetName ? `<div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target: <b>${data.targetName}</b></div>` : '';
                 
                 const internalNoteCell = isSuperAdmin ? `<td style="max-width: 200px; font-size:0.8rem; color:var(--text-secondary);">${data.adminNote || '-'}</td>` : '';
 
                 tbody.innerHTML += `
                     <tr class="${rowClass}">
                         <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
-                        <td><span style="font-family:monospace; font-size:0.8rem; color:var(--accent-primary); font-weight:700;">${doc.id}</span></td>
+                        <td><span style="font-family:monospace; font-size:0.8rem; color:var(--accent-primary); font-weight:700;">${doc.id.substring(0,8)}...</span></td>
                         <td>${sourceBadge}</td>
                         <td style="font-weight:700;">${data.type}</td>
                         <td><div style="font-weight:600;">${data.name}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div></td>
-                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data.message}</td>
+                        <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; position: relative;">
+                            ${data.message}
+                            ${targetInfo}
+                        </td>
                         <td><span class="status-badge ${statusClass}">${data.status}</span></td>
                         ${internalNoteCell}
                         <td><button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button></td>
+                    </tr>`;
+            });
+        }
+
+        // SYSTEM LOGS LOGIC
+        function loadLogsTab(type) {
+            // Update UI buttons
+            const buttons = document.querySelectorAll('#tab-logs .sm-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Find button by ID or index to add active class (more robust than event.target)
+            let activeBtnId = 'btn-log-all';
+            if(type === 'tickets') activeBtnId = 'btn-log-tickets';
+            if(type === 'vouchers') activeBtnId = 'btn-log-vouchers';
+            
+            const activeBtn = document.getElementById(activeBtnId);
+            if(activeBtn) activeBtn.classList.add('active');
+
+            currentLogFilter = type;
+            renderLogsTable();
+        }
+
+        function renderLogsTable() {
+            const tbody = document.getElementById('logs-table-body');
+            tbody.innerHTML = '';
+            
+            let logEntries = [];
+
+            // 1. GENERATE LOGS FROM DATA
+            // Vouchers
+            allUsers.filter(u => u.personalVoucher).forEach(u => {
+                const v = u.personalVoucher;
+                const date = v.voucherTimestamp ? new Date(v.voucherTimestamp.toDate()).toLocaleString() : '-';
+                logEntries.push({
+                    timestamp: date,
+                    admin: v.voucherCreatedBy || 'Admin',
+                    action: 'Assigned Voucher',
+                    detail: `Code: ${v.code} to ${u.name}`,
+                    type: 'voucher'
+                });
+            });
+
+            // Tickets (Resolved)
+            ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
+                const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
+                const note = t.data.adminNote || '';
+                const adminMatch = note.match(/Updated by: (.*?)\s/);
+                const admin = adminMatch ? adminMatch[1] : 'Admin';
+                logEntries.push({
+                    timestamp: date,
+                    admin: admin,
+                    action: 'Resolved Ticket',
+                    detail: `Case #${t.id.substring(0,6)}: ${t.data.name} (${note ? note : ''})`,
+                    type: 'ticket'
+                });
+            });
+
+            // Sort by timestamp descending
+            logEntries.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Filter based on selection
+            if(currentLogFilter !== 'all') {
+                if(currentLogFilter === 'vouchers') logEntries = logEntries.filter(l => l.type === 'voucher');
+                if(currentLogFilter === 'tickets') logEntries = logEntries.filter(l => l.type === 'ticket');
+            }
+
+            if(logEntries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">No logs found for this category.</td></tr>`;
+                return;
+            }
+
+            logEntries.forEach(log => {
+                tbody.innerHTML += `
+                    <tr class="log-entry">
+                        <td class="log-timestamp">${log.timestamp}</td>
+                        <td class="log-admin">${log.admin}</td>
+                        <td style="font-weight:600; font-size:0.85rem;">${log.action}</td>
+                        <td class="log-detail">${log.detail}</td>
                     </tr>`;
             });
         }
@@ -1358,6 +1547,8 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
+            
+            // Highlight correct nav item
             const navItems = document.querySelectorAll('.nav-item');
             if(tabId === 'orders') navItems[0].classList.add('active');
             if(tabId === 'users') navItems[1].classList.add('active');
@@ -1367,6 +1558,11 @@
             if(tabId === 'logs') navItems[5].classList.add('active');
             if(tabId === 'maintenance') navItems[6].classList.add('active');
             if(tabId === 'content') navItems[7].classList.add('active');
+
+            // Automatically load logs if Logs tab is opened
+            if(tabId === 'logs') {
+                loadLogsTab(currentLogFilter || 'all');
+            }
         }
 
         function openEditUser(uid, name, phone, role, jobTitle) {
@@ -1472,12 +1668,10 @@
             const voucherData = {
                 code: code,
                 value: val,
-                type: type
+                type: type,
+                voucherCreatedBy: currentAdminEmail,
+                voucherTimestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
-
-            if (currentAdminEmail) {
-                voucherData.voucherCreatedBy = currentAdminEmail;
-            }
 
             db.collection("users").doc(uid).update({ personalVoucher: voucherData }).then(() => {
                 alert(`Voucher ${code} assigned!`);
@@ -1525,69 +1719,6 @@
 
         function deletePromo(code) {
             if(confirm(`Delete code ${code}?`)) db.collection("promo_codes").doc(code).delete();
-        }
-
-        function loadLogsTab(type) {
-            // Update buttons
-            const buttons = document.querySelectorAll('#tab-logs .sm-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            const tbody = document.getElementById('logs-table-body');
-            tbody.innerHTML = '';
-
-            let logEntries = [];
-
-            // Generate logs from existing data in memory
-            // 1. Vouchers
-            if (type === 'vouchers' || type === 'all') {
-                allUsers.filter(u => u.personalVoucher && u.personalVoucher.voucherCreatedBy).forEach(u => {
-                    const v = u.personalVoucher;
-                    const date = u.personalVoucher.voucherTimestamp ? new Date(u.personalVoucher.voucherTimestamp.toDate()).toLocaleString() : new Date().toLocaleString();
-                    logEntries.push({
-                        timestamp: date,
-                        admin: v.voucherCreatedBy,
-                        action: 'Assigned Voucher',
-                        detail: `Code: ${v.code} to ${u.name}`
-                    });
-                });
-            }
-
-            // 2. Tickets (Resolved recently)
-            if (type === 'tickets' || type === 'all') {
-                ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
-                    const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
-                    // Try to guess admin from note if possible, or use "Unknown"
-                    const note = t.data.adminNote || '';
-                    const adminMatch = note.match(/Updated by: (.*?)\s/);
-                    const admin = adminMatch ? adminMatch[1] : 'Admin';
-                    
-                    logEntries.push({
-                        timestamp: date,
-                        admin: admin,
-                        action: 'Resolved Ticket',
-                        detail: `Case #${t.id}: ${t.data.name}`
-                    });
-                });
-            }
-
-            // Sort by timestamp desc
-            logEntries.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            if(logEntries.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">No activity logs found.</td></tr>';
-                return;
-            }
-
-            logEntries.forEach(log => {
-                tbody.innerHTML += `
-                    <tr class="log-entry">
-                        <td class="log-timestamp">${log.timestamp}</td>
-                        <td class="log-admin">${log.admin}</td>
-                        <td style="font-weight:600; font-size:0.85rem;">${log.action}</td>
-                        <td class="log-action">${log.detail}</td>
-                    </tr>`;
-            });
         }
 
         function closeModal(id) {
