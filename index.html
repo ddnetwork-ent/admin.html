@@ -176,20 +176,28 @@
             padding: 2rem;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            /* Ensure scrolling works on mobile */
+            height: 100vh; 
+            box-sizing: border-box;
         }
 
-        /* MOBILE HEADER */
+        /* MOBILE HEADER (Sticky) */
         .mobile-brand-header {
-            display: none; /* Hidden on desktop */
+            display: none; 
             align-items: center;
             justify-content: space-between;
             padding-bottom:1rem;
+            margin-bottom:1rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--bg-deep); /* Opaque to cover content behind */
+            padding-top: 1rem;
             border-bottom: 1px solid var(--border-light);
-            margin-bottom:1.5rem;
         }
 
         /* TABS & TABLES */
-        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; padding-bottom: 2rem; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -197,12 +205,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             flex-wrap: wrap;
             gap: 1rem;
         }
         .section-header h2 { margin: 0; font-size: 1.5rem; color: white; }
         .section-header-actions { display: flex; gap: 0.5rem; }
+
+        /* SEARCH BAR */
+        .search-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .search-container input {
+            margin-bottom: 0;
+            padding-left: 2.5rem;
+            background: rgba(255,255,255,0.05);
+        }
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
 
         /* --- FILTER BUTTONS --- */
         .ticket-filters {
@@ -344,6 +370,7 @@
             border-radius: 12px;
             border: 1px solid var(--border-light);
             margin-bottom: 2rem;
+            scroll-margin-top: 100px; /* For smooth scroll from search */
         }
         .admin-card h3 { margin-bottom: 1rem; color: white; font-size: 1rem; margin-top: 0; }
         .form-row { margin-bottom: 1rem; text-align: left; }
@@ -403,7 +430,7 @@
                 border-top: 1px solid var(--border-light);
                 overflow-x: auto;
                 box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
-                z-index: 50;
+                z-index: 100; /* Above everything */
             }
             
             .brand { display: none; } /* Hide Sidebar Brand */
@@ -433,13 +460,19 @@
             }
             .nav-item i { font-size: 1.3rem; color: var(--text-secondary); }
             .nav-item.active i { color: var(--accent-primary); }
+            
+            /* Main Content Scroll Adjustments */
             .main-content { 
-                padding: 1.5rem 1rem; 
-                margin-bottom: 70px; 
+                padding: 0.5rem 1rem 90px 1rem; /* Extra bottom padding for nav */
+                margin-bottom: 0;
             }
+            
             .section-header { flex-direction: column; align-items: stretch; gap: 0.5rem; }
             .section-header h2 { font-size: 1.2rem; }
             button { font-size: 0.9rem; }
+            
+            /* Sticky Header Padding adjustment */
+            .tab-content { padding-top: 1rem; }
         }
     </style>
 </head>
@@ -506,7 +539,7 @@
 
         <div class="main-content">
             
-            <!-- MOBILE PROFILE HEADER -->
+            <!-- MOBILE PROFILE HEADER (Sticky) -->
             <div class="mobile-brand-header">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <i class="ri-shield-user-fill brand-icon"></i>
@@ -526,6 +559,12 @@
                         <i class="ri-refresh-line"></i> Live Updates
                     </div>
                 </div>
+                
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-orders" placeholder="Search Name, ID, Company..." onkeyup="handleSearch('orders', this.value)">
+                </div>
+
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -559,6 +598,12 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-users" placeholder="Search Name, Email, Phone..." onkeyup="handleSearch('users', this.value)">
+                </div>
+
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -602,7 +647,12 @@
                     </div>
                 </div>
 
-                <!-- TICKETS TABLE (Moved Up as the primary content) -->
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-support" placeholder="Search Name, Type, Message..." onkeyup="handleSearch('support', this.value)">
+                </div>
+
+                <!-- TICKETS TABLE -->
                 <div class="table-responsive" style="margin-bottom: 2rem;">
                     <table>
                         <thead>
@@ -662,6 +712,11 @@
                     <button onclick="assignVoucher()" style="margin-top: 1rem;">Assign Voucher</button>
                 </div>
 
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-vouchers" placeholder="Search Code or User..." onkeyup="handleSearch('vouchers', this.value)">
+                </div>
+
                 <div class="table-responsive" style="margin-top: 2rem;">
                     <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Recent Assignments</h3>
                     <table>
@@ -698,6 +753,11 @@
                     </form>
                 </div>
 
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-promos" placeholder="Search Code..." onkeyup="handleSearch('promos', this.value)">
+                </div>
+
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -731,6 +791,11 @@
                     </div>
                 </div>
 
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-logs" placeholder="Search Admin, Action..." onkeyup="handleSearch('logs', this.value)">
+                </div>
+
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -750,13 +815,18 @@
                 </div>
             </div>
 
-            <!-- MAINTENANCE TAB -->
+            <!-- MAINTENANCE TAB (Config) -->
             <div id="tab-maintenance" class="tab-content">
                 <div class="section-header">
                     <h2>Site Configuration</h2>
                 </div>
 
-                <div class="admin-card">
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-config" placeholder="Jump to section (e.g. Maintenance, Pricing)..." onkeyup="handleSearch('config', this.value)">
+                </div>
+
+                <div class="admin-card" id="config-maintenance">
                     <h3>Maintenance Mode</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 1rem;">Toggle warning banner on main site.</p>
                     <div class="form-row">
@@ -776,7 +846,7 @@
                     <button onclick="saveMaintenanceConfig()" style="margin-top: 1rem;">Save Config</button>
                 </div>
 
-                <div class="admin-card">
+                <div class="admin-card" id="config-pricing">
                     <h3>Dynamic Pricing</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 1rem;">Override base prices.</p>
                     <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -799,7 +869,12 @@
                     <h2>Package Details</h2>
                 </div>
 
-                <div class="admin-card">
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-content" placeholder="Jump to section (e.g. Frontend, AI)..." onkeyup="handleSearch('content', this.value)">
+                </div>
+
+                <div class="admin-card" id="content-frontend">
                     <h3>Frontend Details</h3>
                     <p class="helper-text">One feature per line.</p>
                     <div class="form-row">
@@ -809,7 +884,7 @@
                     <button onclick="saveContentConfig()" style="margin-top: 1rem;">Save Details</button>
                 </div>
 
-                <div class="admin-card">
+                <div class="admin-card" id="content-ai">
                     <h3>AI Powered Details</h3>
                     <p class="helper-text">One feature per line.</p>
                     <div class="form-row">
@@ -893,7 +968,7 @@
             <div class="form-group">
                 <div>
                     <label>Message</label>
-                    <textarea id="ticket-message" placeholder="Describe the issue or task..." required></textarea>
+                    <textarea id="ticket-message" placeholder="Describe issue or task..." required></textarea>
                 </div>
                 <div>
                     <label>Target User Name</label>
@@ -1047,10 +1122,24 @@
         let db, auth;
         let ticketFilter = 'all';
         let ticketCache = []; 
+        let orderCache = []; // Added for Orders Search
+        let promoCache = []; // Added for Promo Search
         let currentAdminUID = ""; 
         let isSuperAdmin = false; 
         let currentAdminEmail = "";
         let currentLogFilter = 'all'; // Default to All
+
+        // Search State
+        let searchStates = {
+            orders: "",
+            users: "",
+            support: "",
+            vouchers: "",
+            promos: "",
+            logs: "",
+            config: "",
+            content: ""
+        };
 
         try {
             firebase.initializeApp(firebaseConfig);
@@ -1279,6 +1368,50 @@
                 });
         }
 
+        // SEARCH HANDLER
+        function handleSearch(tab, value) {
+            searchStates[tab] = value.toLowerCase();
+            
+            // Trigger specific render functions
+            if (tab === 'orders') renderOrdersTable();
+            if (tab === 'users') renderUsersTable();
+            if (tab === 'support') renderTicketsTable();
+            if (tab === 'vouchers') renderVoucherTable();
+            if (tab === 'promos') renderPromoTable();
+            if (tab === 'logs') renderLogsTable();
+            if (tab === 'config') scrollToSection('config', value);
+            if (tab === 'content') scrollToSection('content', value);
+        }
+
+        function scrollToSection(context, text) {
+            const textLower = text.toLowerCase();
+            if (!textLower) return;
+            
+            // Define mapping for context tabs
+            const sections = [];
+            if (context === 'config') {
+                sections.push({ id: 'config-maintenance', keywords: ['maintenance', 'banner', 'mode'] });
+                sections.push({ id: 'config-pricing', keywords: ['pricing', 'price', 'html', 'frontend'] });
+            } else if (context === 'content') {
+                sections.push({ id: 'content-frontend', keywords: ['frontend', 'features', 'standard'] });
+                sections.push({ id: 'content-ai', keywords: ['ai', 'artificial', 'intelligence', 'chatbot'] });
+            }
+
+            for (let sec of sections) {
+                if (sec.keywords.some(k => textLower.includes(k))) {
+                    const el = document.getElementById(sec.id);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Flash effect
+                        el.style.transition = 'background 0.3s';
+                        el.style.background = 'rgba(59, 130, 246, 0.2)';
+                        setTimeout(() => { el.style.background = 'var(--bg-card)'; }, 500);
+                        break;
+                    }
+                }
+            }
+        }
+
         function loadDashboardData() {
             db.collection("config").doc("site_settings").onSnapshot(doc => {
                 if(doc.exists) {
@@ -1290,84 +1423,30 @@
             });
 
             db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const tbody = document.getElementById('orders-table-body');
-                tbody.innerHTML = '';
-                if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
-                    return;
-                }
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
-                    let statusClass = 'status-pending';
-                    if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
-                    if(data.status === 'Cancelled') statusClass = 'status-cancelled';
-                    
-                    // Safe string escaping for function arguments
-                    const safeCompany = (data.companyName || '').replace(/'/g, "\\'");
-                    const safePackage = (data.package || '').replace(/'/g, "\\'");
-                    const safeTotal = (data.total || '').replace(/'/g, "\\'");
-                    const safeVoucher = (data.voucherCode || '').replace(/'/g, "\\'");
-                    const safeNote = (data.adminNote || '').replace(/'/g, "\\'");
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
-                            <td><div style="font-weight:600;">${data.customerName}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div></td>
-                            <td style="color:var(--text-secondary); font-size:0.85rem;">${data.companyName || '-'}</td>
-                            <td>${data.package || '-'}</td>
-                            <td style="color:var(--success); font-weight:600;">${data.voucherCode || '-'}</td>
-                            <td style="font-weight:700;">${data.total || '-'}</td>
-                            <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                            <td><button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}', '${safeNote}', '${safeCompany}', '${safePackage}', '${safeTotal}', '${safeVoucher}')">Manage</button></td>
-                        </tr>`;
-                });
+                orderCache = []; 
+                snapshot.forEach(doc => orderCache.push({ id: doc.id, data: doc.data() }));
+                renderOrdersTable();
             });
 
             db.collection("users").onSnapshot((snapshot) => {
-                const tbody = document.getElementById('users-table-body');
                 const select = document.getElementById('voucher-user-select');
                 allUsers = []; 
                 let optionsHTML = '<option value="" disabled selected>Select a User</option>';
-                tbody.innerHTML = '';
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const role = data.role || 'user';
-                    let roleClass = 'role-user';
-                    let roleLabel = 'User';
-                    
-                    if(role === 'admin') { roleClass = 'role-admin'; roleLabel = 'Admin'; }
-                    if(role === 'superadmin') { roleClass = 'role-superadmin'; roleLabel = 'Super Admin'; }
-
                     allUsers.push({ id: doc.id, ...data });
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
-                            <td>${data.name}</td>
-                            <td style="color:var(--text-secondary); font-size:0.9rem;">${data.jobTitle || '-'}</td>
-                            <td style="font-size:0.9rem;">${data.email}</td>
-                            <td>${data.phone}</td>
-                            <td>
-                                <button class="action-btn" onclick="openEditUser('${doc.id}', '${(data.name || '').replace(/'/g, "\\'")}', '${(data.phone || '').replace(/'/g, "\\'")}', '${role}', '${(data.jobTitle || '').replace(/'/g, "\\'")}')">Edit</button>
-                                <button class="action-btn" onclick="resetUserPass('${data.email}')">Pwd</button>
-                            </td>
-                        </tr>`;
                     optionsHTML += `<option value="${doc.id}">${data.name} (${data.email})</option>`;
                 });
                 select.innerHTML = optionsHTML;
+                renderUsersTable();
                 refreshVoucherTable();
-                // If Logs tab is active (or becomes active), refresh logs too as users might have changed
-                if(currentLogFilter && document.getElementById('tab-logs').classList.contains('active')) {
-                    renderLogsTable();
-                }
             });
 
             db.collection("tickets").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 ticketCache = []; 
                 snapshot.forEach(doc => ticketCache.push({ id: doc.id, data: doc.data() }));
-                renderTicketTable();
+                renderTicketsTable();
                 // Refresh logs if tickets updated and logs tab is active
                 if(currentLogFilter && document.getElementById('tab-logs').classList.contains('active')) {
                     renderLogsTable();
@@ -1375,21 +1454,101 @@
             });
 
             db.collection("promo_codes").onSnapshot((snapshot) => {
-                const tbody = document.getElementById('promo-table-body');
-                tbody.innerHTML = '';
-                if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">No promos.</td></tr>';
-                    return;
-                }
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="font-weight:700; color: var(--accent-primary);">${doc.id}</td>
-                            <td style="font-weight:700; color: var(--success);">${(data.discount * 100).toFixed(0)}%</td>
-                            <td><button class="action-btn" style="color: var(--danger);" onclick="deletePromo('${doc.id}')">Del</button></td>
-                        </tr>`;
+                promoCache = [];
+                snapshot.forEach(doc => promoCache.push({ id: doc.id, data: doc.data() }));
+                renderPromoTable();
+            });
+        }
+
+        // --- RENDER FUNCTIONS WITH SEARCH ---
+
+        function renderOrdersTable() {
+            const tbody = document.getElementById('orders-table-body');
+            tbody.innerHTML = '';
+            
+            let visibleOrders = orderCache;
+            // Apply Search
+            const s = searchStates.orders;
+            if(s) {
+                visibleOrders = visibleOrders.filter(o => {
+                    const d = o.data;
+                    const str = `${d.customerName} ${d.customerEmail} ${d.companyName || ''} ${o.id}`.toLowerCase();
+                    return str.includes(s);
                 });
+            }
+
+            if(visibleOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
+                return;
+            }
+
+            visibleOrders.forEach(doc => {
+                const data = doc.data;
+                const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
+                let statusClass = 'status-pending';
+                if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
+                if(data.status === 'Cancelled') statusClass = 'status-cancelled';
+                
+                // Safe string escaping
+                const safeCompany = (data.companyName || '').replace(/'/g, "\\'");
+                const safePackage = (data.package || '').replace(/'/g, "\\'");
+                const safeTotal = (data.total || '').replace(/'/g, "\\'");
+                const safeVoucher = (data.voucherCode || '').replace(/'/g, "\\'");
+                const safeNote = (data.adminNote || '').replace(/'/g, "\\'");
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
+                        <td><div style="font-weight:600;">${data.customerName}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div></td>
+                        <td style="color:var(--text-secondary); font-size:0.85rem;">${data.companyName || '-'}</td>
+                        <td>${data.package || '-'}</td>
+                        <td style="color:var(--success); font-weight:600;">${data.voucherCode || '-'}</td>
+                        <td style="font-weight:700;">${data.total || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${data.status}</span></td>
+                        <td><button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}', '${safeNote}', '${safeCompany}', '${safePackage}', '${safeTotal}', '${safeVoucher}')">Manage</button></td>
+                    </tr>`;
+            });
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+            
+            let visibleUsers = allUsers;
+            // Apply Search
+            const s = searchStates.users;
+            if(s) {
+                visibleUsers = visibleUsers.filter(u => {
+                    const str = `${u.name} ${u.email} ${u.phone}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+
+            if(visibleUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No users found.</td></tr>';
+                return;
+            }
+
+            visibleUsers.forEach(u => {
+                const role = u.role || 'user';
+                let roleClass = 'role-user';
+                let roleLabel = 'User';
+                
+                if(role === 'admin') { roleClass = 'role-admin'; roleLabel = 'Admin'; }
+                if(role === 'superadmin') { roleClass = 'role-superadmin'; roleLabel = 'Super Admin'; }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
+                        <td>${u.name}</td>
+                        <td style="color:var(--text-secondary); font-size:0.9rem;">${u.jobTitle || '-'}</td>
+                        <td style="font-size:0.9rem;">${u.email}</td>
+                        <td>${u.phone}</td>
+                        <td>
+                            <button class="action-btn" onclick="openEditUser('${u.id}', '${(u.name || '').replace(/'/g, "\\'")}', '${(u.phone || '').replace(/'/g, "\\'")}', '${role}', '${(u.jobTitle || '').replace(/'/g, "\\'")}')">Edit</button>
+                            <button class="action-btn" onclick="resetUserPass('${u.email}')">Pwd</button>
+                        </td>
+                    </tr>`;
             });
         }
 
@@ -1397,15 +1556,27 @@
             ticketFilter = type;
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            renderTicketTable();
+            renderTicketsTable();
         }
 
-        function renderTicketTable() {
+        function renderTicketsTable() {
             const tbody = document.getElementById('tickets-table-body');
             tbody.innerHTML = '';
             let visibleTickets = ticketCache;
-            if (ticketFilter === 'internal') visibleTickets = ticketCache.filter(t => t.data.source === "internal");
-            else if (ticketFilter === 'external') visibleTickets = ticketCache.filter(t => t.data.source !== "internal");
+            
+            // 1. Filter by Category (Internal/External)
+            if (ticketFilter === 'internal') visibleTickets = visibleTickets.filter(t => t.data.source === "internal");
+            else if (ticketFilter === 'external') visibleTickets = visibleTickets.filter(t => t.data.source !== "internal");
+
+            // 2. Filter by Search Text
+            const s = searchStates.support;
+            if(s) {
+                visibleTickets = visibleTickets.filter(t => {
+                    const d = t.data;
+                    const str = `${d.name} ${d.type} ${d.message} ${t.id}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
 
             if(visibleTickets.length === 0) {
                 const colspan = isSuperAdmin ? 9 : 8;
@@ -1446,13 +1617,79 @@
             });
         }
 
+        function renderVoucherTable() {
+            const tbody = document.getElementById('voucher-table-body');
+            tbody.innerHTML = '';
+            const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
+            
+            let visibleVouchers = usersWithVouchers;
+            // Apply Search
+            const s = searchStates.vouchers;
+            if(s) {
+                visibleVouchers = visibleVouchers.filter(u => {
+                    const v = u.personalVoucher;
+                    const str = `${u.name} ${v.code}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+
+            if(visibleVouchers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No vouchers.</td></tr>';
+                return;
+            }
+            visibleVouchers.forEach(u => {
+                const v = u.personalVoucher;
+                const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
+                const createdBy = v.voucherCreatedBy || '-';
+
+                const createdByCell = isSuperAdmin ? `<td style="font-size:0.8rem;">${createdBy}</td>` : '';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600;">${u.name}</td>
+                        <td style="color:var(--accent-primary);">${v.code}</td>
+                        <td style="color:var(--success);">${displayVal}</td>
+                        ${createdByCell}
+                        <td><button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button></td>
+                    </tr>`;
+            });
+        }
+
+        function renderPromoTable() {
+            const tbody = document.getElementById('promo-table-body');
+            tbody.innerHTML = '';
+            
+            let visiblePromos = promoCache;
+            // Apply Search
+            const s = searchStates.promos;
+            if(s) {
+                visiblePromos = visiblePromos.filter(p => {
+                    const str = `${p.id}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+
+            if(visiblePromos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">No promos found.</td></tr>';
+                return;
+            }
+            visiblePromos.forEach(doc => {
+                const data = doc.data;
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:700; color: var(--accent-primary);">${doc.id}</td>
+                        <td style="font-weight:700; color: var(--success);">${(data.discount * 100).toFixed(0)}%</td>
+                        <td><button class="action-btn" style="color: var(--danger);" onclick="deletePromo('${doc.id}')">Del</button></td>
+                    </tr>`;
+            });
+        }
+
         // SYSTEM LOGS LOGIC
         function loadLogsTab(type) {
             // Update UI buttons
             const buttons = document.querySelectorAll('#tab-logs .sm-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
             
-            // Find button by ID or index to add active class (more robust than event.target)
             let activeBtnId = 'btn-log-all';
             if(type === 'tickets') activeBtnId = 'btn-log-tickets';
             if(type === 'vouchers') activeBtnId = 'btn-log-vouchers';
@@ -1502,14 +1739,23 @@
             // Sort by timestamp descending
             logEntries.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            // Filter based on selection
+            // 2. Filter by Category
             if(currentLogFilter !== 'all') {
                 if(currentLogFilter === 'vouchers') logEntries = logEntries.filter(l => l.type === 'voucher');
                 if(currentLogFilter === 'tickets') logEntries = logEntries.filter(l => l.type === 'ticket');
             }
 
+            // 3. Filter by Search Text
+            const s = searchStates.logs;
+            if(s) {
+                logEntries = logEntries.filter(l => {
+                    const str = `${l.admin} ${l.action} ${l.detail}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+
             if(logEntries.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">No logs found for this category.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">No logs found.</td></tr>`;
                 return;
             }
 
@@ -1617,29 +1863,24 @@
             const helperLabel = document.getElementById('jobtitle-helper');
             const restrictionMsg = document.getElementById('edit-restriction-msg');
 
-            // Determine if editing a SuperAdmin
             const isTargetSuperAdmin = (role === 'superadmin');
 
             if (!isSuperAdmin) {
                 // CURRENT USER IS STANDARD ADMIN
                 if (isTargetSuperAdmin) {
-                    // BLOCK ALL EDITS FOR SUPERADMIN ACCOUNTS
                     nameInput.disabled = true;
                     phoneInput.disabled = true;
                     roleSelect.disabled = true;
                     jobTitleInput.disabled = true;
-                    
                     restrictionMsg.style.display = 'block';
                     restrictionMsg.innerText = "Standard Admins cannot edit SuperAdmin accounts.";
                     restrictionMsg.style.color = 'var(--warning)';
                     helperLabel.style.display = 'none';
                 } else {
-                    // STANDARD ADMIN EDITING NORMAL USER
                     nameInput.disabled = false;
                     phoneInput.disabled = false;
-                    roleSelect.disabled = true; // Still can't change role
-                    jobTitleInput.disabled = true; // Still can't change job title
-                    
+                    roleSelect.disabled = true; 
+                    jobTitleInput.disabled = true; 
                     restrictionMsg.style.display = 'none';
                     helperLabel.style.display = 'none';
                 }
@@ -1649,7 +1890,6 @@
                 phoneInput.disabled = false;
                 roleSelect.disabled = false;
                 jobTitleInput.disabled = false;
-                
                 jobTitleInput.value = jobTitle || "";
                 helperLabel.style.display = 'inline';
                 restrictionMsg.style.display = 'none';
@@ -1663,7 +1903,6 @@
             const phone = document.getElementById('edit-phone').value;
             const role = document.getElementById('edit-role').value;
             
-            // PERMISSION CHECK 2: Prevent saving SuperAdmin data by Standard Admin
             if (!isSuperAdmin && role === 'superadmin') {
                 alert("You do not have permission to modify SuperAdmin accounts.");
                 return;
@@ -1690,19 +1929,17 @@
             }
         }
 
-        // UPDATED: openOrderModal to accept Package, Total, Voucher
         function openOrderModal(orderId, currentStatus, note, companyName, pkg, total, voucher) {
             document.getElementById('order-id').value = orderId;
             document.getElementById('order-status-select').value = currentStatus || 'Pending';
             document.getElementById('order-admin-note').value = note || '';
-            document.getElementById('order-company-name').value = companyName || ''; // Populate Company Name
-            document.getElementById('order-package').value = pkg || ''; // Populate Package
-            document.getElementById('order-total').value = total || ''; // Populate Total
-            document.getElementById('order-voucher').value = voucher || '-'; // Populate Voucher (Read Only)
+            document.getElementById('order-company-name').value = companyName || ''; 
+            document.getElementById('order-package').value = pkg || ''; 
+            document.getElementById('order-total').value = total || ''; 
+            document.getElementById('order-voucher').value = voucher || '-'; 
             document.getElementById('orderModal').classList.add('open');
         }
 
-        // UPDATED: saveOrder to save Package, Total, Company Name
         function saveOrder() {
             const id = document.getElementById('order-id').value;
             const status = document.getElementById('order-status-select').value;
@@ -1757,29 +1994,7 @@
         }
 
         function refreshVoucherTable() {
-            const tbody = document.getElementById('voucher-table-body');
-            tbody.innerHTML = '';
-            const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
-            if(usersWithVouchers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No vouchers.</td></tr>';
-                return;
-            }
-            usersWithVouchers.forEach(u => {
-                const v = u.personalVoucher;
-                const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
-                const createdBy = v.voucherCreatedBy || '-';
-
-                const createdByCell = isSuperAdmin ? `<td style="font-size:0.8rem;">${createdBy}</td>` : '';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight:600;">${u.name}</td>
-                        <td style="color:var(--accent-primary);">${v.code}</td>
-                        <td style="color:var(--success);">${displayVal}</td>
-                        ${createdByCell}
-                        <td><button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button></td>
-                    </tr>`;
-            });
+            renderVoucherTable();
         }
 
         function deleteUserVoucher(uid) {
