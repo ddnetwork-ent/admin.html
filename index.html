@@ -355,13 +355,6 @@
             gap: 1rem;
         }
 
-        /* INTERNAL SUPPORT CARD SPECIFIC (Kept for potential reuse, but hidden via HTML removal) */
-        .internal-support-card {
-            background: rgba(59, 130, 246, 0.05);
-            border: 1px solid var(--accent-primary);
-        }
-        .internal-support-card h3 { color: var(--accent-primary); display: flex; align-items: center; gap: 8px; }
-
         /* ALERTS */
         .alert-box {
             padding: 1rem;
@@ -539,7 +532,9 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Customer</th>
+                                <th>Company</th>
                                 <th>Package</th>
+                                <th>Voucher</th>
                                 <th>Total</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -547,7 +542,7 @@
                         </thead>
                         <tbody id="orders-table-body">
                             <tr>
-                                <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading orders...</td>
+                                <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading orders...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -721,7 +716,7 @@
                 </div>
             </div>
 
-            <!-- SYSTEM LOGS TAB (UPDATED) -->
+            <!-- SYSTEM LOGS TAB -->
             <div id="tab-logs" class="tab-content">
                 <div class="section-header">
                     <h2>System Logs</h2>
@@ -857,8 +852,8 @@
                     <option value="superadmin">Super Admin</option>
                 </select>
             </div>
-            <div id="role-restricted-msg" style="display:none; color:var(--warning); font-size:0.8rem; margin-bottom:1rem;">
-                <i class="ri-lock-line"></i> Only SuperAdmins can edit roles and job titles.
+            <div id="edit-restriction-msg" style="display:none; color:var(--warning); font-size:0.8rem; margin-bottom:1rem;">
+                <!-- Message injected via JS -->
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveUser()" style="background: var(--success);">Update User</button>
@@ -977,7 +972,7 @@
         </div>
     </div>
 
-    <!-- ORDER MODAL -->
+    <!-- ORDER MODAL (UPDATED) -->
     <div id="orderModal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -985,6 +980,37 @@
                 <i class="ri-close-line" onclick="closeModal('orderModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
             </div>
             <input type="hidden" id="order-id">
+            
+            <!-- Company Name -->
+            <div class="form-row">
+                <label>Company Name (Optional)</label>
+                <input type="text" id="order-company-name" placeholder="e.g. ABC Corp">
+            </div>
+
+            <!-- Package Select -->
+            <div class="form-row">
+                <label>Package</label>
+                <select id="order-package">
+                    <option value="HTML">Standard HTML</option>
+                    <option value="Frontend">Advanced Frontend</option>
+                    <option value="AI">AI Powered Website</option>
+                    <option value="Custom">Custom Package</option>
+                </select>
+            </div>
+
+            <!-- Total Input -->
+            <div class="form-row">
+                <label>Total (RM)</label>
+                <input type="number" id="order-total" step="0.01" placeholder="0.00">
+            </div>
+
+            <!-- Voucher Read Only -->
+            <div class="form-row">
+                <label>Voucher Applied</label>
+                <input type="text" id="order-voucher" readonly style="background: rgba(255,255,255,0.05); color: var(--text-secondary);" placeholder="-">
+            </div>
+
+            <!-- Status -->
             <div class="form-row">
                 <label>Order Status</label>
                 <select id="order-status-select" style="width: 100%;">
@@ -994,10 +1020,13 @@
                     <option value="Cancelled">Cancelled</option>
                 </select>
             </div>
+
+            <!-- Admin Note -->
             <div class="form-row">
                 <label>Admin Notes</label>
                 <textarea id="order-admin-note"></textarea>
             </div>
+
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveOrder()" style="background: var(--success);">Update Order</button>
                 <button class="secondary" onclick="closeModal('orderModal')">Cancel</button>
@@ -1264,7 +1293,7 @@
                 const tbody = document.getElementById('orders-table-body');
                 tbody.innerHTML = '';
                 if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
                     return;
                 }
                 snapshot.forEach(doc => {
@@ -1273,14 +1302,24 @@
                     let statusClass = 'status-pending';
                     if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
                     if(data.status === 'Cancelled') statusClass = 'status-cancelled';
+                    
+                    // Safe string escaping for function arguments
+                    const safeCompany = (data.companyName || '').replace(/'/g, "\\'");
+                    const safePackage = (data.package || '').replace(/'/g, "\\'");
+                    const safeTotal = (data.total || '').replace(/'/g, "\\'");
+                    const safeVoucher = (data.voucherCode || '').replace(/'/g, "\\'");
+                    const safeNote = (data.adminNote || '').replace(/'/g, "\\'");
+
                     tbody.innerHTML += `
                         <tr>
                             <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
                             <td><div style="font-weight:600;">${data.customerName}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div></td>
-                            <td>${data.package}</td>
-                            <td style="font-weight:700;">${data.total}</td>
+                            <td style="color:var(--text-secondary); font-size:0.85rem;">${data.companyName || '-'}</td>
+                            <td>${data.package || '-'}</td>
+                            <td style="color:var(--success); font-weight:600;">${data.voucherCode || '-'}</td>
+                            <td style="font-weight:700;">${data.total || '-'}</td>
                             <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                            <td><button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button></td>
+                            <td><button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}', '${safeNote}', '${safeCompany}', '${safePackage}', '${safeTotal}', '${safeVoucher}')">Manage</button></td>
                         </tr>`;
                 });
             });
@@ -1311,7 +1350,7 @@
                             <td style="font-size:0.9rem;">${data.email}</td>
                             <td>${data.phone}</td>
                             <td>
-                                <button class="action-btn" onclick="openEditUser('${doc.id}', '${data.name}', '${data.phone}', '${role}', '${data.jobTitle || ''}')">Edit</button>
+                                <button class="action-btn" onclick="openEditUser('${doc.id}', '${(data.name || '').replace(/'/g, "\\'")}', '${(data.phone || '').replace(/'/g, "\\'")}', '${role}', '${(data.jobTitle || '').replace(/'/g, "\\'")}')">Edit</button>
                                 <button class="action-btn" onclick="resetUserPass('${data.email}')">Pwd</button>
                             </td>
                         </tr>`;
@@ -1402,7 +1441,7 @@
                         </td>
                         <td><span class="status-badge ${statusClass}">${data.status}</span></td>
                         ${internalNoteCell}
-                        <td><button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button></td>
+                        <td><button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${(data.adminNote || '').replace(/'/g, "\\'")}')">Manage</button></td>
                     </tr>`;
             });
         }
@@ -1573,33 +1612,48 @@
             
             const roleSelect = document.getElementById('edit-role');
             const jobTitleInput = document.getElementById('edit-jobtitle');
+            const nameInput = document.getElementById('edit-name');
+            const phoneInput = document.getElementById('edit-phone');
             const helperLabel = document.getElementById('jobtitle-helper');
-            const roleMsg = document.getElementById('role-restricted-msg');
+            const restrictionMsg = document.getElementById('edit-restriction-msg');
+
+            // Determine if editing a SuperAdmin
+            const isTargetSuperAdmin = (role === 'superadmin');
 
             if (!isSuperAdmin) {
-                // RESTRICTIONS FOR STANDARD ADMIN
-                roleSelect.disabled = true;
-                roleSelect.title = "Only Super Admins can change roles";
-                
-                jobTitleInput.disabled = true; 
-                jobTitleInput.value = "Restricted (SuperAdmin Only)";
-                jobTitleInput.style.opacity = "0.5";
-                helperLabel.style.display = "none";
-
-                roleMsg.style.display = "block";
+                // CURRENT USER IS STANDARD ADMIN
+                if (isTargetSuperAdmin) {
+                    // BLOCK ALL EDITS FOR SUPERADMIN ACCOUNTS
+                    nameInput.disabled = true;
+                    phoneInput.disabled = true;
+                    roleSelect.disabled = true;
+                    jobTitleInput.disabled = true;
+                    
+                    restrictionMsg.style.display = 'block';
+                    restrictionMsg.innerText = "Standard Admins cannot edit SuperAdmin accounts.";
+                    restrictionMsg.style.color = 'var(--warning)';
+                    helperLabel.style.display = 'none';
+                } else {
+                    // STANDARD ADMIN EDITING NORMAL USER
+                    nameInput.disabled = false;
+                    phoneInput.disabled = false;
+                    roleSelect.disabled = true; // Still can't change role
+                    jobTitleInput.disabled = true; // Still can't change job title
+                    
+                    restrictionMsg.style.display = 'none';
+                    helperLabel.style.display = 'none';
+                }
             } else {
-                // SUPERADMIN PRIVILEGES
-                roleSelect.disabled = false; 
-                roleSelect.title = "";
+                // SUPER ADMIN PRIVILEGES
+                nameInput.disabled = false;
+                phoneInput.disabled = false;
+                roleSelect.disabled = false;
+                jobTitleInput.disabled = false;
                 
-                jobTitleInput.disabled = false; 
                 jobTitleInput.value = jobTitle || "";
-                jobTitleInput.style.opacity = "1";
-                helperLabel.style.display = "inline";
-
-                roleMsg.style.display = "none";
+                helperLabel.style.display = 'inline';
+                restrictionMsg.style.display = 'none';
             }
-
             document.getElementById('editUserModal').classList.add('open');
         }
 
@@ -1608,6 +1662,13 @@
             const name = document.getElementById('edit-name').value;
             const phone = document.getElementById('edit-phone').value;
             const role = document.getElementById('edit-role').value;
+            
+            // PERMISSION CHECK 2: Prevent saving SuperAdmin data by Standard Admin
+            if (!isSuperAdmin && role === 'superadmin') {
+                alert("You do not have permission to modify SuperAdmin accounts.");
+                return;
+            }
+
             if(!name || !phone) return alert("Fields cannot be empty");
             
             const updateData = { 
@@ -1629,18 +1690,34 @@
             }
         }
 
-        function openOrderModal(orderId, currentStatus, note) {
+        // UPDATED: openOrderModal to accept Package, Total, Voucher
+        function openOrderModal(orderId, currentStatus, note, companyName, pkg, total, voucher) {
             document.getElementById('order-id').value = orderId;
             document.getElementById('order-status-select').value = currentStatus || 'Pending';
             document.getElementById('order-admin-note').value = note || '';
+            document.getElementById('order-company-name').value = companyName || ''; // Populate Company Name
+            document.getElementById('order-package').value = pkg || ''; // Populate Package
+            document.getElementById('order-total').value = total || ''; // Populate Total
+            document.getElementById('order-voucher').value = voucher || '-'; // Populate Voucher (Read Only)
             document.getElementById('orderModal').classList.add('open');
         }
 
+        // UPDATED: saveOrder to save Package, Total, Company Name
         function saveOrder() {
             const id = document.getElementById('order-id').value;
             const status = document.getElementById('order-status-select').value;
             const note = document.getElementById('order-admin-note').value;
-            db.collection("orders").doc(id).update({ status: status, adminNote: note }).then(() => { closeModal('orderModal'); alert("Order updated"); }).catch(err => alert(err.message));
+            const companyName = document.getElementById('order-company-name').value; 
+            const pkg = document.getElementById('order-package').value;
+            const total = document.getElementById('order-total').value;
+
+            db.collection("orders").doc(id).update({ 
+                status: status, 
+                adminNote: note,
+                companyName: companyName,
+                package: pkg,
+                total: total
+            }).then(() => { closeModal('orderModal'); alert("Order updated"); }).catch(err => alert(err.message));
         }
 
         function openTicketModal(ticketId, currentStatus, note) {
