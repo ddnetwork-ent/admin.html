@@ -972,10 +972,10 @@
                     <input type="text" id="search-config" placeholder="Jump to section (e.g. Discount, Maintenance, Pricing)..." onkeyup="handleSearch('config', this.value)">
                 </div>
 
-                <!-- NEW: PLAN DISCOUNT CONFIG -->
+                <!-- PLAN DISCOUNT CONFIG (UPDATED) -->
                 <div class="admin-card" id="config-discount">
                     <h3>Global Plan Discount</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Activate a discount badge displayed on the main website pricing tables.</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Activate a discount badge displayed on main website pricing tables.</p>
                     
                     <div class="form-row">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
@@ -989,11 +989,6 @@
                     <div class="form-row">
                         <label>Discount Percentage (%)</label>
                         <input type="number" id="discount-value" placeholder="e.g. 20">
-                    </div>
-
-                    <div class="form-row">
-                        <label>Badge Text</label>
-                        <input type="text" id="discount-badge-text" placeholder="e.g. Limited Time Offer!">
                     </div>
                     
                     <button onclick="saveDiscountConfig()" style="margin-top: 1rem;">Save Discount Config</button>
@@ -1388,7 +1383,9 @@
             message: '', 
             prices: { html: 199, frontend: 599 }, 
             packageDetails: {},
-            planDiscount: { active: false, value: 0, text: '' }
+            // Updated defaults to match Main Website expectations
+            discountActive: false, 
+            discountPercent: 0
         };
 
         const DEFAULT_DETAILS = {
@@ -1435,7 +1432,7 @@
         });
 
         function adjustUIForSuperAdmin() {
-            // Plan Discount & Logs accessible to SuperAdmin only
+            // Plan Discount accessible to SuperAdmin only
             const planDiscountCard = document.getElementById('config-discount');
             const logsTab = document.getElementById('tab-logs');
             const logsNav = document.getElementById('nav-logs');
@@ -1648,7 +1645,7 @@
                 if(doc.exists) {
                     siteConfig = doc.data();
                     updateMaintenanceUI();
-                    updateDiscountUI(); // New
+                    updateDiscountUI(); // UPDATED LOGIC
                     updatePricingUI();
                     updateContentUI();
                 }
@@ -2007,42 +2004,50 @@
             db.collection("config").doc("site_settings").set({ packageDetails: siteConfig.packageDetails }, { merge: true }).then(() => showToast("Details Updated!", "success")).catch(err => showToast(err.message, "error"));
         }
 
-        /* --- DISCOUNT CONFIG LOGIC --- */
+        /* --- DISCOUNT CONFIG LOGIC (UPDATED) --- */
         function updateDiscountUI() {
             const toggleCircle = document.getElementById('discount-toggle-circle');
-            if(siteConfig.planDiscount && siteConfig.planDiscount.active) {
-                toggleCircle.style.left = '27px'; toggleCircle.style.background = '#10b981';
-                document.getElementById('discount-value').value = siteConfig.planDiscount.value || 0;
-                document.getElementById('discount-badge-text').value = siteConfig.planDiscount.text || "";
+            
+            // Check for flat fields that Main Website expects
+            const isActive = siteConfig.discountActive || false;
+            const percent = siteConfig.discountPercent || 0;
+
+            if (isActive) {
+                toggleCircle.style.left = '27px'; 
+                toggleCircle.style.background = '#10b981';
+                // Convert decimal 0.2 back to integer 20 for display
+                document.getElementById('discount-value').value = (percent * 100).toFixed(0);
             } else {
-                toggleCircle.style.left = '3px'; toggleCircle.style.background = '#555';
+                toggleCircle.style.left = '3px'; 
+                toggleCircle.style.background = '#555';
                 document.getElementById('discount-value').value = "";
-                document.getElementById('discount-badge-text').value = "";
             }
         }
 
         function toggleDiscountStatus() {
-            if(!siteConfig.planDiscount) siteConfig.planDiscount = {};
-            siteConfig.planDiscount.active = !siteConfig.planDiscount.active;
+            // Toggle the visual state and the config object
+            siteConfig.discountActive = !siteConfig.discountActive;
             updateDiscountUI();
         }
 
         function saveDiscountConfig() {
-            const val = parseFloat(document.getElementById('discount-value').value);
-            const text = document.getElementById('discount-badge-text').value;
-            const active = siteConfig.planDiscount.active;
+            const inputVal = parseFloat(document.getElementById('discount-value').value);
+            const isActive = siteConfig.discountActive;
 
-            if(active && (isNaN(val) || val < 0)) return showToast("Invalid Discount Value", "error");
+            // Input is "20". Save "0.20".
+            if (isActive && (isNaN(inputVal) || inputVal <= 0)) return showToast("Invalid Discount Value", "error");
 
+            const decimalVal = inputVal / 100;
+
+            // WRITE TO FIREBASE using flat fields
             const update = {
-                planDiscount: {
-                    active: active,
-                    value: val,
-                    text: text
-                }
+                discountActive: isActive,
+                discountPercent: decimalVal
             };
 
-            db.collection("config").doc("site_settings").update(update).then(() => showToast("Discount Config Saved!", "success")).catch(err => showToast(err.message, "error"));
+            db.collection("config").doc("site_settings").update(update)
+                .then(() => showToast("Discount Config Saved!", "success"))
+                .catch(err => showToast(err.message, "error"));
         }
         /* --- END DISCOUNT CONFIG --- */
 
@@ -2206,7 +2211,7 @@
         }
 
         function openTicketModal(ticketId) {
-            // Find ticket data to populate the read-only view
+            // Find ticket data to populate read-only view
             const ticketObj = ticketCache.find(t => t.id === ticketId);
             if(!ticketObj) return;
             const data = ticketObj.data;
