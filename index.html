@@ -92,6 +92,7 @@
             max-width: 400px;
             text-align: center;
             box-shadow: var(--shadow-card);
+            position: relative; /* For absolute button inside */
         }
         .login-card h2 { margin-bottom:1.5rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
         
@@ -167,8 +168,8 @@
             color: var(--text-main);
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding-left: 0.5rem;
+            justify-content: space-between; /* Updated to justify space-between for toggle button */
+            padding-right: 0.5rem;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 1.5rem;
         }
@@ -180,15 +181,18 @@
             display: flex;
             flex-direction: column;
             line-height: 1.2;
+            flex: 1; /* Take up space */
         }
         .brand-name {
             font-weight: 700;
             font-size: 1rem;
+            text-align: left;
         }
         .brand-job {
             font-size: 0.75rem;
             color: var(--text-secondary);
             font-weight: 400;
+            text-align: left;
         }
 
         /* Desktop Nav Items */
@@ -232,11 +236,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         .theme-toggle-btn:hover {
             background: var(--bg-input);
             color: var(--accent-primary);
-            transform: none;
+            transform: scale(1.05);
         }
 
         /* --- MAIN CONTENT --- */
@@ -487,18 +493,17 @@
                 bottom: 0; left: 0; top: auto; right: 0;
                 border-right: none;
                 border-top: 1px solid var(--border-color);
-                overflow-x: auto; /* Horizontal scroll if too many items */
+                overflow-x: auto; 
                 overflow-y: hidden;
                 box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
                 z-index: 100; 
                 justify-content: flex-start;
-                /* Hide scrollbar */
                 -ms-overflow-style: none; 
                 scrollbar-width: none; 
             }
             .sidebar::-webkit-scrollbar { display: none; }
 
-            .brand, .logout-btn { display: none; } /* Hide desktop brand/logout in sidebar */
+            .brand, .logout-btn { display: none; } /* Hide desktop elements on mobile */
 
             /* Mobile Header */
             .mobile-brand-header {
@@ -511,8 +516,8 @@
 
             /* Bottom Nav Items */
             .nav-item {
-                flex: 0 0 auto; /* Don't shrink, allow scroll */
-                min-width: 80px; /* Ensure touch target size */
+                flex: 0 0 auto; 
+                min-width: 80px; 
                 justify-content: center;
                 flex-direction: column;
                 gap: 4px;
@@ -536,7 +541,7 @@
             
             /* Main Content */
             .main-content { 
-                padding: 1rem 1rem 90px 1rem; /* Extra bottom padding for nav */
+                padding: 1rem 1rem 90px 1rem; 
                 margin-bottom: 0;
             }
             
@@ -571,6 +576,11 @@
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen">
+        <!-- Desktop/Mobile Login Theme Toggle -->
+        <button class="theme-toggle-btn" style="position: absolute; top: 20px; right: 20px;" onclick="toggleTheme()" aria-label="Toggle Theme">
+            <i id="theme-icon-login" class="ri-moon-line"></i>
+        </button>
+
         <div class="login-card">
             <div style="margin-bottom: 1.5rem;">
                 <i class="ri-shield-keyhole-line" style="font-size: 3rem; color: var(--accent-primary);"></i>
@@ -592,11 +602,17 @@
         <div class="sidebar">
             <!-- DESKTOP BRAND -->
             <div class="brand">
-                <i class="ri-shield-user-fill brand-icon"></i>
-                <div class="brand-info">
-                    <span id="sidebar-name" class="brand-name">DDN Admin</span>
-                    <span id="sidebar-jobtitle" class="brand-job">Super Admin</span>
+                <div style="display:flex; align-items:center; gap:12px; flex:1;">
+                    <i class="ri-shield-user-fill brand-icon"></i>
+                    <div class="brand-info">
+                        <span id="sidebar-name" class="brand-name">DDN Admin</span>
+                        <span id="sidebar-jobtitle" class="brand-job">Super Admin</span>
+                    </div>
                 </div>
+                <!-- DESKTOP THEME TOGGLE -->
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <i id="theme-icon-desktop" class="ri-moon-line"></i>
+                </button>
             </div>
 
             <!-- NAV ITEMS -->
@@ -1230,7 +1246,8 @@
         }
 
         function updateThemeIcon(theme) {
-            const icons = document.querySelectorAll('#theme-icon-mobile, #theme-icon-desktop');
+            // Now selects all 3 potential locations: Mobile, Desktop, Login
+            const icons = document.querySelectorAll('#theme-icon-mobile, #theme-icon-desktop, #theme-icon-login');
             icons.forEach(icon => {
                 if(theme === 'dark') {
                     icon.className = 'ri-moon-line';
@@ -1240,7 +1257,6 @@
             });
         }
 
-        // Initialize Theme on Load
         initTheme();
 
 
@@ -1927,9 +1943,7 @@
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
             
-            // Highlight correct nav item
-            // We find the index based on the known order
-            const navItems = Array.from(document.querySelectorAll('.sidebar .nav-item')); // Get all nav items
+            const navItems = Array.from(document.querySelectorAll('.sidebar .nav-item'));
             const mapping = ['orders','users','support','vouchers','promos','logs','maintenance','content'];
             const index = mapping.indexOf(tabId);
             
