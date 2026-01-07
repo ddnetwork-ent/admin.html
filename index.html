@@ -72,6 +72,12 @@
             box-sizing: border-box;
             transition: 0.2s;
         }
+        input:disabled, select:disabled, textarea:disabled {
+            background: rgba(0,0,0,0.3);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            border-color: transparent;
+        }
         textarea { height: 150px; resize: vertical; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent-primary); outline: none; background: rgba(59, 130, 246, 0.05); }
         
@@ -114,15 +120,35 @@
             z-index: 10;
         }
         .brand {
-            font-size:1.1rem;
-            font-weight: 800;
+            font-size:1rem;
             margin-bottom: 3rem;
             color: white;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             padding-left: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 1.5rem;
         }
+        .brand-icon {
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+        }
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .brand-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .brand-job {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
         .nav-item {
             padding: 12px 1rem;
             border-radius: 8px;
@@ -152,10 +178,20 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        /* MOBILE HEADER */
+        .mobile-brand-header {
+            display: none; /* Hidden on desktop */
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom:1rem;
+            border-bottom:1px solid var(--border-light);
+            margin-bottom:1.5rem;
+        }
+
         /* TABS & TABLES */
         .tab-content { display: none; animation: fadeIn 0.3s ease; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
         .section-header {
             display: flex;
@@ -167,14 +203,14 @@
         }
         .section-header h2 { margin: 0; font-size: 1.5rem; color: white; }
 
-        /* --- FILTER BUTTONS (NEW) --- */
+        /* --- FILTER BUTTONS --- */
         .ticket-filters {
             display: flex;
             gap: 10px;
             background: var(--bg-card);
             padding: 5px;
             border-radius: 8px;
-            border: 1px solid var(--border-light);
+            border:1px solid var(--border-light);
         }
         .filter-btn {
             background: transparent;
@@ -202,7 +238,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px; /* Wider for Source column */
+            min-width: 800px;
         }
         th, td {
             text-align: left;
@@ -232,6 +268,7 @@
             display: inline-block;
         }
         .role-admin { background: var(--warning); color: black; }
+        .role-superadmin { background: var(--accent-primary); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .role-user { background: #333; color: var(--text-secondary); }
 
         .action-btn {
@@ -247,7 +284,7 @@
         }
         .action-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: var(--text-secondary); }
 
-        /* --- SOURCE BADGES (NEW) --- */
+        /* --- SOURCE BADGES --- */
         .source-badge {
             padding: 3px 10px;
             border-radius: 4px;
@@ -267,9 +304,7 @@
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
 
-        .row-internal {
-            background: rgba(245, 158, 11, 0.03); /* Very subtle tint for internal rows */
-        }
+        .row-internal { background: rgba(245, 158, 11, 0.03); }
 
         /* ADMIN CARDS */
         .admin-card {
@@ -289,12 +324,7 @@
             background: rgba(59, 130, 246, 0.05);
             border: 1px solid var(--accent-primary);
         }
-        .internal-support-card h3 {
-            color: var(--accent-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .internal-support-card h3 { color: var(--accent-primary); display: flex; align-items: center; gap: 8px; }
 
         /* ALERTS */
         .alert-box {
@@ -331,29 +361,31 @@
         
         /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 768px) {
-            #dashboard {
-                flex-direction: column;
-            }
-
+            #dashboard { flex-direction: column; }
+            
             .sidebar {
                 width: 100%;
                 height: auto;
                 padding: 0.8rem;
                 flex-direction: row;
                 position: fixed;
-                bottom: 0;
-                left: 0;
-                top: auto;
-                right: 0;
+                bottom: 0; left: 0; top: auto; right: 0;
                 border-right: none;
                 border-top: 1px solid var(--border-light);
                 overflow-x: auto;
                 box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
                 z-index: 50;
             }
+            
+            .brand { display: none; } /* Hide Sidebar Brand */
+            .logout-btn { display: none; } /* Hide Sidebar Logout */
 
-            .brand { display: none; }
-            .logout-btn { display: none; }
+            /* Show Mobile Header */
+            .mobile-brand-header {
+                display: flex;
+            }
+            .mobile-brand-header .brand-name { font-size: 1.1rem; }
+            .mobile-brand-header .brand-job { font-size: 0.85rem; }
 
             .nav-item {
                 flex: 0 0 auto;
@@ -372,12 +404,10 @@
             }
             .nav-item i { font-size: 1.3rem; color: var(--text-secondary); }
             .nav-item.active i { color: var(--accent-primary); }
-
-            .main-content {
-                padding: 1.5rem 1rem;
-                margin-bottom: 70px;
+            .main-content { 
+                padding: 1.5rem 1rem; 
+                margin-bottom: 70px; 
             }
-
             .section-header h2 { font-size: 1.2rem; }
             button { font-size: 0.9rem; }
         }
@@ -404,19 +434,26 @@
     <!-- DASHBOARD -->
     <div id="dashboard" style="display: none;">
         <div class="sidebar">
-            <div class="brand"><i class="ri-shield-user-fill"></i> DDN Admin</div>
+            <!-- DESKTOP BRAND -->
+            <div class="brand">
+                <i class="ri-shield-user-fill brand-icon"></i>
+                <div class="brand-info">
+                    <span id="sidebar-name" class="brand-name">DDN Admin</span>
+                    <span id="sidebar-jobtitle" class="brand-job">Super Admin</span>
+                </div>
+            </div>
             
             <div class="nav-item active" onclick="switchTab('orders')">
                 <i class="ri-shopping-bag-3-line"></i> <span>Orders</span>
             </div>
             <div class="nav-item" onclick="switchTab('users')">
-                <i class="ri-group-line"></i> <span>Users & Roles</span>
+                <i class="ri-group-line"></i> <span>Users</span>
             </div>
             <div class="nav-item" onclick="switchTab('support')">
                 <i class="ri-customer-service-2-line"></i> <span>Support</span>
             </div>
             <div class="nav-item" onclick="switchTab('vouchers')">
-                <i class="ri-gift-line"></i> <span>Assign Vouchers</span>
+                <i class="ri-gift-line"></i> <span>Vouchers</span>
             </div>
             <div class="nav-item" onclick="switchTab('promos')">
                 <i class="ri-coupon-3-line"></i> <span>Promo</span>
@@ -435,6 +472,18 @@
 
         <div class="main-content">
             
+            <!-- MOBILE PROFILE HEADER -->
+            <div class="mobile-brand-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="ri-shield-user-fill brand-icon"></i>
+                    <div class="brand-info">
+                        <span id="mobile-name" class="brand-name">DDN Admin</span>
+                        <span id="mobile-jobtitle" class="brand-job">Super Admin</span>
+                    </div>
+                </div>
+                <button class="action-btn sm-btn" onclick="handleLogout()" style="color:var(--danger); border-color:var(--danger);">Logout</button>
+            </div>
+
             <!-- ORDERS TAB -->
             <div id="tab-orders" class="tab-content active">
                 <div class="section-header">
@@ -464,11 +513,16 @@
                 </div>
             </div>
 
-            <!-- USERS TAB (UPDATED) -->
+            <!-- USERS TAB -->
             <div id="tab-users" class="tab-content">
                 <div class="section-header">
                     <h2>User Management</h2>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Edit users and change roles here.</p>
+                    <!-- SUPERADMIN CONTROL: CREATE USER BUTTON -->
+                    <div id="superadmin-controls">
+                        <button class="action-btn success" style="color:white; border:none; width:auto;" onclick="openCreateUserModal()">
+                            <i class="ri-user-add-line"></i> Create New User
+                        </button>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -476,6 +530,7 @@
                             <tr>
                                 <th>Role</th>
                                 <th>Name</th>
+                                <th>Job Title</th>
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Actions</th>
@@ -483,36 +538,35 @@
                         </thead>
                         <tbody id="users-table-body">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading users...</td>
+                                <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading users...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- SUPPORT TAB (UPDATED: INTERNAL VS EXTERNAL) -->
+            <!-- SUPPORT TAB -->
             <div id="tab-support" class="tab-content">
                 <div class="section-header">
                     <h2>Support Desk</h2>
-                    <!-- FILTER BUTTONS -->
                     <div class="ticket-filters">
                         <button class="filter-btn active" onclick="filterTickets('all', this)">
-                            <i class="ri-list-check"></i> All Tickets
+                            <i class="ri-list-check"></i> All
                         </button>
                         <button class="filter-btn" onclick="filterTickets('internal', this)">
-                            <i class="ri-bug-line"></i> Internal Team
+                            <i class="ri-bug-line"></i> Internal
                         </button>
                         <button class="filter-btn" onclick="filterTickets('external', this)">
-                            <i class="ri-user-line"></i> Customers
+                            <i class="ri-user-line"></i> External
                         </button>
                     </div>
                 </div>
 
                 <!-- INTERNAL REPORT FORM -->
                 <div class="admin-card internal-support-card">
-                    <h3><i class="ri-bug-line"></i> Report Internal Issue / Bug</h3>
+                    <h3><i class="ri-bug-line"></i> Report Internal Issue</h3>
                     <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
-                        Use this form to report issues with the portal, bugs, or IT requests.
+                        Report bugs or IT requests here.
                     </p>
                     
                     <form onsubmit="handleInternalTicketSubmit(event)">
@@ -523,27 +577,26 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            <label>Admin Email (Auto-filled)</label>
+                            <label>Admin Email</label>
                             <input type="email" id="internal-email" readonly style="background: rgba(0,0,0,0.3); cursor: not-allowed;">
                         </div>
                         <div class="form-row">
                             <label>Issue Type</label>
                             <select id="internal-type" required>
-                                <option value="Internal Bug">Internal Bug (Portal/DB)</option>
+                                <option value="Internal Bug">Internal Bug</option>
                                 <option value="Feature Request">Feature Request</option>
                                 <option value="System Error">System Error</option>
-                                <option value="Other">Other</option>
                             </select>
                         </div>
                         <div class="form-row">
                             <label>Description</label>
-                            <textarea id="internal-message" placeholder="Describe the issue in detail..." required></textarea>
+                            <textarea id="internal-message" placeholder="Describe issue..." required></textarea>
                         </div>
-                        <button type="submit" class="success">Submit Internal Ticket</button>
+                        <button type="submit" class="success">Submit Ticket</button>
                     </form>
                 </div>
 
-                <!-- TICKETS TABLE (UPDATED WITH SOURCE COLUMN) -->
+                <!-- TICKETS TABLE -->
                 <div class="table-responsive" style="margin-bottom: 2rem;">
                     <h3 style="font-size: 1rem; color: var(--text-secondary); margin: 1rem 0 1rem 0;">Ticket List</h3>
                     <table>
@@ -551,11 +604,12 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Case ID</th>
-                                <th>Source</th> <!-- NEW COLUMN -->
-                                <th>Issue Type</th>
+                                <th>Source</th>
+                                <th>Type</th>
                                 <th>Customer</th>
                                 <th>Message</th>
                                 <th>Status</th>
+                                <th id="th-internal-note" style="display:none;">Internal Notes</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -574,7 +628,7 @@
                 
                 <div class="admin-card">
                     <h3>Send Gift Voucher</h3>
-                    <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                    <div class="form-row" style="display: grid; grid-template-columns:1fr; gap: 10px;">
                         <div style="grid-column: 1 / -1;">
                             <label>Select Customer</label>
                             <select id="voucher-user-select" style="margin-bottom: 0;">
@@ -585,7 +639,7 @@
                     
                     <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div>
-                            <label>Voucher Code</label>
+                            <label>Code</label>
                             <input type="text" id="voucher-code" placeholder="e.g. GIFT50">
                         </div>
                         <div>
@@ -600,17 +654,18 @@
                         </div>
                     </div>
 
-                    <button onclick="assignVoucher()" style="margin-top: 1rem;">Assign Voucher to User</button>
+                    <button onclick="assignVoucher()" style="margin-top: 1rem;">Assign Voucher</button>
                 </div>
 
                 <div class="table-responsive" style="margin-top: 2rem;">
-                    <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Recent Voucher Assignments</h3>
+                    <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Recent Assignments</h3>
                     <table>
                         <thead>
                             <tr>
                                 <th>User</th>
                                 <th>Code</th>
                                 <th>Value</th>
+                                <th id="th-created-by" style="display:none;">Created By</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -631,8 +686,8 @@
                     <h3>Create Global Promo</h3>
                     <form onsubmit="event.preventDefault(); createPromo();">
                         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;">
-                            <input type="text" id="new-promo-code" placeholder="Code (e.g. SUMMER)" style="margin:0;" required>
-                            <input type="number" id="new-promo-val" placeholder="0.5 (50%)" step="0.01" style="margin:0;" required>
+                            <input type="text" id="new-promo-code" placeholder="Code" style="margin:0;" required>
+                            <input type="number" id="new-promo-val" placeholder="0.5" step="0.01" style="margin:0;" required>
                             <button type="submit" style="width: auto; white-space: nowrap;">Add</button>
                         </div>
                     </form>
@@ -664,10 +719,10 @@
 
                 <div class="admin-card">
                     <h3>Maintenance Mode</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">When enabled, users see a warning banner on main site.</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Toggle warning banner on main site.</p>
                     <div class="form-row">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-                            <label>Enable Maintenance Mode</label>
+                            <label>Enable Maintenance</label>
                             <div style="width: 50px; height: 26px; background: #333; border-radius: 13px; position: relative; cursor: pointer;" onclick="toggleMaintenanceStatus()">
                                 <div id="maintenance-toggle-circle" style="width: 20px; height: 20px; background: #555; border-radius: 50%; position: absolute; left: 3px; top: 3px; transition: 0.3s;"></div>
                             </div>
@@ -675,16 +730,16 @@
                     </div>
 
                     <div class="form-row">
-                        <label>Maintenance Message (Red Banner)</label>
-                        <input type="text" id="maintenance-msg" placeholder="e.g. Site Down for scheduled update.">
+                        <label>Banner Message</label>
+                        <input type="text" id="maintenance-msg" placeholder="e.g. Site Down for update.">
                     </div>
                     
-                    <button onclick="saveMaintenanceConfig()" style="margin-top: 1rem;">Save Configuration</button>
+                    <button onclick="saveMaintenanceConfig()" style="margin-top: 1rem;">Save Config</button>
                 </div>
 
                 <div class="admin-card">
-                    <h3>Dynamic Pricing (Optional)</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Override base package prices without changing code.</p>
+                    <h3>Dynamic Pricing</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Override base prices.</p>
                     <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div>
                             <label>HTML Price (RM)</label>
@@ -702,12 +757,12 @@
             <!-- CONTENT TAB -->
             <div id="tab-content" class="tab-content">
                 <div class="section-header">
-                    <h2>Package Details (Features)</h2>
+                    <h2>Package Details</h2>
                 </div>
 
                 <div class="admin-card">
-                    <h3>Frontend Website Details</h3>
-                    <p class="helper-text">Enter one feature per line.</p>
+                    <h3>Frontend Details</h3>
+                    <p class="helper-text">One feature per line.</p>
                     <div class="form-row">
                         <label>Features List</label>
                         <textarea id="details-frontend" placeholder="e.g. Up to 5 Pages"></textarea>
@@ -717,10 +772,10 @@
 
                 <div class="admin-card">
                     <h3>AI Powered Details</h3>
-                    <p class="helper-text">Enter one feature per line.</p>
+                    <p class="helper-text">One feature per line.</p>
                     <div class="form-row">
                         <label>Features List</label>
-                        <textarea id="details-ai" placeholder="e.g. AI Chatbot Integration"></textarea>
+                        <textarea id="details-ai" placeholder="e.g. AI Chatbot"></textarea>
                     </div>
                     <button onclick="saveContentConfig()" style="margin-top: 1rem;">Save Details</button>
                 </div>
@@ -733,7 +788,7 @@
     <div id="editUserModal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Manage User Role</h3>
+                <h3 style="margin:0;">Manage User</h3>
                 <i class="ri-close-line" onclick="closeModal('editUserModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
             </div>
             <input type="hidden" id="edit-uid">
@@ -742,14 +797,20 @@
                 <input type="text" id="edit-name" placeholder="John Doe">
             </div>
             <div class="form-row">
+                <label>Job Title</label>
+                <input type="text" id="edit-jobtitle" placeholder="e.g. CEO">
+                <span id="jobtitle-helper" style="font-size:0.7em; color:var(--accent-primary); display:none;">(SuperAdmin Only)</span>
+            </div>
+            <div class="form-row">
                 <label>Phone Number</label>
                 <input type="tel" id="edit-phone" placeholder="0123456789">
             </div>
             <div class="form-row">
-                <label>Role (Permissions)</label>
+                <label>Role</label>
                 <select id="edit-role" style="width: 100%;">
                     <option value="user">Standard User</option>
-                    <option value="admin">Admin (Full Access)</option>
+                    <option value="admin">Admin</option>
+                    <option value="superadmin">Super Admin</option>
                 </select>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
@@ -759,23 +820,61 @@
         </div>
     </div>
 
+    <!-- CREATE USER MODAL (NEW) -->
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="margin:0;">Create New User</h3>
+                <i class="ri-close-line" onclick="closeModal('createUserModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            </div>
+            <div class="form-row">
+                <label>Full Name</label>
+                <input type="text" id="create-name" placeholder="John Doe">
+            </div>
+            <div class="form-row">
+                <label>Email Address</label>
+                <input type="email" id="create-email" placeholder="user@example.com">
+            </div>
+            <div class="form-row">
+                <label>Initial Password</label>
+                <input type="password" id="create-password" placeholder="At least 6 characters">
+            </div>
+            <div class="form-row">
+                <label>Phone Number</label>
+                <input type="tel" id="create-phone" placeholder="0123456789">
+            </div>
+            <div class="form-row">
+                <label>Assign Role</label>
+                <select id="create-role" style="width: 100%;">
+                    <option value="user">Standard User</option>
+                    <option value="admin">Admin</option>
+                    <option value="superadmin">Super Admin</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                <button onclick="createNewUser()" style="background: var(--success);">Create User</button>
+                <button class="secondary" onclick="closeModal('createUserModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- TICKET MODAL -->
     <div id="ticketModal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Manage Support Ticket</h3>
+                <h3 style="margin:0;">Manage Ticket</h3>
                 <i class="ri-close-line" onclick="closeModal('ticketModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
             </div>
             <input type="hidden" id="ticket-id">
             <div class="form-row">
-                <label>Ticket Status</label>
+                <label>Status</label>
                 <select id="ticket-status-select" style="width: 100%;">
                     <option value="Open">Open</option>
                     <option value="Resolved">Resolved</option>
                 </select>
             </div>
             <div class="form-row">
-                <label>Admin Note (Visible to User)</label>
+                <label>Admin Note</label>
                 <textarea id="ticket-admin-note"></textarea>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
@@ -803,7 +902,7 @@
                 </select>
             </div>
             <div class="form-row">
-                <label>Admin Notes (Internal)</label>
+                <label>Admin Notes</label>
                 <textarea id="order-admin-note"></textarea>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
@@ -814,7 +913,6 @@
     </div>
 
     <script>
-        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyAwf31b-wpYQwPbd-3DxnqGVRw8g3xq938",
             authDomain: "ddnetwork-database.firebaseapp.com",
@@ -825,8 +923,11 @@
         };
 
         let db, auth;
-        let ticketFilter = 'all'; // 'all', 'internal', 'external'
-        let ticketCache = []; // Store tickets locally for filtering
+        let ticketFilter = 'all';
+        let ticketCache = []; 
+        let currentAdminUID = ""; 
+        let isSuperAdmin = false; 
+        let currentAdminEmail = ""; 
 
         try {
             firebase.initializeApp(firebaseConfig);
@@ -837,95 +938,102 @@
             alert("Error connecting to database.");
         }
 
-        const ADMIN_EMAIL = "ddnetwork.one@outlook.com";
         let allUsers = []; 
         let siteConfig = { maintenance_active: false, message: '', prices: { html: 199, frontend: 599 }, packageDetails: {} };
 
-        // Default Details (Used as fallback)
         const DEFAULT_DETAILS = {
-            frontend: [
-                "Up to 5 Pages",
-                "Animations & Interactions",
-                "Contact Forms",
-                "WhatsApp Integration"
-            ],
-            ai: [
-                "All Front-End Features",
-                "AI Chatbot Integration",
-                "Lead Auto-Response",
-                "Smart Analytics"
-            ]
+            frontend: ["Up to 5 Pages", "Animations", "Contact Forms"],
+            ai: ["All Frontend Features", "AI Chatbot", "Analytics"]
         };
 
-        // AUTH LOGIC (ROLE CHECK + SUPER ADMIN BOOTSTRAP)
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // Fetch user data to check role
+                currentAdminUID = user.uid;
+                currentAdminEmail = user.email;
+                
                 db.collection("users").doc(user.uid).get().then((doc) => {
-                    if (doc.exists && doc.data().role === 'admin') {
-                        // User is admin
-                        document.getElementById('login-screen').style.display = 'none';
-                        document.getElementById('dashboard').style.display = 'flex';
-                        
-                        // Populate Internal Ticket Form
-                        document.getElementById('internal-email').value = user.email;
-                        
-                        loadDashboardData();
-                    } else {
-                        // User is not admin
-                        auth.signOut();
-                        alert("ACCESS DENIED: You do not have permission to access this portal.");
-                        document.getElementById('login-screen').style.display = 'flex';
-                        document.getElementById('dashboard').style.display = 'none';
+                    if (doc.exists) {
+                        const data = doc.data();
+                        const role = data.role || 'user';
+
+                        if (role === 'admin' || role === 'superadmin') {
+                            document.getElementById('login-screen').style.display = 'none';
+                            document.getElementById('dashboard').style.display = 'flex';
+                            document.getElementById('internal-email').value = user.email;
+                            
+                            isSuperAdmin = (role === 'superadmin');
+
+                            loadDashboardData();
+                            loadSidebarProfile(); 
+                            adjustUIForSuperAdmin();
+                        } else {
+                            auth.signOut();
+                            alert("ACCESS DENIED: You do not have permission to access this portal.");
+                            document.getElementById('login-screen').style.display = 'flex';
+                            document.getElementById('dashboard').style.display = 'none';
+                        }
                     }
                 }).catch((err) => {
-                    console.error("Error checking role:", err);
                     alert("Error verifying permissions.");
                 });
             } else {
+                currentAdminUID = "";
+                isSuperAdmin = false;
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('dashboard').style.display = 'none';
             }
         });
 
+        function adjustUIForSuperAdmin() {
+            if(isSuperAdmin) {
+                document.getElementById('th-internal-note').style.display = 'table-cell';
+                document.getElementById('th-created-by').style.display = 'table-cell';
+                // SHOW CREATE USER BUTTON
+                document.getElementById('superadmin-controls').style.display = 'block';
+            } else {
+                document.getElementById('th-internal-note').style.display = 'none';
+                document.getElementById('th-created-by').style.display = 'none';
+                // HIDE CREATE USER BUTTON
+                document.getElementById('superadmin-controls').style.display = 'none';
+            }
+        }
+
+        function loadSidebarProfile() {
+            if(currentAdminUID) {
+                db.collection("users").doc(currentAdminUID).onSnapshot((doc) => {
+                    if(doc.exists) {
+                        const data = doc.data();
+                        const name = data.name || "DDN Admin";
+                        const title = data.jobTitle || (isSuperAdmin ? "Super Admin" : "Admin");
+
+                        document.getElementById('sidebar-name').innerText = name;
+                        document.getElementById('sidebar-jobtitle').innerText = title;
+                        document.getElementById('mobile-name').innerText = name;
+                        document.getElementById('mobile-jobtitle').innerText = title;
+                    }
+                });
+            }
+        }
+
         function handleAdminLogin(e) {
             e.preventDefault();
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
-            
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
-
-                    // ==========================================
-                    // ONE-TIME SETUP LOGIC (BOOTSTRAP)
-                    // ==========================================
-                    if (user.email.toLowerCase() === ADMIN_EMAIL) {
-                        console.log("Main Admin detected. Bootstrapping Admin Role...");
-                        
-                        const userRef = db.collection("users").doc(user.uid);
-                        
-                        userRef.get().then((docSnapshot) => {
-                            const currentData = docSnapshot.exists ? docSnapshot.data() : {};
-                            
-                            userRef.update({
-                                role: 'admin',
-                                name: currentData.name || "Admin",
-                                phone: currentData.phone || "",
-                                email: user.email
-                            }, { merge: true }).then(() => {
-                                alert("SUCCESS: Admin Role Applied Automatically!");
-                                window.location.reload();
-                            }).catch((err) => {
-                                console.error("Bootstrap Error:", err);
-                                alert("Error applying admin role: " + err.message);
-                            });
-                        });
-                    } else {
-                        console.warn("Unauthorized login attempt.");
-                        alert("ACCESS DENIED: You do not have permission to access this portal.");
-                        auth.signOut();
-                    }
+                    const userRef = db.collection("users").doc(user.uid);
+                    userRef.get().then((docSnapshot) => {
+                        if (!docSnapshot.exists) {
+                            userRef.set({
+                                email: user.email,
+                                role: 'user',
+                                name: "New User",
+                                phone: ""
+                            }).then(() => alert("Account created. Please contact admin for access."))
+                            .catch(err => alert(err.message));
+                        }
+                    });
                 })
                 .catch((error) => {
                     const errBox = document.getElementById('login-error');
@@ -935,13 +1043,53 @@
         }
 
         function handleLogout() {
-            if(confirm("Are you sure you want to logout?")) {
-                auth.signOut();
-            }
+            if(confirm("Logout?")) auth.signOut();
+        }
+
+        function openCreateUserModal() {
+            // Clear fields
+            document.getElementById('create-name').value = '';
+            document.getElementById('create-email').value = '';
+            document.getElementById('create-password').value = '';
+            document.getElementById('create-phone').value = '';
+            document.getElementById('create-role').value = 'user';
+            document.getElementById('createUserModal').classList.add('open');
+        }
+
+        function createNewUser() {
+            const name = document.getElementById('create-name').value;
+            const email = document.getElementById('create-email').value;
+            const password = document.getElementById('create-password').value;
+            const phone = document.getElementById('create-phone').value;
+            const role = document.getElementById('create-role').value;
+
+            if(!name || !email || !password) return alert("Name, Email, and Password are required.");
+
+            // 1. Create Auth Account
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // 2. Create Firestore Profile
+                    return db.collection("users").doc(user.uid).set({
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        role: role,
+                        jobTitle: role === 'superadmin' ? 'Super Admin' : '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    closeModal('createUserModal');
+                    alert("User Created Successfully!");
+                })
+                .catch((error) => {
+                    alert("Error creating user: " + error.message);
+                });
         }
 
         function loadDashboardData() {
-            // Load Config
             db.collection("config").doc("site_settings").onSnapshot(doc => {
                 if(doc.exists) {
                     siteConfig = doc.data();
@@ -951,7 +1099,6 @@
                 }
             });
 
-            // Load Orders
             db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('orders-table-body');
                 tbody.innerHTML = '';
@@ -959,38 +1106,27 @@
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
                     return;
                 }
-                
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
                     let statusClass = 'status-pending';
                     if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
                     if(data.status === 'Cancelled') statusClass = 'status-cancelled';
-
-                    const row = `
+                    tbody.innerHTML += `
                         <tr>
                             <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
-                            <td>
-                                <div style="font-weight:600;">${data.customerName}</div>
-                                <div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div>
-                            </td>
+                            <td><div style="font-weight:600;">${data.customerName}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div></td>
                             <td>${data.package}</td>
                             <td style="font-weight:700;">${data.total}</td>
                             <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                            <td>
-                                <button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
+                            <td><button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button></td>
+                        </tr>`;
                 });
             });
 
-            // Load Users & Populate Dropdown
             db.collection("users").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('users-table-body');
                 const select = document.getElementById('voucher-user-select');
-                
                 allUsers = []; 
                 let optionsHTML = '<option value="" disabled selected>Select a User</option>';
                 tbody.innerHTML = '';
@@ -998,134 +1134,105 @@
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const role = data.role || 'user';
-                    const roleClass = role === 'admin' ? 'role-admin' : 'role-user';
-                    const roleLabel = role === 'admin' ? 'Admin' : 'User';
+                    let roleClass = 'role-user';
+                    let roleLabel = 'User';
+                    
+                    if(role === 'admin') { roleClass = 'role-admin'; roleLabel = 'Admin'; }
+                    if(role === 'superadmin') { roleClass = 'role-superadmin'; roleLabel = 'Super Admin'; }
 
-                    const userObj = { id: doc.id, ...data };
-                    allUsers.push(userObj);
+                    allUsers.push({ id: doc.id, ...data });
 
-                    const row = `
+                    tbody.innerHTML += `
                         <tr>
                             <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
                             <td>${data.name}</td>
+                            <td style="color:var(--text-secondary); font-size:0.9rem;">${data.jobTitle || '-'}</td>
                             <td style="font-size:0.9rem;">${data.email}</td>
                             <td>${data.phone}</td>
                             <td>
-                                <button class="action-btn" onclick="openEditUser('${doc.id}', '${data.name}', '${data.phone}', '${role}')">Edit / Role</button>
+                                <button class="action-btn" onclick="openEditUser('${doc.id}', '${data.name}', '${data.phone}', '${role}', '${data.jobTitle || ''}')">Edit</button>
                                 <button class="action-btn" onclick="resetUserPass('${data.email}')">Pwd</button>
                             </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
+                        </tr>`;
                     optionsHTML += `<option value="${doc.id}">${data.name} (${data.email})</option>`;
                 });
                 select.innerHTML = optionsHTML;
                 refreshVoucherTable();
             });
 
-            // Load Tickets
             db.collection("tickets").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                ticketCache = []; // Clear cache and rebuild
-                snapshot.forEach(doc => {
-                    ticketCache.push({ id: doc.id, data: doc.data() });
-                });
-                renderTicketTable(); // Render based on filter
+                ticketCache = []; 
+                snapshot.forEach(doc => ticketCache.push({ id: doc.id, data: doc.data() }));
+                renderTicketTable(); 
             });
 
-            // Load Global Promos
             db.collection("promo_codes").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('promo-table-body');
                 tbody.innerHTML = '';
                 if(snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">No promo codes found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">No promos.</td></tr>';
                     return;
                 }
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const discountPct = (data.discount * 100).toFixed(0);
-                    const row = `
+                    tbody.innerHTML += `
                         <tr>
-                            <td style="font-weight:700; color: var(--accent-primary); font-size:1.1rem;">${doc.id}</td>
-                            <td style="font-weight:700; color: var(--success);">${discountPct}%</td>
-                            <td>
-                                <button class="action-btn" style="color: var(--danger); border-color: var(--danger);" onclick="deletePromo('${doc.id}')">Del</button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
+                            <td style="font-weight:700; color: var(--accent-primary);">${doc.id}</td>
+                            <td style="font-weight:700; color: var(--success);">${(data.discount * 100).toFixed(0)}%</td>
+                            <td><button class="action-btn" style="color: var(--danger);" onclick="deletePromo('${doc.id}')">Del</button></td>
+                        </tr>`;
                 });
             });
         }
 
-        // --- TICKET FILTERING & RENDERING (UPDATED) ---
         function filterTickets(type, btnElement) {
             ticketFilter = type;
-            
-            // Update Button Styles
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            
             renderTicketTable();
         }
 
         function renderTicketTable() {
             const tbody = document.getElementById('tickets-table-body');
             tbody.innerHTML = '';
-
             let visibleTickets = ticketCache;
-
-            if (ticketFilter === 'internal') {
-                visibleTickets = ticketCache.filter(t => t.data.type.toLowerCase().startsWith("internal"));
-            } else if (ticketFilter === 'external') {
-                visibleTickets = ticketCache.filter(t => !t.data.type.toLowerCase().startsWith("internal"));
-            }
+            if (ticketFilter === 'internal') visibleTickets = ticketCache.filter(t => t.data.type.toLowerCase().startsWith("internal"));
+            else if (ticketFilter === 'external') visibleTickets = ticketCache.filter(t => !t.data.type.toLowerCase().startsWith("internal"));
 
             if(visibleTickets.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-secondary);">No tickets found for this filter.</td></tr>';
+                const colspan = isSuperAdmin ? 9 : 8;
+                tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:2rem;">No tickets.</td></tr>`;
                 return;
             }
-
             visibleTickets.forEach(item => {
                 const doc = item;
                 const data = item.data;
                 const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
-                let statusClass = 'status-open';
-                if(data.status === 'Resolved') statusClass = 'status-paid';
-
-                // DETERMINE SOURCE
+                let statusClass = data.status === 'Resolved' ? 'status-paid' : 'status-open';
                 const isInternal = data.type.toLowerCase().startsWith("internal");
                 const rowClass = isInternal ? "row-internal" : "";
-                const sourceBadge = isInternal 
-                    ? `<span class="source-badge badge-internal">Team</span>` 
-                    : `<span class="source-badge badge-external">User</span>`;
+                const sourceBadge = isInternal ? `<span class="source-badge badge-internal">Team</span>` : `<span class="source-badge badge-external">User</span>`;
+                const internalNoteCell = isSuperAdmin ? `<td style="max-width: 200px; font-size:0.8rem; color:var(--text-secondary);">${data.adminNote || '-'}</td>` : '';
 
-                const row = `
+                tbody.innerHTML += `
                     <tr class="${rowClass}">
                         <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
                         <td><span style="font-family:monospace; font-size:0.8rem; color:var(--accent-primary); font-weight:700;">${doc.id}</span></td>
                         <td>${sourceBadge}</td>
                         <td style="font-weight:700;">${data.type}</td>
-                        <td>
-                            <div style="font-weight:600;">${data.name}</div>
-                            <div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div>
-                        </td>
+                        <td><div style="font-weight:600;">${data.name}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div></td>
                         <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data.message}</td>
                         <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                        <td>
-                            <button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
+                        ${internalNoteCell}
+                        <td><button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button></td>
+                    </tr>`;
             });
         }
 
-        // --- CONTENT LOGIC ---
         function updateContentUI() {
             if(siteConfig.packageDetails) {
                 const frontData = siteConfig.packageDetails.frontend || DEFAULT_DETAILS.frontend;
                 const aiData = siteConfig.packageDetails.ai || DEFAULT_DETAILS.ai;
-
                 document.getElementById('details-frontend').value = frontData.join('\n');
                 document.getElementById('details-ai').value = aiData.join('\n');
             } else {
@@ -1137,35 +1244,21 @@
         function saveContentConfig() {
             const frontText = document.getElementById('details-frontend').value;
             const aiText = document.getElementById('details-ai').value;
-
-            const frontArray = frontText.split('\n').filter(line => line.trim() !== '');
-            const aiArray = aiText.split('\n').filter(line => line.trim() !== '');
-
             siteConfig.packageDetails = {
-                frontend: frontArray,
-                ai: aiArray
+                frontend: frontText.split('\n').filter(line => line.trim() !== ''),
+                ai: aiText.split('\n').filter(line => line.trim() !== '')
             };
-
-            db.collection("config").doc("site_settings").set({
-                packageDetails: siteConfig.packageDetails
-            }, { merge: true }).then(() => {
-                alert("Package Details Updated Successfully!");
-            }).catch(err => alert("Error: " + err.message));
+            db.collection("config").doc("site_settings").set({ packageDetails: siteConfig.packageDetails }, { merge: true }).then(() => alert("Details Updated!")).catch(err => alert(err.message));
         }
 
-        // --- MAINTENANCE LOGIC ---
         function updateMaintenanceUI() {
             const toggleCircle = document.getElementById('maintenance-toggle-circle');
-            const inputMsg = document.getElementById('maintenance-msg');
-            
             if(siteConfig.maintenance_active) {
-                toggleCircle.style.left = '27px';
-                toggleCircle.style.background = '#10b981';
-                inputMsg.value = siteConfig.message || "Site is currently under maintenance.";
+                toggleCircle.style.left = '27px'; toggleCircle.style.background = '#10b981';
+                document.getElementById('maintenance-msg').value = siteConfig.message || "Site is under maintenance.";
             } else {
-                toggleCircle.style.left = '3px';
-                toggleCircle.style.background = '#555';
-                inputMsg.value = "";
+                toggleCircle.style.left = '3px'; toggleCircle.style.background = '#555';
+                document.getElementById('maintenance-msg').value = "";
             }
         }
 
@@ -1177,16 +1270,9 @@
         function saveMaintenanceConfig() {
             const msg = document.getElementById('maintenance-msg').value;
             siteConfig.message = msg;
-            
-            db.collection("config").doc("site_settings").set({
-                maintenance_active: siteConfig.maintenance_active,
-                message: msg
-            }, { merge: true }).then(() => {
-                alert("Configuration Saved Successfully!");
-            });
+            db.collection("config").doc("site_settings").set({ maintenance_active: siteConfig.maintenance_active, message: msg }, { merge: true }).then(() => alert("Saved!"));
         }
 
-        // --- PRICING LOGIC ---
         function updatePricingUI() {
             if(siteConfig.prices) {
                 document.getElementById('price-html').value = siteConfig.prices.html || 199;
@@ -1197,26 +1283,14 @@
         function savePricingConfig() {
             const htmlPrice = parseFloat(document.getElementById('price-html').value);
             const frontendPrice = parseFloat(document.getElementById('price-frontend').value);
-
-            siteConfig.prices = {
-                html: htmlPrice,
-                frontend: frontendPrice
-            };
-
-            db.collection("config").doc("site_settings").update({
-                prices: siteConfig.prices
-            }).then(() => {
-                alert("Prices updated successfully!");
-            });
+            siteConfig.prices = { html: htmlPrice, frontend: frontendPrice };
+            db.collection("config").doc("site_settings").update({ prices: siteConfig.prices }).then(() => alert("Prices updated!"));
         }
 
-        // --- TAB NAVIGATION ---
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
             document.getElementById('tab-' + tabId).classList.add('active');
-            
             const navItems = document.querySelectorAll('.nav-item');
             if(tabId === 'orders') navItems[0].classList.add('active');
             if(tabId === 'users') navItems[1].classList.add('active');
@@ -1227,15 +1301,27 @@
             if(tabId === 'content') navItems[6].classList.add('active');
         }
 
-        // --- USER MANAGEMENT (ROLE LOGIC) ---
-        function openEditUser(uid, name, phone, role) {
+        function openEditUser(uid, name, phone, role, jobTitle) {
             document.getElementById('edit-uid').value = uid;
             document.getElementById('edit-name').value = name;
             document.getElementById('edit-phone').value = phone;
+            document.getElementById('edit-role').value = role || 'user';
             
-            const roleSelect = document.getElementById('edit-role');
-            roleSelect.value = role || 'user';
-            
+            const jobTitleInput = document.getElementById('edit-jobtitle');
+            const helperLabel = document.getElementById('jobtitle-helper');
+
+            if (!isSuperAdmin) {
+                jobTitleInput.disabled = true; 
+                jobTitleInput.value = "Restricted (SuperAdmin Only)";
+                jobTitleInput.style.opacity = "0.5";
+                helperLabel.style.display = "none";
+            } else {
+                jobTitleInput.disabled = false; 
+                jobTitleInput.value = jobTitle || "";
+                jobTitleInput.style.opacity = "1";
+                helperLabel.style.display = "inline";
+            }
+
             document.getElementById('editUserModal').classList.add('open');
         }
 
@@ -1244,30 +1330,27 @@
             const name = document.getElementById('edit-name').value;
             const phone = document.getElementById('edit-phone').value;
             const role = document.getElementById('edit-role').value;
-
             if(!name || !phone) return alert("Fields cannot be empty");
-
-            db.collection("users").doc(uid).update({ 
+            
+            const updateData = { 
                 name: name, 
-                phone: phone,
+                phone: phone, 
                 role: role
-            })
-                .then(() => {
-                    closeModal('editUserModal');
-                    alert("User updated successfully");
-                })
-                .catch(err => alert("Error updating: " + err.message));
+            };
+
+            if (isSuperAdmin) {
+                updateData.jobTitle = document.getElementById('edit-jobtitle').value;
+            }
+
+            db.collection("users").doc(uid).update(updateData).then(() => { closeModal('editUserModal'); alert("User updated"); }).catch(err => alert(err.message));
         }
 
         function resetUserPass(email) {
-            if(confirm(`Send password reset email to ${email}?`)) {
-                auth.sendPasswordResetEmail(email)
-                    .then(() => alert("Reset email sent."))
-                    .catch(err => alert("Error: " + err.message));
+            if(confirm(`Reset password for ${email}?`)) {
+                auth.sendPasswordResetEmail(email).then(() => alert("Reset email sent.")).catch(err => alert(err.message));
             }
         }
 
-        // --- ORDER MANAGEMENT ---
         function openOrderModal(orderId, currentStatus, note) {
             document.getElementById('order-id').value = orderId;
             document.getElementById('order-status-select').value = currentStatus || 'Pending';
@@ -1279,19 +1362,9 @@
             const id = document.getElementById('order-id').value;
             const status = document.getElementById('order-status-select').value;
             const note = document.getElementById('order-admin-note').value;
-            
-            db.collection("orders").doc(id).update({ 
-                status: status,
-                adminNote: note
-            })
-            .then(() => {
-                closeModal('orderModal');
-                alert("Order status updated");
-            })
-            .catch(err => alert("Error updating: " + err.message));
+            db.collection("orders").doc(id).update({ status: status, adminNote: note }).then(() => { closeModal('orderModal'); alert("Order updated"); }).catch(err => alert(err.message));
         }
 
-        // --- TICKET MANAGEMENT ---
         function openTicketModal(ticketId, currentStatus, note) {
             document.getElementById('ticket-id').value = ticketId;
             document.getElementById('ticket-status-select').value = currentStatus;
@@ -1303,25 +1376,14 @@
             const id = document.getElementById('ticket-id').value;
             const status = document.getElementById('ticket-status-select').value;
             const note = document.getElementById('ticket-admin-note').value;
-            
-            db.collection("tickets").doc(id).update({ 
-                status: status,
-                adminNote: note
-            })
-            .then(() => {
-                closeModal('ticketModal');
-                alert("Ticket status updated");
-            })
-            .catch(err => alert("Error updating: " + err.message));
+            db.collection("tickets").doc(id).update({ status: status, adminNote: note }).then(() => { closeModal('ticketModal'); alert("Ticket updated"); }).catch(err => alert(err.message));
         }
 
-        // --- VOUCHER LOGIC ---
         function assignVoucher() {
             const uid = document.getElementById('voucher-user-select').value;
             const code = document.getElementById('voucher-code').value.trim().toUpperCase();
             const val = parseFloat(document.getElementById('voucher-val').value);
             const type = document.getElementById('voucher-type').value;
-
             if(!uid) return alert("Please select a user.");
             if(!code || isNaN(val)) return alert("Invalid Voucher Details.");
 
@@ -1331,74 +1393,58 @@
                 type: type
             };
 
-            db.collection("users").doc(uid).update({ 
-                personalVoucher: voucherData 
-            }).then(() => {
-                alert(`Voucher ${code} assigned to user!`);
+            if (currentAdminEmail) {
+                voucherData.voucherCreatedBy = currentAdminEmail;
+            }
+
+            db.collection("users").doc(uid).update({ personalVoucher: voucherData }).then(() => {
+                alert(`Voucher ${code} assigned!`);
                 refreshVoucherTable();
-            }).catch(err => alert("Error: " + err.message));
+            }).catch(err => alert(err.message));
         }
 
         function refreshVoucherTable() {
             const tbody = document.getElementById('voucher-table-body');
             tbody.innerHTML = '';
-
             const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
-
             if(usersWithVouchers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No personal vouchers assigned yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No vouchers.</td></tr>';
                 return;
             }
-
             usersWithVouchers.forEach(u => {
                 const v = u.personalVoucher;
                 const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
-                const row = `
+                const createdBy = v.voucherCreatedBy || '-';
+
+                const createdByCell = isSuperAdmin ? `<td style="font-size:0.8rem;">${createdBy}</td>` : '';
+
+                tbody.innerHTML += `
                     <tr>
                         <td style="font-weight:600;">${u.name}</td>
                         <td style="color:var(--accent-primary);">${v.code}</td>
                         <td style="color:var(--success);">${displayVal}</td>
-                        <td>
-                            <button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
+                        ${createdByCell}
+                        <td><button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button></td>
+                    </tr>`;
             });
         }
 
         function deleteUserVoucher(uid) {
-            if(confirm("Remove this voucher from user?")) {
-                db.collection("users").doc(uid).update({
-                    personalVoucher: firebase.firestore.FieldValue.delete()
-                });
-            }
+            if(confirm("Remove voucher?")) db.collection("users").doc(uid).update({ personalVoucher: firebase.firestore.FieldValue.delete() });
         }
 
-        // --- PROMO MANAGEMENT ---
         function createPromo() {
             const code = document.getElementById('new-promo-code').value.trim().toUpperCase();
             const val = parseFloat(document.getElementById('new-promo-val').value);
-
             if(!code || isNaN(val)) return alert("Invalid input");
             if(val <= 0 || val >= 1) return alert("Discount must be between 0 and 1");
-
-            db.collection("promo_codes").doc(code).set({ discount: val })
-                .then(() => {
-                    document.getElementById('new-promo-code').value = '';
-                    document.getElementById('new-promo-val').value = '';
-                    alert("Promo Code Created!");
-                })
-                .catch(err => alert("Error: " + err.message));
+            db.collection("promo_codes").doc(code).set({ discount: val }).then(() => { document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-val').value = ''; alert("Promo Code Created!"); }).catch(err => alert(err.message));
         }
 
         function deletePromo(code) {
-            if(confirm(`Delete code ${code}?`)) {
-                db.collection("promo_codes").doc(code).delete();
-            }
+            if(confirm(`Delete code ${code}?`)) db.collection("promo_codes").doc(code).delete();
         }
 
-        // --- UTILS ---
         function closeModal(id) {
             document.getElementById(id).classList.remove('open');
         }
