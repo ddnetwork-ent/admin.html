@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDNetwork Internal Portal</title>
+    <title>DDNetwork(Admin)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -167,6 +167,30 @@
         }
         .section-header h2 { margin: 0; font-size: 1.5rem; color: white; }
 
+        /* --- FILTER BUTTONS (NEW) --- */
+        .ticket-filters {
+            display: flex;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+        }
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            width: auto;
+            margin: 0;
+            transition: 0.2s;
+        }
+        .filter-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+        .filter-btn.active { background: var(--accent-primary); color: white; }
+
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -178,7 +202,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px;
+            min-width: 800px; /* Wider for Source column */
         }
         th, td {
             text-align: left;
@@ -223,6 +247,30 @@
         }
         .action-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: var(--text-secondary); }
 
+        /* --- SOURCE BADGES (NEW) --- */
+        .source-badge {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-internal { 
+            background: rgba(245, 158, 11, 0.15); 
+            color: #f59e0b; 
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .badge-external { 
+            background: rgba(59, 130, 246, 0.15); 
+            color: #3b82f6; 
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .row-internal {
+            background: rgba(245, 158, 11, 0.03); /* Very subtle tint for internal rows */
+        }
+
         /* ADMIN CARDS */
         .admin-card {
             background: var(--bg-card);
@@ -235,6 +283,18 @@
         .form-row { margin-bottom: 1rem; text-align: left; }
         .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
         .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+        /* INTERNAL SUPPORT CARD SPECIFIC */
+        .internal-support-card {
+            background: rgba(59, 130, 246, 0.05);
+            border: 1px solid var(--accent-primary);
+        }
+        .internal-support-card h3 {
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         /* ALERTS */
         .alert-box {
@@ -286,7 +346,7 @@
                 top: auto;
                 right: 0;
                 border-right: none;
-                border-top:1px solid var(--border-light);
+                border-top: 1px solid var(--border-light);
                 overflow-x: auto;
                 box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
                 z-index: 50;
@@ -430,18 +490,68 @@
                 </div>
             </div>
 
-            <!-- SUPPORT TAB (UPDATED: ADDED CASE ID COLUMN) -->
+            <!-- SUPPORT TAB (UPDATED: INTERNAL VS EXTERNAL) -->
             <div id="tab-support" class="tab-content">
                 <div class="section-header">
-                    <h2>Support Tickets</h2>
+                    <h2>Support Desk</h2>
+                    <!-- FILTER BUTTONS -->
+                    <div class="ticket-filters">
+                        <button class="filter-btn active" onclick="filterTickets('all', this)">
+                            <i class="ri-list-check"></i> All Tickets
+                        </button>
+                        <button class="filter-btn" onclick="filterTickets('internal', this)">
+                            <i class="ri-bug-line"></i> Internal Team
+                        </button>
+                        <button class="filter-btn" onclick="filterTickets('external', this)">
+                            <i class="ri-user-line"></i> Customers
+                        </button>
+                    </div>
                 </div>
 
+                <!-- INTERNAL REPORT FORM -->
+                <div class="admin-card internal-support-card">
+                    <h3><i class="ri-bug-line"></i> Report Internal Issue / Bug</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
+                        Use this form to report issues with the portal, bugs, or IT requests.
+                    </p>
+                    
+                    <form onsubmit="handleInternalTicketSubmit(event)">
+                        <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                            <div>
+                                <label>Admin Name</label>
+                                <input type="text" id="internal-name" placeholder="Your Name" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <label>Admin Email (Auto-filled)</label>
+                            <input type="email" id="internal-email" readonly style="background: rgba(0,0,0,0.3); cursor: not-allowed;">
+                        </div>
+                        <div class="form-row">
+                            <label>Issue Type</label>
+                            <select id="internal-type" required>
+                                <option value="Internal Bug">Internal Bug (Portal/DB)</option>
+                                <option value="Feature Request">Feature Request</option>
+                                <option value="System Error">System Error</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Description</label>
+                            <textarea id="internal-message" placeholder="Describe the issue in detail..." required></textarea>
+                        </div>
+                        <button type="submit" class="success">Submit Internal Ticket</button>
+                    </form>
+                </div>
+
+                <!-- TICKETS TABLE (UPDATED WITH SOURCE COLUMN) -->
                 <div class="table-responsive" style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1rem; color: var(--text-secondary); margin: 1rem 0 1rem 0;">Ticket List</h3>
                     <table>
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Case ID</th> <!-- NEW COLUMN -->
+                                <th>Case ID</th>
+                                <th>Source</th> <!-- NEW COLUMN -->
                                 <th>Issue Type</th>
                                 <th>Customer</th>
                                 <th>Message</th>
@@ -464,7 +574,7 @@
                 
                 <div class="admin-card">
                     <h3>Send Gift Voucher</h3>
-                    <div class="form-row" style="display: grid; grid-template-columns:1fr; gap: 10px;">
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                         <div style="grid-column: 1 / -1;">
                             <label>Select Customer</label>
                             <select id="voucher-user-select" style="margin-bottom: 0;">
@@ -554,7 +664,7 @@
 
                 <div class="admin-card">
                     <h3>Maintenance Mode</h3>
-                    <p style="color: var(--text-secondary); margin-bottom:1rem;">When enabled, users see a warning banner on main site.</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">When enabled, users see a warning banner on main site.</p>
                     <div class="form-row">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
                             <label>Enable Maintenance Mode</label>
@@ -715,6 +825,9 @@
         };
 
         let db, auth;
+        let ticketFilter = 'all'; // 'all', 'internal', 'external'
+        let ticketCache = []; // Store tickets locally for filtering
+
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
@@ -753,6 +866,10 @@
                         // User is admin
                         document.getElementById('login-screen').style.display = 'none';
                         document.getElementById('dashboard').style.display = 'flex';
+                        
+                        // Populate Internal Ticket Form
+                        document.getElementById('internal-email').value = user.email;
+                        
                         loadDashboardData();
                     } else {
                         // User is not admin
@@ -783,28 +900,21 @@
                     // ==========================================
                     // ONE-TIME SETUP LOGIC (BOOTSTRAP)
                     // ==========================================
-                    // If this is main owner account (ddnetwork.one@outlook.com)
-                    // ensure they have 'admin' role in database automatically.
                     if (user.email.toLowerCase() === ADMIN_EMAIL) {
                         console.log("Main Admin detected. Bootstrapping Admin Role...");
                         
                         const userRef = db.collection("users").doc(user.uid);
                         
-                        // Fetch existing data first to prevent "doc is undefined" error
                         userRef.get().then((docSnapshot) => {
                             const currentData = docSnapshot.exists ? docSnapshot.data() : {};
                             
-                            // 'update' specifically overwrites fields.
                             userRef.update({
                                 role: 'admin',
                                 name: currentData.name || "Admin",
                                 phone: currentData.phone || "",
                                 email: user.email
                             }, { merge: true }).then(() => {
-                                // We do NOT sign out here. The onAuthStateChanged listener (above) will see role update 
-                                // and automatically grant access.
-                                alert("SUCCESS: Admin Role Applied Automatically! \n\nYou now have Admin privileges.");
-                                // Force refresh UI
+                                alert("SUCCESS: Admin Role Applied Automatically!");
                                 window.location.reload();
                             }).catch((err) => {
                                 console.error("Bootstrap Error:", err);
@@ -812,7 +922,6 @@
                             });
                         });
                     } else {
-                        // Not main admin
                         console.warn("Unauthorized login attempt.");
                         alert("ACCESS DENIED: You do not have permission to access this portal.");
                         auth.signOut();
@@ -888,7 +997,7 @@
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const role = data.role || 'user'; // Default to user
+                    const role = data.role || 'user';
                     const roleClass = role === 'admin' ? 'role-admin' : 'role-user';
                     const roleLabel = role === 'admin' ? 'Admin' : 'User';
 
@@ -914,41 +1023,13 @@
                 refreshVoucherTable();
             });
 
-            // Load Tickets (UPDATED TO INCLUDE CASE ID)
+            // Load Tickets
             db.collection("tickets").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const tbody = document.getElementById('tickets-table-body');
-                tbody.innerHTML = '';
-                if(snapshot.empty) {
-                    // UPDATED colspan from 6 to 7 to include Case ID
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem;">No support tickets found.</td></tr>';
-                    return;
-                }
-                
+                ticketCache = []; // Clear cache and rebuild
                 snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
-                    let statusClass = 'status-open';
-                    if(data.status === 'Resolved') statusClass = 'status-paid';
-
-                    // UPDATED ROW STRUCTURE TO INCLUDE CASE ID
-                    const row = `
-                        <tr>
-                            <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
-                            <td><span style="font-family:monospace; font-size:0.8rem; color:var(--accent-primary); font-weight:700;">${doc.id}</span></td>
-                            <td style="font-weight:700;">${data.type}</td>
-                            <td>
-                                <div style="font-weight:600;">${data.name}</div>
-                                <div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div>
-                            </td>
-                            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data.message}</td>
-                            <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                            <td>
-                                <button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
+                    ticketCache.push({ id: doc.id, data: doc.data() });
                 });
+                renderTicketTable(); // Render based on filter
             });
 
             // Load Global Promos
@@ -973,6 +1054,69 @@
                     `;
                     tbody.innerHTML += row;
                 });
+            });
+        }
+
+        // --- TICKET FILTERING & RENDERING (UPDATED) ---
+        function filterTickets(type, btnElement) {
+            ticketFilter = type;
+            
+            // Update Button Styles
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            
+            renderTicketTable();
+        }
+
+        function renderTicketTable() {
+            const tbody = document.getElementById('tickets-table-body');
+            tbody.innerHTML = '';
+
+            let visibleTickets = ticketCache;
+
+            if (ticketFilter === 'internal') {
+                visibleTickets = ticketCache.filter(t => t.data.type.toLowerCase().startsWith("internal"));
+            } else if (ticketFilter === 'external') {
+                visibleTickets = ticketCache.filter(t => !t.data.type.toLowerCase().startsWith("internal"));
+            }
+
+            if(visibleTickets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-secondary);">No tickets found for this filter.</td></tr>';
+                return;
+            }
+
+            visibleTickets.forEach(item => {
+                const doc = item;
+                const data = item.data;
+                const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
+                let statusClass = 'status-open';
+                if(data.status === 'Resolved') statusClass = 'status-paid';
+
+                // DETERMINE SOURCE
+                const isInternal = data.type.toLowerCase().startsWith("internal");
+                const rowClass = isInternal ? "row-internal" : "";
+                const sourceBadge = isInternal 
+                    ? `<span class="source-badge badge-internal">Team</span>` 
+                    : `<span class="source-badge badge-external">User</span>`;
+
+                const row = `
+                    <tr class="${rowClass}">
+                        <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
+                        <td><span style="font-family:monospace; font-size:0.8rem; color:var(--accent-primary); font-weight:700;">${doc.id}</span></td>
+                        <td>${sourceBadge}</td>
+                        <td style="font-weight:700;">${data.type}</td>
+                        <td>
+                            <div style="font-weight:600;">${data.name}</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div>
+                        </td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${data.message}</td>
+                        <td><span class="status-badge ${statusClass}">${data.status}</span></td>
+                        <td>
+                            <button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${data.adminNote || ''}')">Manage</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
             });
         }
 
@@ -1090,7 +1234,7 @@
             document.getElementById('edit-phone').value = phone;
             
             const roleSelect = document.getElementById('edit-role');
-            roleSelect.value = role || 'user'; // Default to user if not provided
+            roleSelect.value = role || 'user';
             
             document.getElementById('editUserModal').classList.add('open');
         }
@@ -1099,11 +1243,10 @@
             const uid = document.getElementById('edit-uid').value;
             const name = document.getElementById('edit-name').value;
             const phone = document.getElementById('edit-phone').value;
-            const role = document.getElementById('edit-role').value; // Get selected role
+            const role = document.getElementById('edit-role').value;
 
             if(!name || !phone) return alert("Fields cannot be empty");
 
-            // Update User Document
             db.collection("users").doc(uid).update({ 
                 name: name, 
                 phone: phone,
