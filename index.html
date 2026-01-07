@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,21 +11,55 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
     <style>
+        /* --- THEME VARIABLES --- */
         :root {
-            --bg-deep: #050505;
+            /* Dark Mode (Default) */
+            --bg-body: #050505;
             --bg-card: #111111;
-            --accent-primary: #3b82f6;
+            --bg-input: rgba(255,255,255,0.05);
+            --bg-input-focus: rgba(59, 130, 246, 0.1);
+            --bg-sidebar: #111111;
+            
             --text-main: #ffffff;
             --text-secondary: #a1a1aa;
-            --border-light: rgba(255,255,255,0.1);
+            --text-muted: #52525b;
+            
+            --border-color: rgba(255,255,255,0.1);
+            --border-focus: #3b82f6;
+            
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --alert-bg: rgba(245, 158, 11, 0.1);
-            --alert-border: #f59e0b;
+            
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
+
+        [data-theme="light"] {
+            /* Light Mode */
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --bg-input: #f9fafb;
+            --bg-input-focus: #eff6ff;
+            --bg-sidebar: #ffffff;
+
+            --text-main: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+
+            --border-color: #e5e7eb;
+            --border-focus: #3b82f6;
+            
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Global Reset & Base */
         body {
-            background-color: var(--bg-deep);
+            background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -33,9 +67,10 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* LOGIN SCREEN */
+        /* --- LOGIN SCREEN --- */
         #login-screen {
             display: flex;
             justify-content: center;
@@ -45,42 +80,47 @@
             position: fixed;
             top: 0;
             left: 0;
-            background: var(--bg-deep);
+            background: var(--bg-body);
             z-index: 200;
         }
         .login-card {
             background: var(--bg-card);
             padding: 2.5rem;
             border-radius: 16px;
-            border:1px solid var(--border-light);
+            border:1px solid var(--border-color);
             width: 90%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: var(--shadow-card);
         }
-        .login-card h2 { margin-bottom:1.5rem; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        .login-card h2 { margin-bottom:1.5rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
         
+        /* Inputs & Buttons */
         input, select, textarea {
             width: 100%;
             padding: 12px;
-            background: rgba(255,255,255,0.05);
-            border:1px solid var(--border-light);
+            background: var(--bg-input);
+            border:1px solid var(--border-color);
             border-radius: 8px;
-            color: white;
+            color: var(--text-main);
             margin-bottom:1rem;
             font-family: inherit;
             box-sizing: border-box;
             transition: 0.2s;
-            -webkit-appearance: none; /* Remove iOS default styling */
+            -webkit-appearance: none; 
         }
         input:disabled, select:disabled, textarea:disabled {
-            background: rgba(0,0,0,0.3);
-            color: var(--text-secondary);
+            opacity: 0.6;
             cursor: not-allowed;
-            border-color: transparent;
+            background: var(--bg-body);
         }
         textarea { height: 150px; resize: vertical; }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent-primary); outline: none; background: rgba(59, 130, 246, 0.05); }
+        
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--border-focus); 
+            outline: none; 
+            background: var(--bg-input-focus); 
+        }
         
         button {
             width: 100%;
@@ -95,12 +135,12 @@
             box-sizing: border-box;
         }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
-        button.secondary { background: #333; }
+        button.secondary { background: var(--text-muted); color: var(--text-main); }
         button.danger { background: var(--danger); }
         button.sm-btn { width: auto; padding: 6px 12px; font-size: 0.8rem; }
         button.success { background: var(--success); }
 
-        /* DASHBOARD LAYOUT */
+        /* --- DASHBOARD LAYOUT --- */
         #dashboard {
             display: none; 
             height: 100vh;
@@ -109,26 +149,27 @@
             flex-direction: row;
         }
         
-        /* SIDEBAR */
+        /* --- SIDEBAR (DESKTOP) --- */
         .sidebar {
             width: 260px;
-            background: var(--bg-card);
-            border-right:1px solid var(--border-light);
+            background: var(--bg-sidebar);
+            border-right:1px solid var(--border-color);
             padding: 2rem 1rem;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             z-index: 10;
+            transition: background 0.3s, border-color 0.3s;
         }
         .brand {
             font-size:1rem;
-            margin-bottom: 3rem;
-            color: white;
+            margin-bottom: 2rem;
+            color: var(--text-main);
             display: flex;
             align-items: center;
             gap: 12px;
             padding-left: 0.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 1.5rem;
         }
         .brand-icon {
@@ -150,6 +191,7 @@
             font-weight: 400;
         }
 
+        /* Desktop Nav Items */
         .nav-item {
             padding: 12px 1rem;
             border-radius: 8px;
@@ -162,16 +204,42 @@
             transition: 0.2s;
             font-size: 0.95rem;
             white-space: nowrap;
+            border-left: 3px solid transparent;
         }
-        .nav-item:hover, .nav-item.active {
-            background: rgba(59, 130, 246, 0.15);
+        .nav-item:hover {
+            background: rgba(59, 130, 246, 0.08); 
+            color: var(--text-main);
+        }
+        .nav-item.active {
+            background: var(--bg-input-focus);
             color: var(--accent-primary);
             border-left: 3px solid var(--accent-primary);
+            font-weight: 600;
         }
+        
         .logout-btn { margin-top: auto; color: var(--danger); }
-        .logout-btn:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-left: 3px solid var(--danger); }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-left-color: var(--danger); }
 
-        /* MAIN CONTENT */
+        /* THEME TOGGLE BUTTON */
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: auto;
+            margin: 0;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-toggle-btn:hover {
+            background: var(--bg-input);
+            color: var(--accent-primary);
+            transform: none;
+        }
+
+        /* --- MAIN CONTENT --- */
         .main-content {
             flex: 1;
             padding: 2rem;
@@ -181,22 +249,21 @@
             box-sizing: border-box;
         }
 
-        /* MOBILE HEADER (Sticky) */
+        /* --- MOBILE HEADER (Sticky) --- */
         .mobile-brand-header {
             display: none; 
             align-items: center;
             justify-content: space-between;
-            padding-bottom:1rem;
-            margin-bottom:1rem;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
             position: sticky;
             top: 0;
             z-index: 50;
-            background: var(--bg-deep); 
-            padding-top: 1rem;
-            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-body); 
+            transition: background 0.3s;
         }
 
-        /* TABS & TABLES */
+        /* --- TABS & TABLES --- */
         .tab-content { display: none; animation: fadeIn 0.3s ease; padding-bottom: 2rem; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -209,8 +276,8 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-        .section-header h2 { margin: 0; font-size: 1.5rem; color: white; }
-        .section-header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .section-header h2 { margin: 0; font-size: 1.5rem; color: var(--text-main); }
+        .section-header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
 
         /* SEARCH BAR */
         .search-container {
@@ -220,7 +287,8 @@
         .search-container input {
             margin-bottom: 0;
             padding-left: 2.5rem;
-            background: rgba(255,255,255,0.05);
+            background: var(--bg-input);
+            border-color: var(--border-color);
         }
         .search-icon {
             position: absolute;
@@ -233,35 +301,37 @@
         /* --- FILTER BUTTONS --- */
         .ticket-filters {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             background: var(--bg-card);
-            padding: 5px;
+            padding: 4px;
             border-radius: 8px;
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--border-color);
             flex-wrap: wrap;
         }
         .filter-btn {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             width: auto;
             margin: 0;
             transition: 0.2s;
+            font-weight: 500;
         }
-        .filter-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+        .filter-btn:hover { background: var(--bg-input); color: var(--text-main); }
         .filter-btn.active { background: var(--accent-primary); color: white; }
 
+        /* --- TABLES --- */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             border-radius: 12px;
             background: var(--bg-card);
-            border:1px solid var(--border-light);
+            border:1px solid var(--border-color);
         }
         table {
             width: 100%;
@@ -271,12 +341,20 @@
         th, td {
             text-align: left;
             padding: 1rem;
-            border-bottom:1px solid var(--border-light);
+            border-bottom:1px solid var(--border-color);
             white-space: nowrap;
         }
-        th { background: rgba(255,255,255,0.02); font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+        th { 
+            background: var(--bg-input); 
+            font-size: 0.75rem; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            font-weight: 600;
+        }
         tr:last-child td { border-bottom: none; }
         
+        /* STATUS BADGES */
         .status-badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -284,10 +362,12 @@
             font-weight: 700;
             display: inline-block;
         }
-        .status-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .status-paid, .status-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .status-open { background: rgba(59, 130, 246, 0.2); color: var(--accent-primary); }
+        .status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-paid, .status-completed { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-open { background: rgba(59, 130, 246, 0.15); color: var(--accent-primary); border: 1px solid rgba(59, 130, 246, 0.3); }
+        
+        /* ROLE BADGES */
         .role-badge {
             padding: 4px 10px;
             border-radius: 4px;
@@ -297,11 +377,12 @@
         }
         .role-admin { background: var(--warning); color: black; }
         .role-superadmin { background: var(--accent-primary); color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .role-user { background: #333; color: var(--text-secondary); }
+        .role-user { background: var(--text-muted); color: var(--text-main); }
 
+        /* ACTION BUTTONS */
         .action-btn {
-            background: none;
-            border:1px solid var(--border-light);
+            background: transparent;
+            border:1px solid var(--border-color);
             padding: 6px 12px;
             margin-right: 5px;
             font-size: 0.75rem;
@@ -311,7 +392,7 @@
             transition: 0.2s;
             white-space: nowrap;
         }
-        .action-btn:hover { background: rgba(255,255,255,0.1); color: white; border-color: var(--text-secondary); }
+        .action-btn:hover { background: var(--bg-input); color: var(--text-main); border-color: var(--text-secondary); }
 
         /* --- SOURCE BADGES --- */
         .source-badge {
@@ -322,89 +403,55 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .badge-internal { 
-            background: rgba(245, 158, 11, 0.15); 
-            color: #f59e0b; 
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-        .badge-external { 
-            background: rgba(59, 130, 246, 0.15); 
-            color: #3b82f6; 
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
+        .badge-internal { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-external { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
         .row-internal { background: rgba(245, 158, 11, 0.03); }
 
-        /* --- LOGS TAB STYLES --- */
-        .log-entry {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+        /* LOGS STYLES */
+        .log-entry { padding: 1rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; }
         .log-entry:last-child { border-bottom: none; }
-        .log-timestamp {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            min-width: 150px;
-        }
-        .log-admin {
-            font-weight: 600;
-            color: var(--accent-primary);
-            min-width: 150px;
-        }
-        .log-action {
-            flex: 1;
-            font-size: 0.9rem;
-            color: white;
-        }
-        .log-detail {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
+        .log-timestamp { font-size: 0.85rem; color: var(--text-secondary); min-width: 150px; }
+        .log-admin { font-weight: 600; color: var(--accent-primary); min-width: 150px; }
+        .log-action { flex: 1; font-size: 0.9rem; color: var(--text-main); }
+        .log-detail { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
 
         /* ADMIN CARDS */
         .admin-card {
             background: var(--bg-card);
             padding: 1.5rem;
             border-radius: 12px;
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--border-color);
             margin-bottom: 2rem;
-            scroll-margin-top: 100px; /* For smooth scroll from search */
+            scroll-margin-top: 100px; 
+            transition: background 0.3s, border-color 0.3s;
         }
-        .admin-card h3 { margin-bottom: 1rem; color: white; font-size: 1rem; margin-top: 0; }
+        .admin-card h3 { margin-bottom: 1rem; color: var(--text-main); font-size: 1rem; margin-top: 0; }
         .form-row { margin-bottom: 1rem; text-align: left; }
-        .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); }
+        .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;}
         .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
-        .form-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
+        .form-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
         /* ALERTS */
         .alert-box {
             padding: 1rem;
             border-radius: 8px;
-            background: var(--alert-bg);
-            border-left: 4px solid var(--alert-border);
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
             margin-bottom: 1rem;
         }
-        .alert-text { font-size: 0.9rem; color: white; font-weight: 600; }
+        .alert-text { font-size: 0.9rem; color: var(--text-main); font-weight: 600; }
 
-        /* MODAL (GENERAL) - UPDATED FOR RESPONSIVENESS */
+        /* --- MODAL --- */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.6);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
-            padding: 1rem; /* Safety padding for desktop */
+            backdrop-filter: blur(4px);
+            padding: 1rem;
             box-sizing: border-box;
         }
         .modal.open { display: flex; }
@@ -415,69 +462,81 @@
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
-            border: 1px solid var(--border-light);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            
-            /* KEY FIXES FOR DESKTOP SCROLL */
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-modal);
             max-height: 90vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             box-sizing: border-box;
+            color: var(--text-main);
         }
-        .modal-content h3 { margin-top: 0; color: white; margin-bottom: 1.5rem; position: sticky; top: 0; background: var(--bg-card); z-index: 10; padding-bottom: 1rem; }
+        .modal-content h3 { margin-top: 0; color: var(--text-main); margin-bottom: 1.5rem; }
 
-        /* --- MOBILE RESPONSIVENESS --- */
+        /* --- RESPONSIVE MOBILE --- */
         @media (max-width: 768px) {
-            /* Dashboard Layout */
+            /* Layout */
             #dashboard { flex-direction: column; }
             
+            /* Sidebar -> Bottom Nav */
             .sidebar {
                 width: 100%;
                 height: auto;
-                padding: 0.8rem;
+                padding: 0;
                 flex-direction: row;
                 position: fixed;
                 bottom: 0; left: 0; top: auto; right: 0;
                 border-right: none;
-                border-top: 1px solid var(--border-light);
-                overflow-x: auto;
-                box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+                border-top: 1px solid var(--border-color);
+                overflow-x: auto; /* Horizontal scroll if too many items */
+                overflow-y: hidden;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
                 z-index: 100; 
-                justify-content: space-between;
+                justify-content: flex-start;
+                /* Hide scrollbar */
+                -ms-overflow-style: none; 
+                scrollbar-width: none; 
             }
-            
-            .brand { display: none; } 
-            .logout-btn { display: none; } 
+            .sidebar::-webkit-scrollbar { display: none; }
+
+            .brand, .logout-btn { display: none; } /* Hide desktop brand/logout in sidebar */
 
             /* Mobile Header */
             .mobile-brand-header {
                 display: flex;
+                padding-left: 0; 
+                padding-right: 0;
             }
-            .mobile-brand-header .brand-name { font-size: 1.1rem; }
-            .mobile-brand-header .brand-job { font-size: 0.85rem; }
+            .mobile-brand-header .brand-name { font-size: 1.1rem; color: var(--text-main); }
+            .mobile-brand-header .brand-job { font-size: 0.85rem; color: var(--text-secondary); }
 
+            /* Bottom Nav Items */
             .nav-item {
-                flex: 1; /* Distribute evenly */
+                flex: 0 0 auto; /* Don't shrink, allow scroll */
+                min-width: 80px; /* Ensure touch target size */
                 justify-content: center;
                 flex-direction: column;
                 gap: 4px;
                 margin-bottom: 0;
-                padding: 8px 4px;
+                padding: 10px 8px;
                 font-size: 0.7rem;
-                border-radius: 6px;
-                border-left: 2px solid transparent;
+                border-radius: 0;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                color: var(--text-secondary);
             }
-            .nav-item:hover, .nav-item.active {
-                background: rgba(255,255,255,0.05);
-                color: white;
-                border-left: 2px solid var(--accent-primary);
+            .nav-item i { font-size: 1.4rem; margin-bottom: 2px; color: var(--text-muted); }
+            
+            .nav-item.active {
+                background: transparent;
+                color: var(--accent-primary);
+                border-bottom: 3px solid var(--accent-primary);
             }
-            .nav-item i { font-size: 1.3rem; color: var(--text-secondary); }
             .nav-item.active i { color: var(--accent-primary); }
+            .nav-item:hover { background: transparent; }
             
             /* Main Content */
             .main-content { 
-                padding: 0.5rem 1rem 90px 1rem; 
+                padding: 1rem 1rem 90px 1rem; /* Extra bottom padding for nav */
                 margin-bottom: 0;
             }
             
@@ -485,32 +544,26 @@
             .section-header h2 { font-size: 1.2rem; }
             button { font-size: 0.9rem; }
             
-            /* MODAL MOBILE FIXES - CRITICAL PART */
+            /* Modal Mobile */
             .modal {
-                align-items: flex-start; /* Align to top so header isn't hidden */
+                align-items: flex-start;
                 padding: 0;
-                overflow: hidden;
+                background: rgba(0,0,0,0.8);
             }
-
             .modal-content {
                 width: 100%;
                 max-width: 100%;
-                height: 100vh; /* Full screen height */
+                height: 100vh;
                 max-height: 100vh;
-                border-radius: 0; /* No rounded corners on full screen */
+                border-radius: 0;
                 border: none;
                 padding: 1.5rem;
-                
-                /* Allow scrolling within the full screen modal */
-                overflow-y: auto;
                 display: flex;
                 flex-direction: column;
             }
             
-            /* Adjust table inputs if needed */
-            .form-row input, .form-row select {
-                font-size: 16px; /* Prevents iOS zoom on focus */
-            }
+            /* Inputs fix */
+            .form-row input, .form-row select { font-size: 16px; } 
         }
     </style>
 </head>
@@ -534,6 +587,8 @@
 
     <!-- DASHBOARD -->
     <div id="dashboard" style="display: none;">
+        
+        <!-- SIDEBAR (Desktop) / BOTTOM NAV (Mobile) -->
         <div class="sidebar">
             <!-- DESKTOP BRAND -->
             <div class="brand">
@@ -543,7 +598,8 @@
                     <span id="sidebar-jobtitle" class="brand-job">Super Admin</span>
                 </div>
             </div>
-            
+
+            <!-- NAV ITEMS -->
             <div class="nav-item active" onclick="switchTab('orders')">
                 <i class="ri-shopping-bag-3-line"></i> <span>Orders</span>
             </div>
@@ -570,11 +626,13 @@
                 <i class="ri-file-list-3-line"></i> <span>Content</span>
             </div>
             
+            <!-- DESKTOP LOGOUT -->
             <div class="nav-item logout-btn" onclick="handleLogout()">
                 <i class="ri-logout-box-r-line"></i> <span>Logout</span>
             </div>
         </div>
 
+        <!-- MAIN CONTENT -->
         <div class="main-content">
             
             <!-- MOBILE PROFILE HEADER (Sticky) -->
@@ -586,7 +644,13 @@
                         <span id="mobile-jobtitle" class="brand-job">Super Admin</span>
                     </div>
                 </div>
-                <button class="action-btn sm-btn" onclick="handleLogout()" style="color:var(--danger); border-color:var(--danger);">Logout</button>
+                <div style="display: flex; gap: 8px;">
+                    <!-- Theme Toggle (Mobile) -->
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                        <i id="theme-icon-mobile" class="ri-moon-line"></i>
+                    </button>
+                    <button class="action-btn sm-btn" onclick="handleLogout()" style="color:var(--danger); border-color:var(--danger);">Logout</button>
+                </div>
             </div>
 
             <!-- ORDERS TAB -->
@@ -690,7 +754,6 @@
                     <input type="text" id="search-support" placeholder="Search Name, Type, Message..." onkeyup="handleSearch('support', this.value)">
                 </div>
 
-                <!-- TICKETS TABLE -->
                 <div class="table-responsive" style="margin-bottom: 2rem;">
                     <table>
                         <thead>
@@ -1010,7 +1073,7 @@
                 </div>
                 <div>
                     <label>Target User Name</label>
-                    <input type="text" id="ticket-target-user-name" placeholder="Auto-filled if user selected" readonly style="background: rgba(0,0,0,0.3);">
+                    <input type="text" id="ticket-target-user-name" placeholder="Auto-filled if user selected" readonly style="background: rgba(0,0,0,0.1);">
                 </div>
             </div>
 
@@ -1085,7 +1148,7 @@
         </div>
     </div>
 
-    <!-- ORDER MODAL (UPDATED) -->
+    <!-- ORDER MODAL -->
     <div id="orderModal" class="modal">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -1094,13 +1157,11 @@
             </div>
             <input type="hidden" id="order-id">
             
-            <!-- Company Name -->
             <div class="form-row">
                 <label>Company Name (Optional)</label>
                 <input type="text" id="order-company-name" placeholder="e.g. ABC Corp">
             </div>
 
-            <!-- Package Select -->
             <div class="form-row">
                 <label>Package</label>
                 <select id="order-package">
@@ -1111,19 +1172,16 @@
                 </select>
             </div>
 
-            <!-- Total Input -->
             <div class="form-row">
                 <label>Total (RM)</label>
                 <input type="number" id="order-total" step="0.01" placeholder="0.00">
             </div>
 
-            <!-- Voucher Read Only -->
             <div class="form-row">
                 <label>Voucher Applied</label>
-                <input type="text" id="order-voucher" readonly style="background: rgba(255,255,255,0.05); color: var(--text-secondary);" placeholder="-">
+                <input type="text" id="order-voucher" readonly style="background: var(--bg-input); color: var(--text-secondary);" placeholder="-">
             </div>
 
-            <!-- Status -->
             <div class="form-row">
                 <label>Order Status</label>
                 <select id="order-status-select" style="width: 100%;">
@@ -1134,7 +1192,6 @@
                 </select>
             </div>
 
-            <!-- Admin Note -->
             <div class="form-row">
                 <label>Admin Notes</label>
                 <textarea id="order-admin-note"></textarea>
@@ -1157,17 +1214,47 @@
             appId: "1:699127560990:web:50cfd61ff620bc85fb670f"
         };
 
+        // --- THEME MANAGEMENT ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            const icons = document.querySelectorAll('#theme-icon-mobile, #theme-icon-desktop');
+            icons.forEach(icon => {
+                if(theme === 'dark') {
+                    icon.className = 'ri-moon-line';
+                } else {
+                    icon.className = 'ri-sun-line';
+                }
+            });
+        }
+
+        // Initialize Theme on Load
+        initTheme();
+
+
+        // --- FIREBASE & APP LOGIC ---
         let db, auth;
         let ticketFilter = 'all';
         let ticketCache = []; 
-        let orderCache = []; // Added for Orders Search
-        let promoCache = []; // Added for Promo Search
+        let orderCache = []; 
+        let promoCache = []; 
         let currentAdminUID = ""; 
         let isSuperAdmin = false; 
         let currentAdminEmail = "";
-        let currentLogFilter = 'all'; // Default to All
+        let currentLogFilter = 'all'; 
 
-        // Search State
         let searchStates = {
             orders: "",
             users: "",
@@ -1242,11 +1329,8 @@
             } else {
                 document.getElementById('th-internal-note').style.display = 'none';
                 document.getElementById('th-created-by').style.display = 'none';
-                // HIDE CREATE USER BUTTON
                 const createUserBtn = document.querySelector('button[onclick="openCreateUserModal()"]');
                 if(createUserBtn) createUserBtn.style.display = 'none';
-                
-                // RESTRICT LOGS TAB ENTIRELY
                 if(document.getElementById('nav-logs')) document.getElementById('nav-logs').style.display = 'none';
                 if(document.getElementById('tab-logs')) document.getElementById('tab-logs').style.display = 'none';
             }
@@ -1310,14 +1394,12 @@
         }
 
         function openInternalTicketModal() {
-            // Clear fields
             document.getElementById('ticket-message').value = '';
             document.getElementById('ticket-target-user-select').value = '';
             document.getElementById('ticket-target-user-input').value = '';
             document.getElementById('ticket-target-user-name').value = '';
             document.getElementById('ticket-type').value = 'Internal Bug';
 
-            // Populate Target User Select
             const select = document.getElementById('ticket-target-user-select');
             let optionsHTML = '<option value="">General (Myself)</option>';
             allUsers.forEach(u => {
@@ -1328,7 +1410,6 @@
             document.getElementById('internalTicketModal').classList.add('open');
         }
 
-        // Sync Target User Name when Dropdown Changes
         document.getElementById('ticket-target-user-select').addEventListener('change', (e) => {
             const selectedOption = e.target.options[e.target.selectedIndex];
             const name = selectedOption.getAttribute('data-name');
@@ -1341,8 +1422,7 @@
             const targetUserId = document.getElementById('ticket-target-user-select').value;
             const targetName = document.getElementById('ticket-target-user-name').value;
             
-            // If Target User is not empty, get their details
-            let targetEmail = currentAdminEmail; // Default self
+            let targetEmail = currentAdminEmail; 
             let targetPhone = "";
             let source = "internal";
             
@@ -1409,8 +1489,6 @@
         // SEARCH HANDLER
         function handleSearch(tab, value) {
             searchStates[tab] = value.toLowerCase();
-            
-            // Trigger specific render functions
             if (tab === 'orders') renderOrdersTable();
             if (tab === 'users') renderUsersTable();
             if (tab === 'support') renderTicketsTable();
@@ -1425,7 +1503,6 @@
             const textLower = text.toLowerCase();
             if (!textLower) return;
             
-            // Define mapping for context tabs
             const sections = [];
             if (context === 'config') {
                 sections.push({ id: 'config-maintenance', keywords: ['maintenance', 'banner', 'mode'] });
@@ -1440,10 +1517,9 @@
                     const el = document.getElementById(sec.id);
                     if (el) {
                         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        // Flash effect
                         el.style.transition = 'background 0.3s';
                         el.style.background = 'rgba(59, 130, 246, 0.2)';
-                        setTimeout(() => { el.style.background = 'var(--bg-card)'; }, 500);
+                        setTimeout(() => { el.style.background = ''; }, 500);
                         break;
                     }
                 }
@@ -1485,7 +1561,6 @@
                 ticketCache = []; 
                 snapshot.forEach(doc => ticketCache.push({ id: doc.id, data: doc.data() }));
                 renderTicketsTable();
-                // Refresh logs if tickets updated and logs tab is active
                 if(currentLogFilter && document.getElementById('tab-logs').classList.contains('active')) {
                     renderLogsTable();
                 }
@@ -1498,14 +1573,11 @@
             });
         }
 
-        // --- RENDER FUNCTIONS WITH SEARCH ---
-
         function renderOrdersTable() {
             const tbody = document.getElementById('orders-table-body');
             tbody.innerHTML = '';
             
             let visibleOrders = orderCache;
-            // Apply Search
             const s = searchStates.orders;
             if(s) {
                 visibleOrders = visibleOrders.filter(o => {
@@ -1527,7 +1599,6 @@
                 if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
                 if(data.status === 'Cancelled') statusClass = 'status-cancelled';
                 
-                // Safe string escaping
                 const safeCompany = (data.companyName || '').replace(/'/g, "\\'");
                 const safePackage = (data.package || '').replace(/'/g, "\\'");
                 const safeTotal = (data.total || '').replace(/'/g, "\\'");
@@ -1553,7 +1624,6 @@
             tbody.innerHTML = '';
             
             let visibleUsers = allUsers;
-            // Apply Search
             const s = searchStates.users;
             if(s) {
                 visibleUsers = visibleUsers.filter(u => {
@@ -1602,11 +1672,9 @@
             tbody.innerHTML = '';
             let visibleTickets = ticketCache;
             
-            // 1. Filter by Category (Internal/External)
             if (ticketFilter === 'internal') visibleTickets = visibleTickets.filter(t => t.data.source === "internal");
             else if (ticketFilter === 'external') visibleTickets = visibleTickets.filter(t => t.data.source !== "internal");
 
-            // 2. Filter by Search Text
             const s = searchStates.support;
             if(s) {
                 visibleTickets = visibleTickets.filter(t => {
@@ -1627,12 +1695,10 @@
                 const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
                 let statusClass = data.status === 'Resolved' ? 'status-paid' : 'status-open';
                 
-                // Badges
                 const isInternal = data.source === "internal";
                 const rowClass = isInternal ? "row-internal" : "";
                 const sourceBadge = isInternal ? `<span class="source-badge badge-internal">Team</span>` : `<span class="source-badge badge-external">User</span>`;
                 
-                // Target Info
                 const targetInfo = data.targetName ? `<div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target: <b>${data.targetName}</b></div>` : '';
                 
                 const internalNoteCell = isSuperAdmin ? `<td style="max-width: 200px; font-size:0.8rem; color:var(--text-secondary);">${data.adminNote || '-'}</td>` : '';
@@ -1661,7 +1727,6 @@
             const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
             
             let visibleVouchers = usersWithVouchers;
-            // Apply Search
             const s = searchStates.vouchers;
             if(s) {
                 visibleVouchers = visibleVouchers.filter(u => {
@@ -1698,7 +1763,6 @@
             tbody.innerHTML = '';
             
             let visiblePromos = promoCache;
-            // Apply Search
             const s = searchStates.promos;
             if(s) {
                 visiblePromos = visiblePromos.filter(p => {
@@ -1722,9 +1786,7 @@
             });
         }
 
-        // SYSTEM LOGS LOGIC
         function loadLogsTab(type) {
-            // Update UI buttons
             const buttons = document.querySelectorAll('#tab-logs .sm-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
             
@@ -1745,8 +1807,6 @@
             
             let logEntries = [];
 
-            // 1. GENERATE LOGS FROM DATA
-            // Vouchers
             allUsers.filter(u => u.personalVoucher).forEach(u => {
                 const v = u.personalVoucher;
                 const date = v.voucherTimestamp ? new Date(v.voucherTimestamp.toDate()).toLocaleString() : '-';
@@ -1759,7 +1819,6 @@
                 });
             });
 
-            // Tickets (Resolved)
             ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
                 const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
                 const note = t.data.adminNote || '';
@@ -1774,16 +1833,13 @@
                 });
             });
 
-            // Sort by timestamp descending
             logEntries.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            // 2. Filter by Category
             if(currentLogFilter !== 'all') {
                 if(currentLogFilter === 'vouchers') logEntries = logEntries.filter(l => l.type === 'voucher');
                 if(currentLogFilter === 'tickets') logEntries = logEntries.filter(l => l.type === 'ticket');
             }
 
-            // 3. Filter by Search Text
             const s = searchStates.logs;
             if(s) {
                 logEntries = logEntries.filter(l => {
@@ -1872,17 +1928,15 @@
             document.getElementById('tab-' + tabId).classList.add('active');
             
             // Highlight correct nav item
-            const navItems = document.querySelectorAll('.nav-item');
-            if(tabId === 'orders') navItems[0].classList.add('active');
-            if(tabId === 'users') navItems[1].classList.add('active');
-            if(tabId === 'support') navItems[2].classList.add('active');
-            if(tabId === 'vouchers') navItems[3].classList.add('active');
-            if(tabId === 'promos') navItems[4].classList.add('active');
-            if(tabId === 'logs') navItems[5].classList.add('active');
-            if(tabId === 'maintenance') navItems[6].classList.add('active');
-            if(tabId === 'content') navItems[7].classList.add('active');
+            // We find the index based on the known order
+            const navItems = Array.from(document.querySelectorAll('.sidebar .nav-item')); // Get all nav items
+            const mapping = ['orders','users','support','vouchers','promos','logs','maintenance','content'];
+            const index = mapping.indexOf(tabId);
+            
+            if(index !== -1 && navItems[index]) {
+                navItems[index].classList.add('active');
+            }
 
-            // Automatically load logs if Logs tab is opened
             if(tabId === 'logs') {
                 loadLogsTab(currentLogFilter || 'all');
             }
@@ -1904,7 +1958,6 @@
             const isTargetSuperAdmin = (role === 'superadmin');
 
             if (!isSuperAdmin) {
-                // CURRENT USER IS STANDARD ADMIN
                 if (isTargetSuperAdmin) {
                     nameInput.disabled = true;
                     phoneInput.disabled = true;
@@ -1923,7 +1976,6 @@
                     helperLabel.style.display = 'none';
                 }
             } else {
-                // SUPER ADMIN PRIVILEGES
                 nameInput.disabled = false;
                 phoneInput.disabled = false;
                 roleSelect.disabled = false;
