@@ -70,6 +70,44 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* --- TOAST NOTIFICATIONS (Replaces Alert) --- */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--bg-card);
+            color: var(--text-main);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+            box-shadow: var(--shadow-modal);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            animation: slideIn 0.3s ease forwards;
+            pointer-events: auto;
+        }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast i { font-size: 1.2rem; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
         /* --- LOGIN SCREEN --- */
         #login-screen {
             display: flex;
@@ -92,7 +130,7 @@
             max-width: 400px;
             text-align: center;
             box-shadow: var(--shadow-card);
-            position: relative; /* For absolute button inside */
+            position: relative;
         }
         .login-card h2 { margin-bottom:1.5rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
         
@@ -168,7 +206,7 @@
             color: var(--text-main);
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Updated to justify space-between for toggle button */
+            justify-content: space-between;
             padding-right: 0.5rem;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 1.5rem;
@@ -181,7 +219,7 @@
             display: flex;
             flex-direction: column;
             line-height: 1.2;
-            flex: 1; /* Take up space */
+            flex: 1;
         }
         .brand-name {
             font-weight: 700;
@@ -480,10 +518,8 @@
 
         /* --- RESPONSIVE MOBILE --- */
         @media (max-width: 768px) {
-            /* Layout */
             #dashboard { flex-direction: column; }
             
-            /* Sidebar -> Bottom Nav */
             .sidebar {
                 width: 100%;
                 height: auto;
@@ -503,9 +539,8 @@
             }
             .sidebar::-webkit-scrollbar { display: none; }
 
-            .brand, .logout-btn { display: none; } /* Hide desktop elements on mobile */
+            .brand, .logout-btn { display: none; }
 
-            /* Mobile Header */
             .mobile-brand-header {
                 display: flex;
                 padding-left: 0; 
@@ -514,7 +549,6 @@
             .mobile-brand-header .brand-name { font-size: 1.1rem; color: var(--text-main); }
             .mobile-brand-header .brand-job { font-size: 0.85rem; color: var(--text-secondary); }
 
-            /* Bottom Nav Items */
             .nav-item {
                 flex: 0 0 auto; 
                 min-width: 80px; 
@@ -539,7 +573,6 @@
             .nav-item.active i { color: var(--accent-primary); }
             .nav-item:hover { background: transparent; }
             
-            /* Main Content */
             .main-content { 
                 padding: 1rem 1rem 90px 1rem; 
                 margin-bottom: 0;
@@ -549,7 +582,6 @@
             .section-header h2 { font-size: 1.2rem; }
             button { font-size: 0.9rem; }
             
-            /* Modal Mobile */
             .modal {
                 align-items: flex-start;
                 padding: 0;
@@ -567,16 +599,17 @@
                 flex-direction: column;
             }
             
-            /* Inputs fix */
             .form-row input, .form-row select { font-size: 16px; } 
         }
     </style>
 </head>
 <body>
 
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+
     <!-- LOGIN SCREEN -->
     <div id="login-screen">
-        <!-- Desktop/Mobile Login Theme Toggle -->
         <button class="theme-toggle-btn" style="position: absolute; top: 20px; right: 20px;" onclick="toggleTheme()" aria-label="Toggle Theme">
             <i id="theme-icon-login" class="ri-moon-line"></i>
         </button>
@@ -600,7 +633,6 @@
         
         <!-- SIDEBAR (Desktop) / BOTTOM NAV (Mobile) -->
         <div class="sidebar">
-            <!-- DESKTOP BRAND -->
             <div class="brand">
                 <div style="display:flex; align-items:center; gap:12px; flex:1;">
                     <i class="ri-shield-user-fill brand-icon"></i>
@@ -609,7 +641,6 @@
                         <span id="sidebar-jobtitle" class="brand-job">Super Admin</span>
                     </div>
                 </div>
-                <!-- DESKTOP THEME TOGGLE -->
                 <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                     <i id="theme-icon-desktop" class="ri-moon-line"></i>
                 </button>
@@ -631,7 +662,7 @@
             <div class="nav-item" onclick="switchTab('promos')">
                 <i class="ri-coupon-3-line"></i> <span>Promo</span>
             </div>
-            <!-- LOGS TAB -->
+            <!-- LOGS TAB (SuperAdmin Only) -->
             <div class="nav-item" id="nav-logs" onclick="switchTab('logs')">
                 <i class="ri-file-history-line"></i> <span>Logs</span>
             </div>
@@ -642,7 +673,6 @@
                 <i class="ri-file-list-3-line"></i> <span>Content</span>
             </div>
             
-            <!-- DESKTOP LOGOUT -->
             <div class="nav-item logout-btn" onclick="handleLogout()">
                 <i class="ri-logout-box-r-line"></i> <span>Logout</span>
             </div>
@@ -661,7 +691,6 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <!-- Theme Toggle (Mobile) -->
                     <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-icon-mobile" class="ri-moon-line"></i>
                     </button>
@@ -781,7 +810,7 @@
                                 <th>Customer</th>
                                 <th>Message</th>
                                 <th>Status</th>
-                                <th id="th-internal-note" style="display:none;">Internal Notes</th>
+                                <th>Resolved By</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -940,7 +969,34 @@
 
                 <div class="search-container">
                     <i class="ri-search-line search-icon"></i>
-                    <input type="text" id="search-config" placeholder="Jump to section (e.g. Maintenance, Pricing)..." onkeyup="handleSearch('config', this.value)">
+                    <input type="text" id="search-config" placeholder="Jump to section (e.g. Discount, Maintenance, Pricing)..." onkeyup="handleSearch('config', this.value)">
+                </div>
+
+                <!-- NEW: PLAN DISCOUNT CONFIG -->
+                <div class="admin-card" id="config-discount">
+                    <h3>Global Plan Discount</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Activate a discount badge displayed on the main website pricing tables.</p>
+                    
+                    <div class="form-row">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <label>Enable Plan Discount</label>
+                            <div style="width: 50px; height: 26px; background: #333; border-radius: 13px; position: relative; cursor: pointer;" onclick="toggleDiscountStatus()">
+                                <div id="discount-toggle-circle" style="width: 20px; height: 20px; background: #555; border-radius: 50%; position: absolute; left: 3px; top: 3px; transition: 0.3s;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Discount Percentage (%)</label>
+                        <input type="number" id="discount-value" placeholder="e.g. 20">
+                    </div>
+
+                    <div class="form-row">
+                        <label>Badge Text</label>
+                        <input type="text" id="discount-badge-text" placeholder="e.g. Limited Time Offer!">
+                    </div>
+                    
+                    <button onclick="saveDiscountConfig()" style="margin-top: 1rem;">Save Discount Config</button>
                 </div>
 
                 <div class="admin-card" id="config-maintenance">
@@ -1044,9 +1100,7 @@
                     <option value="superadmin">Super Admin</option>
                 </select>
             </div>
-            <div id="edit-restriction-msg" style="display:none; color:var(--warning); font-size:0.8rem; margin-bottom:1rem;">
-                <!-- Message injected via JS -->
-            </div>
+            <div id="edit-restriction-msg" style="display:none; color:var(--warning); font-size:0.8rem; margin-bottom:1rem;"></div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveUser()" style="background: var(--success);">Update User</button>
                 <button class="secondary" onclick="closeModal('editUserModal')">Cancel</button>
@@ -1076,7 +1130,6 @@
                     <label>Target User (Optional)</label>
                     <select id="ticket-target-user-select" style="width: 100%;">
                         <option value="">General (Myself)</option>
-                        <!-- Populated dynamically via JS -->
                     </select>
                     <input type="text" id="ticket-target-user-input" placeholder="Search user..." style="margin-top: 5px; display: none;">
                 </div>
@@ -1146,6 +1199,25 @@
                 <i class="ri-close-line" onclick="closeModal('ticketModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
             </div>
             <input type="hidden" id="ticket-id">
+            
+            <!-- Ticket Details View Only -->
+            <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">Case ID</div>
+                <div id="view-ticket-id" style="font-family: monospace; font-weight: 700; color: var(--accent-primary); margin-bottom: 8px;">-</div>
+                
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">Customer</div>
+                <div id="view-ticket-customer" style="font-weight: 600; margin-bottom: 8px;">-</div>
+
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">Message</div>
+                <div id="view-ticket-message" style="font-size: 0.9rem; margin-bottom: 8px;">-</div>
+
+                <div id="view-resolved-by-container" style="display: none; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                    <div style="font-size: 0.8rem; color: var(--success); margin-bottom: 4px;">Resolved By</div>
+                    <div id="view-ticket-resolved-by" style="font-weight: 600;">-</div>
+                    <div id="view-ticket-resolved-at" style="font-size: 0.75rem; color: var(--text-secondary);">-</div>
+                </div>
+            </div>
+
             <div class="form-row">
                 <label>Status</label>
                 <select id="ticket-status-select" style="width: 100%;">
@@ -1230,6 +1302,26 @@
             appId: "1:699127560990:web:50cfd61ff620bc85fb670f"
         };
 
+        // --- TOAST NOTIFICATION SYSTEM ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'ri-information-line';
+            if (type === 'success') icon = 'ri-checkbox-circle-line';
+            if (type === 'error') icon = 'ri-error-warning-line';
+
+            toast.innerHTML = `<i class="${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
         // --- THEME MANAGEMENT ---
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -1246,7 +1338,6 @@
         }
 
         function updateThemeIcon(theme) {
-            // Now selects all 3 potential locations: Mobile, Desktop, Login
             const icons = document.querySelectorAll('#theme-icon-mobile, #theme-icon-desktop, #theme-icon-login');
             icons.forEach(icon => {
                 if(theme === 'dark') {
@@ -1288,11 +1379,17 @@
             auth = firebase.auth();
         } catch(e) {
             console.error("Firebase Error", e);
-            alert("Error connecting to database.");
+            showToast("Error connecting to database", "error");
         }
 
         let allUsers = []; 
-        let siteConfig = { maintenance_active: false, message: '', prices: { html: 199, frontend: 599 }, packageDetails: {} };
+        let siteConfig = { 
+            maintenance_active: false, 
+            message: '', 
+            prices: { html: 199, frontend: 599 }, 
+            packageDetails: {},
+            planDiscount: { active: false, value: 0, text: '' }
+        };
 
         const DEFAULT_DETAILS = {
             frontend: ["Up to 5 Pages", "Animations", "Contact Forms"],
@@ -1321,13 +1418,13 @@
                             adjustUIForSuperAdmin();
                         } else {
                             auth.signOut();
-                            alert("ACCESS DENIED: You do not have permission to access this portal.");
+                            showToast("ACCESS DENIED: You do not have permission to access this portal.", "error");
                             document.getElementById('login-screen').style.display = 'flex';
                             document.getElementById('dashboard').style.display = 'none';
                         }
                     }
                 }).catch((err) => {
-                    alert("Error verifying permissions.");
+                    showToast("Error verifying permissions.", "error");
                 });
             } else {
                 currentAdminUID = "";
@@ -1338,17 +1435,18 @@
         });
 
         function adjustUIForSuperAdmin() {
+            // Plan Discount & Logs accessible to SuperAdmin only
+            const planDiscountCard = document.getElementById('config-discount');
+            const logsTab = document.getElementById('tab-logs');
+            const logsNav = document.getElementById('nav-logs');
+
             if(isSuperAdmin) {
-                document.getElementById('th-internal-note').style.display = 'table-cell';
-                document.getElementById('th-created-by').style.display = 'table-cell';
-                if(document.getElementById('nav-logs')) document.getElementById('nav-logs').style.display = 'flex';
+                if(planDiscountCard) planDiscountCard.style.display = 'block';
+                if(logsNav) logsNav.style.display = 'flex';
             } else {
-                document.getElementById('th-internal-note').style.display = 'none';
-                document.getElementById('th-created-by').style.display = 'none';
-                const createUserBtn = document.querySelector('button[onclick="openCreateUserModal()"]');
-                if(createUserBtn) createUserBtn.style.display = 'none';
-                if(document.getElementById('nav-logs')) document.getElementById('nav-logs').style.display = 'none';
-                if(document.getElementById('tab-logs')) document.getElementById('tab-logs').style.display = 'none';
+                if(planDiscountCard) planDiscountCard.style.display = 'none';
+                if(logsTab) logsTab.style.display = 'none';
+                if(logsNav) logsNav.style.display = 'none';
             }
         }
 
@@ -1384,8 +1482,8 @@
                                 role: 'user',
                                 name: "New User",
                                 phone: ""
-                            }).then(() => alert("Account created. Please contact admin for access."))
-                            .catch(err => alert(err.message));
+                            }).then(() => showToast("Account created. Please contact admin for access.", "warning"))
+                            .catch(err => showToast(err.message, "error"));
                         }
                     });
                 })
@@ -1463,13 +1561,15 @@
                 targetName: targetName || "",
                 targetEmail: targetEmail,
                 targetPhone: targetPhone,
-                adminEmail: currentAdminEmail 
+                adminEmail: currentAdminEmail,
+                resolvedBy: null,
+                resolvedAt: null
             };
 
             db.collection("tickets").add(ticketData).then(() => {
                 closeModal('internalTicketModal');
-                alert("Internal Ticket Created Successfully!");
-            }).catch(err => alert("Error creating ticket: " + err.message));
+                showToast("Internal Ticket Created Successfully!", "success");
+            }).catch(err => showToast("Error creating ticket: " + err.message, "error"));
         }
 
         function createNewUser() {
@@ -1479,7 +1579,7 @@
             const phone = document.getElementById('create-phone').value;
             const role = document.getElementById('create-role').value;
 
-            if(!name || !email || !password) return alert("Name, Email, and Password are required.");
+            if(!name || !email || !password) return showToast("Name, Email, and Password are required.", "error");
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
@@ -1495,10 +1595,10 @@
                 })
                 .then(() => {
                     closeModal('createUserModal');
-                    alert("User Created Successfully!");
+                    showToast("User Created Successfully!", "success");
                 })
                 .catch((error) => {
-                    alert("Error creating user: " + error.message);
+                    showToast("Error creating user: " + error.message, "error");
                 });
         }
 
@@ -1521,6 +1621,7 @@
             
             const sections = [];
             if (context === 'config') {
+                sections.push({ id: 'config-discount', keywords: ['discount', 'sale', 'promo', 'badge'] });
                 sections.push({ id: 'config-maintenance', keywords: ['maintenance', 'banner', 'mode'] });
                 sections.push({ id: 'config-pricing', keywords: ['pricing', 'price', 'html', 'frontend'] });
             } else if (context === 'content') {
@@ -1547,6 +1648,7 @@
                 if(doc.exists) {
                     siteConfig = doc.data();
                     updateMaintenanceUI();
+                    updateDiscountUI(); // New
                     updatePricingUI();
                     updateContentUI();
                 }
@@ -1701,8 +1803,7 @@
             }
 
             if(visibleTickets.length === 0) {
-                const colspan = isSuperAdmin ? 9 : 8;
-                tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:2rem;">No tickets.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem;">No tickets.</td></tr>`;
                 return;
             }
             visibleTickets.forEach(item => {
@@ -1717,7 +1818,11 @@
                 
                 const targetInfo = data.targetName ? `<div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target: <b>${data.targetName}</b></div>` : '';
                 
-                const internalNoteCell = isSuperAdmin ? `<td style="max-width: 200px; font-size:0.8rem; color:var(--text-secondary);">${data.adminNote || '-'}</td>` : '';
+                // Check for resolvedBy details
+                let resolvedByDisplay = '-';
+                if(data.status === 'Resolved' && data.resolvedBy) {
+                    resolvedByDisplay = `<span style="font-size:0.8rem; font-weight:600; color:var(--success);">${data.resolvedBy}</span>`;
+                }
 
                 tbody.innerHTML += `
                     <tr class="${rowClass}">
@@ -1731,8 +1836,8 @@
                             ${targetInfo}
                         </td>
                         <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                        ${internalNoteCell}
-                        <td><button class="action-btn" onclick="openTicketModal('${doc.id}', '${data.status}', '${(data.adminNote || '').replace(/'/g, "\\'")}')">Manage</button></td>
+                        <td style="font-size:0.85rem;">${resolvedByDisplay}</td>
+                        <td><button class="action-btn" onclick="openTicketModal('${doc.id}')">View</button></td>
                     </tr>`;
             });
         }
@@ -1837,14 +1942,14 @@
 
             ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
                 const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
-                const note = t.data.adminNote || '';
-                const adminMatch = note.match(/Updated by: (.*?)\s/);
-                const admin = adminMatch ? adminMatch[1] : 'Admin';
+                // Use resolvedBy if available, otherwise try parsing adminNote
+                const resolvedBy = t.data.resolvedBy || (t.data.adminNote ? t.data.adminNote.split(' ')[0] : 'Admin');
+                
                 logEntries.push({
                     timestamp: date,
-                    admin: admin,
+                    admin: resolvedBy,
                     action: 'Resolved Ticket',
-                    detail: `Case #${t.id.substring(0,6)}: ${t.data.name} (${note ? note : ''})`,
+                    detail: `Case #${t.id.substring(0,6)}: ${t.data.name}`,
                     type: 'ticket'
                 });
             });
@@ -1899,8 +2004,47 @@
                 frontend: frontText.split('\n').filter(line => line.trim() !== ''),
                 ai: aiText.split('\n').filter(line => line.trim() !== '')
             };
-            db.collection("config").doc("site_settings").set({ packageDetails: siteConfig.packageDetails }, { merge: true }).then(() => alert("Details Updated!")).catch(err => alert(err.message));
+            db.collection("config").doc("site_settings").set({ packageDetails: siteConfig.packageDetails }, { merge: true }).then(() => showToast("Details Updated!", "success")).catch(err => showToast(err.message, "error"));
         }
+
+        /* --- DISCOUNT CONFIG LOGIC --- */
+        function updateDiscountUI() {
+            const toggleCircle = document.getElementById('discount-toggle-circle');
+            if(siteConfig.planDiscount && siteConfig.planDiscount.active) {
+                toggleCircle.style.left = '27px'; toggleCircle.style.background = '#10b981';
+                document.getElementById('discount-value').value = siteConfig.planDiscount.value || 0;
+                document.getElementById('discount-badge-text').value = siteConfig.planDiscount.text || "";
+            } else {
+                toggleCircle.style.left = '3px'; toggleCircle.style.background = '#555';
+                document.getElementById('discount-value').value = "";
+                document.getElementById('discount-badge-text').value = "";
+            }
+        }
+
+        function toggleDiscountStatus() {
+            if(!siteConfig.planDiscount) siteConfig.planDiscount = {};
+            siteConfig.planDiscount.active = !siteConfig.planDiscount.active;
+            updateDiscountUI();
+        }
+
+        function saveDiscountConfig() {
+            const val = parseFloat(document.getElementById('discount-value').value);
+            const text = document.getElementById('discount-badge-text').value;
+            const active = siteConfig.planDiscount.active;
+
+            if(active && (isNaN(val) || val < 0)) return showToast("Invalid Discount Value", "error");
+
+            const update = {
+                planDiscount: {
+                    active: active,
+                    value: val,
+                    text: text
+                }
+            };
+
+            db.collection("config").doc("site_settings").update(update).then(() => showToast("Discount Config Saved!", "success")).catch(err => showToast(err.message, "error"));
+        }
+        /* --- END DISCOUNT CONFIG --- */
 
         function updateMaintenanceUI() {
             const toggleCircle = document.getElementById('maintenance-toggle-circle');
@@ -1921,7 +2065,7 @@
         function saveMaintenanceConfig() {
             const msg = document.getElementById('maintenance-msg').value;
             siteConfig.message = msg;
-            db.collection("config").doc("site_settings").set({ maintenance_active: siteConfig.maintenance_active, message: msg }, { merge: true }).then(() => alert("Saved!"));
+            db.collection("config").doc("site_settings").set({ maintenance_active: siteConfig.maintenance_active, message: msg }, { merge: true }).then(() => showToast("Saved!", "success"));
         }
 
         function updatePricingUI() {
@@ -1935,7 +2079,7 @@
             const htmlPrice = parseFloat(document.getElementById('price-html').value);
             const frontendPrice = parseFloat(document.getElementById('price-frontend').value);
             siteConfig.prices = { html: htmlPrice, frontend: frontendPrice };
-            db.collection("config").doc("site_settings").update({ prices: siteConfig.prices }).then(() => alert("Prices updated!"));
+            db.collection("config").doc("site_settings").update({ prices: siteConfig.prices }).then(() => showToast("Prices updated!", "success"));
         }
 
         function switchTab(tabId) {
@@ -2008,11 +2152,11 @@
             const role = document.getElementById('edit-role').value;
             
             if (!isSuperAdmin && role === 'superadmin') {
-                alert("You do not have permission to modify SuperAdmin accounts.");
+                showToast("You do not have permission to modify SuperAdmin accounts.", "error");
                 return;
             }
 
-            if(!name || !phone) return alert("Fields cannot be empty");
+            if(!name || !phone) return showToast("Fields cannot be empty", "error");
             
             const updateData = { 
                 name: name, 
@@ -2024,12 +2168,12 @@
                 updateData.jobTitle = document.getElementById('edit-jobtitle').value;
             }
 
-            db.collection("users").doc(uid).update(updateData).then(() => { closeModal('editUserModal'); alert("User updated"); }).catch(err => alert(err.message));
+            db.collection("users").doc(uid).update(updateData).then(() => { closeModal('editUserModal'); showToast("User updated", "success"); }).catch(err => showToast(err.message, "error"));
         }
 
         function resetUserPass(email) {
             if(confirm(`Reset password for ${email}?`)) {
-                auth.sendPasswordResetEmail(email).then(() => alert("Reset email sent.")).catch(err => alert(err.message));
+                auth.sendPasswordResetEmail(email).then(() => showToast("Reset email sent.", "success")).catch(err => showToast(err.message, "error"));
             }
         }
 
@@ -2058,13 +2202,40 @@
                 companyName: companyName,
                 package: pkg,
                 total: total
-            }).then(() => { closeModal('orderModal'); alert("Order updated"); }).catch(err => alert(err.message));
+            }).then(() => { closeModal('orderModal'); showToast("Order updated", "success"); }).catch(err => showToast(err.message, "error"));
         }
 
-        function openTicketModal(ticketId, currentStatus, note) {
+        function openTicketModal(ticketId) {
+            // Find ticket data to populate the read-only view
+            const ticketObj = ticketCache.find(t => t.id === ticketId);
+            if(!ticketObj) return;
+            const data = ticketObj.data;
+
             document.getElementById('ticket-id').value = ticketId;
-            document.getElementById('ticket-status-select').value = currentStatus;
-            document.getElementById('ticket-admin-note').value = note || '';
+            document.getElementById('ticket-status-select').value = data.status || 'Open';
+            document.getElementById('ticket-admin-note').value = data.adminNote || '';
+
+            // Populate View Fields
+            document.getElementById('view-ticket-id').innerText = ticketId;
+            document.getElementById('view-ticket-customer').innerText = `${data.name} (${data.email})`;
+            document.getElementById('view-ticket-message').innerText = data.message;
+
+            const resolvedContainer = document.getElementById('view-resolved-by-container');
+            const resolvedByDiv = document.getElementById('view-ticket-resolved-by');
+            const resolvedAtDiv = document.getElementById('view-ticket-resolved-at');
+
+            if(data.status === 'Resolved' && (data.resolvedBy || data.adminNote)) {
+                resolvedContainer.style.display = 'block';
+                resolvedByDiv.innerText = data.resolvedBy || 'Admin';
+                if(data.resolvedAt) {
+                    resolvedAtDiv.innerText = new Date(data.resolvedAt.toDate()).toLocaleString();
+                } else {
+                    resolvedAtDiv.innerText = '';
+                }
+            } else {
+                resolvedContainer.style.display = 'none';
+            }
+
             document.getElementById('ticketModal').classList.add('open');
         }
 
@@ -2072,7 +2243,20 @@
             const id = document.getElementById('ticket-id').value;
             const status = document.getElementById('ticket-status-select').value;
             const note = document.getElementById('ticket-admin-note').value;
-            db.collection("tickets").doc(id).update({ status: status, adminNote: note }).then(() => { closeModal('ticketModal'); alert("Ticket updated"); }).catch(err => alert(err.message));
+
+            const updateData = { status: status, adminNote: note };
+
+            // If changing to resolved, record who and when
+            if(status === 'Resolved') {
+                updateData.resolvedBy = currentAdminEmail;
+                updateData.resolvedAt = firebase.firestore.FieldValue.serverTimestamp();
+            } else {
+                // If reopening, clear resolved info (optional logic, keeping it clean)
+                updateData.resolvedBy = firebase.firestore.FieldValue.delete();
+                updateData.resolvedAt = firebase.firestore.FieldValue.delete();
+            }
+
+            db.collection("tickets").doc(id).update(updateData).then(() => { closeModal('ticketModal'); showToast("Ticket updated", "success"); }).catch(err => showToast(err.message, "error"));
         }
 
         function assignVoucher() {
@@ -2080,8 +2264,8 @@
             const code = document.getElementById('voucher-code').value.trim().toUpperCase();
             const val = parseFloat(document.getElementById('voucher-val').value);
             const type = document.getElementById('voucher-type').value;
-            if(!uid) return alert("Please select a user.");
-            if(!code || isNaN(val)) return alert("Invalid Voucher Details.");
+            if(!uid) return showToast("Please select a user.", "error");
+            if(!code || isNaN(val)) return showToast("Invalid Voucher Details.", "error");
 
             const voucherData = {
                 code: code,
@@ -2092,9 +2276,9 @@
             };
 
             db.collection("users").doc(uid).update({ personalVoucher: voucherData }).then(() => {
-                alert(`Voucher ${code} assigned!`);
+                showToast(`Voucher ${code} assigned!`, "success");
                 refreshVoucherTable();
-            }).catch(err => alert(err.message));
+            }).catch(err => showToast(err.message, "error"));
         }
 
         function refreshVoucherTable() {
@@ -2108,9 +2292,9 @@
         function createPromo() {
             const code = document.getElementById('new-promo-code').value.trim().toUpperCase();
             const val = parseFloat(document.getElementById('new-promo-val').value);
-            if(!code || isNaN(val)) return alert("Invalid input");
-            if(val <= 0 || val >= 1) return alert("Discount must be between 0 and 1");
-            db.collection("promo_codes").doc(code).set({ discount: val }).then(() => { document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-val').value = ''; alert("Promo Code Created!"); }).catch(err => alert(err.message));
+            if(!code || isNaN(val)) return showToast("Invalid input", "error");
+            if(val <= 0 || val >= 1) return showToast("Discount must be between 0 and 1", "error");
+            db.collection("promo_codes").doc(code).set({ discount: val }).then(() => { document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-val').value = ''; showToast("Promo Code Created!", "success"); }).catch(err => showToast(err.message, "error"));
         }
 
         function deletePromo(code) {
