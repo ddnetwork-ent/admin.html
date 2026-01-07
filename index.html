@@ -184,7 +184,7 @@
             align-items: center;
             justify-content: space-between;
             padding-bottom:1rem;
-            border-bottom:1px solid var(--border-light);
+            border-bottom: 1px solid var(--border-light);
             margin-bottom:1.5rem;
         }
 
@@ -210,7 +210,7 @@
             background: var(--bg-card);
             padding: 5px;
             border-radius: 8px;
-            border:1px solid var(--border-light);
+            border: 1px solid var(--border-light);
         }
         .filter-btn {
             background: transparent;
@@ -305,6 +305,35 @@
         }
 
         .row-internal { background: rgba(245, 158, 11, 0.03); }
+
+        /* --- LOGS TAB STYLES --- */
+        .log-entry {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .log-entry:last-child { border-bottom: none; }
+        .log-timestamp {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            min-width: 150px;
+        }
+        .log-admin {
+            font-weight: 600;
+            color: var(--accent-primary);
+            min-width: 150px;
+        }
+        .log-action {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        .log-detail {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
 
         /* ADMIN CARDS */
         .admin-card {
@@ -457,6 +486,10 @@
             </div>
             <div class="nav-item" onclick="switchTab('promos')">
                 <i class="ri-coupon-3-line"></i> <span>Promo</span>
+            </div>
+            <!-- NEW LOGS TAB (ADMIN ONLY) -->
+            <div class="nav-item" id="nav-logs" onclick="switchTab('logs')">
+                <i class="ri-file-history-line"></i> <span>System Logs</span>
             </div>
             <div class="nav-item" onclick="switchTab('maintenance')">
                 <i class="ri-settings-4-line"></i> <span>Config</span>
@@ -628,7 +661,7 @@
                 
                 <div class="admin-card">
                     <h3>Send Gift Voucher</h3>
-                    <div class="form-row" style="display: grid; grid-template-columns:1fr; gap: 10px;">
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                         <div style="grid-column: 1 / -1;">
                             <label>Select Customer</label>
                             <select id="voucher-user-select" style="margin-bottom: 0;">
@@ -705,6 +738,41 @@
                         <tbody id="promo-table-body">
                              <tr>
                                 <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading promos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SYSTEM LOGS TAB (NEW) -->
+            <div id="tab-logs" class="tab-content">
+                <div class="section-header">
+                    <h2>System Logs</h2>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary);">Audit trail of recent administrative actions.</p>
+                </div>
+
+                <div class="admin-card">
+                    <div style="display: flex; gap: 10px; margin-bottom: 1rem; overflow-x: auto;">
+                        <button class="sm-btn secondary" onclick="loadLogsTab('vouchers')">Vouchers</button>
+                        <button class="sm-btn secondary" onclick="loadLogsTab('tickets')">Tickets</button>
+                        <button class="sm-btn secondary" onclick="loadLogsTab('orders')">Orders</button>
+                        <button class="sm-btn secondary active" onclick="loadLogsTab('all')">All Activity</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Admin</th>
+                                <th>Action Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table-body">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Select a category to view logs.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -812,6 +880,9 @@
                     <option value="admin">Admin</option>
                     <option value="superadmin">Super Admin</option>
                 </select>
+                <p id="role-restricted-msg" style="color:var(--warning); font-size:0.8rem; margin-top:-5px; margin-bottom:1rem; display:none;">
+                    <i class="ri-lock-line"></i> Standard Admins cannot change roles.
+                </p>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveUser()" style="background: var(--success);">Update User</button>
@@ -985,16 +1056,15 @@
         });
 
         function adjustUIForSuperAdmin() {
+            // SUPERADMIN: Show Logs Tab & Internal Notes & Created By
             if(isSuperAdmin) {
                 document.getElementById('th-internal-note').style.display = 'table-cell';
                 document.getElementById('th-created-by').style.display = 'table-cell';
-                // SHOW CREATE USER BUTTON
-                document.getElementById('superadmin-controls').style.display = 'block';
+                if(document.getElementById('nav-logs')) document.getElementById('nav-logs').style.display = 'flex';
             } else {
                 document.getElementById('th-internal-note').style.display = 'none';
                 document.getElementById('th-created-by').style.display = 'none';
-                // HIDE CREATE USER BUTTON
-                document.getElementById('superadmin-controls').style.display = 'none';
+                if(document.getElementById('nav-logs')) document.getElementById('nav-logs').style.display = 'none';
             }
         }
 
@@ -1047,7 +1117,6 @@
         }
 
         function openCreateUserModal() {
-            // Clear fields
             document.getElementById('create-name').value = '';
             document.getElementById('create-email').value = '';
             document.getElementById('create-password').value = '';
@@ -1065,12 +1134,9 @@
 
             if(!name || !email || !password) return alert("Name, Email, and Password are required.");
 
-            // 1. Create Auth Account
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
-                    
-                    // 2. Create Firestore Profile
                     return db.collection("users").doc(user.uid).set({
                         name: name,
                         email: email,
@@ -1212,6 +1278,7 @@
                 const isInternal = data.type.toLowerCase().startsWith("internal");
                 const rowClass = isInternal ? "row-internal" : "";
                 const sourceBadge = isInternal ? `<span class="source-badge badge-internal">Team</span>` : `<span class="source-badge badge-external">User</span>`;
+                
                 const internalNoteCell = isSuperAdmin ? `<td style="max-width: 200px; font-size:0.8rem; color:var(--text-secondary);">${data.adminNote || '-'}</td>` : '';
 
                 tbody.innerHTML += `
@@ -1297,8 +1364,9 @@
             if(tabId === 'support') navItems[2].classList.add('active');
             if(tabId === 'vouchers') navItems[3].classList.add('active');
             if(tabId === 'promos') navItems[4].classList.add('active');
-            if(tabId === 'maintenance') navItems[5].classList.add('active');
-            if(tabId === 'content') navItems[6].classList.add('active');
+            if(tabId === 'logs') navItems[5].classList.add('active');
+            if(tabId === 'maintenance') navItems[6].classList.add('active');
+            if(tabId === 'content') navItems[7].classList.add('active');
         }
 
         function openEditUser(uid, name, phone, role, jobTitle) {
@@ -1307,19 +1375,33 @@
             document.getElementById('edit-phone').value = phone;
             document.getElementById('edit-role').value = role || 'user';
             
+            const roleSelect = document.getElementById('edit-role');
             const jobTitleInput = document.getElementById('edit-jobtitle');
             const helperLabel = document.getElementById('jobtitle-helper');
+            const roleMsg = document.getElementById('role-restricted-msg');
 
             if (!isSuperAdmin) {
+                // RESTRICTIONS FOR STANDARD ADMIN
+                roleSelect.disabled = true;
+                roleSelect.title = "Only Super Admins can change roles";
+                
                 jobTitleInput.disabled = true; 
                 jobTitleInput.value = "Restricted (SuperAdmin Only)";
                 jobTitleInput.style.opacity = "0.5";
                 helperLabel.style.display = "none";
+
+                roleMsg.style.display = "block";
             } else {
+                // SUPERADMIN PRIVILEGES
+                roleSelect.disabled = false; 
+                roleSelect.title = "";
+                
                 jobTitleInput.disabled = false; 
                 jobTitleInput.value = jobTitle || "";
                 jobTitleInput.style.opacity = "1";
                 helperLabel.style.display = "inline";
+
+                roleMsg.style.display = "none";
             }
 
             document.getElementById('editUserModal').classList.add('open');
@@ -1443,6 +1525,69 @@
 
         function deletePromo(code) {
             if(confirm(`Delete code ${code}?`)) db.collection("promo_codes").doc(code).delete();
+        }
+
+        function loadLogsTab(type) {
+            // Update buttons
+            const buttons = document.querySelectorAll('#tab-logs .sm-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const tbody = document.getElementById('logs-table-body');
+            tbody.innerHTML = '';
+
+            let logEntries = [];
+
+            // Generate logs from existing data in memory
+            // 1. Vouchers
+            if (type === 'vouchers' || type === 'all') {
+                allUsers.filter(u => u.personalVoucher && u.personalVoucher.voucherCreatedBy).forEach(u => {
+                    const v = u.personalVoucher;
+                    const date = u.personalVoucher.voucherTimestamp ? new Date(u.personalVoucher.voucherTimestamp.toDate()).toLocaleString() : new Date().toLocaleString();
+                    logEntries.push({
+                        timestamp: date,
+                        admin: v.voucherCreatedBy,
+                        action: 'Assigned Voucher',
+                        detail: `Code: ${v.code} to ${u.name}`
+                    });
+                });
+            }
+
+            // 2. Tickets (Resolved recently)
+            if (type === 'tickets' || type === 'all') {
+                ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
+                    const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
+                    // Try to guess admin from note if possible, or use "Unknown"
+                    const note = t.data.adminNote || '';
+                    const adminMatch = note.match(/Updated by: (.*?)\s/);
+                    const admin = adminMatch ? adminMatch[1] : 'Admin';
+                    
+                    logEntries.push({
+                        timestamp: date,
+                        admin: admin,
+                        action: 'Resolved Ticket',
+                        detail: `Case #${t.id}: ${t.data.name}`
+                    });
+                });
+            }
+
+            // Sort by timestamp desc
+            logEntries.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if(logEntries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">No activity logs found.</td></tr>';
+                return;
+            }
+
+            logEntries.forEach(log => {
+                tbody.innerHTML += `
+                    <tr class="log-entry">
+                        <td class="log-timestamp">${log.timestamp}</td>
+                        <td class="log-admin">${log.admin}</td>
+                        <td style="font-weight:600; font-size:0.85rem;">${log.action}</td>
+                        <td class="log-action">${log.detail}</td>
+                    </tr>`;
+            });
         }
 
         function closeModal(id) {
