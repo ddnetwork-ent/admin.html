@@ -2,10 +2,11 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DDNetwork(Admin)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -36,6 +37,9 @@
             
             --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
             --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            
+            --nav-height-mobile: 70px;
+            --header-height-mobile: 60px;
         }
 
         [data-theme="light"] {
@@ -58,19 +62,21 @@
         }
 
         /* Global Reset & Base */
-        body {
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            overflow: hidden; /* Prevent body scroll, handle internally */
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* --- TOAST NOTIFICATIONS (Replaces Alert) --- */
+        /* --- TOAST NOTIFICATIONS --- */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -116,17 +122,18 @@
             height: 100vh;
             width: 100%;
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             background: var(--bg-body);
             z-index: 200;
+            overflow-y: auto;
+            padding: 20px;
         }
         .login-card {
             background: var(--bg-card);
             padding: 2.5rem;
             border-radius: 16px;
             border:1px solid var(--border-color);
-            width: 90%;
+            width: 100%;
             max-width: 400px;
             text-align: center;
             box-shadow: var(--shadow-card);
@@ -144,7 +151,6 @@
             color: var(--text-main);
             margin-bottom:1rem;
             font-family: inherit;
-            box-sizing: border-box;
             transition: 0.2s;
             -webkit-appearance: none; 
         }
@@ -171,18 +177,19 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
-            box-sizing: border-box;
+            font-size: 0.95rem;
         }
         button:hover { opacity: 0.9; transform: translateY(-1px); }
         button.secondary { background: var(--text-muted); color: var(--text-main); }
         button.danger { background: var(--danger); }
         button.sm-btn { width: auto; padding: 6px 12px; font-size: 0.8rem; }
         button.success { background: var(--success); }
+        button:active { transform: scale(0.98); }
 
         /* --- DASHBOARD LAYOUT --- */
         #dashboard {
             display: none; 
-            height: 100vh;
+            height: 100%;
             width: 100%;
             display: flex;
             flex-direction: row;
@@ -289,8 +296,8 @@
             padding: 2rem;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            height: 100vh; 
-            box-sizing: border-box;
+            height: 100%; 
+            position: relative;
         }
 
         /* --- MOBILE HEADER (Sticky) --- */
@@ -298,13 +305,15 @@
             display: none; 
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 0;
+            padding: 0.8rem 1rem;
+            margin: 0 -1rem; /* Negative margin to bleed to edges */
             margin-bottom: 1rem;
             position: sticky;
             top: 0;
             z-index: 50;
             background: var(--bg-body); 
-            transition: background 0.3s;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
         }
 
         /* --- TABS & TABLES --- */
@@ -427,7 +436,7 @@
         .action-btn {
             background: transparent;
             border:1px solid var(--border-color);
-            padding: 6px 12px;
+            padding: 8px 12px; /* Slightly larger for touch */
             margin-right: 5px;
             font-size: 0.75rem;
             border-radius: 6px;
@@ -496,7 +505,6 @@
             align-items: center;
             backdrop-filter: blur(4px);
             padding: 1rem;
-            box-sizing: border-box;
         }
         .modal.open { display: flex; }
         
@@ -511,10 +519,33 @@
             max-height: 90vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            box-sizing: border-box;
             color: var(--text-main);
+            position: relative;
         }
-        .modal-content h3 { margin-top: 0; color: var(--text-main); margin-bottom: 1.5rem; }
+        .modal-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: 0.2s;
+            z-index: 5;
+        }
+        .modal-close-btn:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        .modal-content h3 { margin-top: 0; color: var(--text-main); margin-bottom: 1.5rem; padding-right: 2rem; }
 
         /* --- RESPONSIVE MOBILE --- */
         @media (max-width: 768px) {
@@ -536,22 +567,33 @@
                 justify-content: flex-start;
                 -ms-overflow-style: none; 
                 scrollbar-width: none; 
+                padding-bottom: env(safe-area-inset-bottom); /* iOS Home Indicator */
             }
             .sidebar::-webkit-scrollbar { display: none; }
 
             .brand, .logout-btn { display: none; }
 
+            /* Mobile Header */
             .mobile-brand-header {
                 display: flex;
-                padding-left: 0; 
-                padding-right: 0;
+                /* Ensure it sits on top of main content */
+                background: var(--bg-body);
             }
-            .mobile-brand-header .brand-name { font-size: 1.1rem; color: var(--text-main); }
-            .mobile-brand-header .brand-job { font-size: 0.85rem; color: var(--text-secondary); }
 
+            .mobile-brand-header .brand-name { font-size: 1.1rem; color: var(--text-main); font-weight: 700; }
+            .mobile-brand-header .brand-job { font-size: 0.85rem; color: var(--text-secondary); }
+            
+            /* Profile Info on Mobile */
+            .mobile-profile-group {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            /* Nav Items on Mobile (Bottom Bar) */
             .nav-item {
                 flex: 0 0 auto; 
-                min-width: 80px; 
+                min-width: 75px; 
                 justify-content: center;
                 flex-direction: column;
                 gap: 4px;
@@ -563,7 +605,7 @@
                 border-bottom: 3px solid transparent;
                 color: var(--text-secondary);
             }
-            .nav-item i { font-size: 1.4rem; margin-bottom: 2px; color: var(--text-muted); }
+            .nav-item i { font-size: 1.5rem; margin-bottom: 2px; color: var(--text-muted); }
             
             .nav-item.active {
                 background: transparent;
@@ -574,32 +616,49 @@
             .nav-item:hover { background: transparent; }
             
             .main-content { 
-                padding: 1rem 1rem 90px 1rem; 
+                padding: 1rem; 
+                padding-top: 1rem; /* Adjusted for sticky header */
+                /* Ensure content doesn't get hidden behind the bottom nav */
+                padding-bottom: 90px;
                 margin-bottom: 0;
             }
             
             .section-header { flex-direction: column; align-items: stretch; gap: 0.5rem; }
-            .section-header h2 { font-size: 1.2rem; }
-            button { font-size: 0.9rem; }
+            .section-header h2 { font-size: 1.25rem; }
+            button { font-size: 0.95rem; padding: 14px; } /* Larger touch targets */
             
+            /* Mobile Modals */
             .modal {
-                align-items: flex-start;
+                align-items: flex-end; /* Slide up from bottom on mobile */
                 padding: 0;
                 background: rgba(0,0,0,0.8);
             }
             .modal-content {
                 width: 100%;
                 max-width: 100%;
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
+                height: auto;
+                max-height: 90vh;
+                border-radius: 16px 16px 0 0;
                 border: none;
+                border-top: 1px solid var(--border-color);
                 padding: 1.5rem;
+                padding-top: 3rem; /* Space for close button */
+                animation: slideUp 0.3s ease forwards;
                 display: flex;
                 flex-direction: column;
             }
+            @keyframes slideUp {
+                from { transform: translateY(100%); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
             
-            .form-row input, .form-row select { font-size: 16px; } 
+            .form-row input, .form-row select { font-size: 16px; } /* Prevent iOS zoom */
+            .modal-close-btn {
+                top: 1rem;
+                right: 1rem;
+                width: 40px;
+                height: 40px;
+            }
         }
     </style>
 </head>
@@ -610,7 +669,7 @@
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen">
-        <button class="theme-toggle-btn" style="position: absolute; top: 20px; right: 20px;" onclick="toggleTheme()" aria-label="Toggle Theme">
+        <button class="theme-toggle-btn" style="position: absolute; top: 20px; right: 20px; z-index: 201;" onclick="toggleTheme()" aria-label="Toggle Theme">
             <i id="theme-icon-login" class="ri-moon-line"></i>
         </button>
 
@@ -683,18 +742,23 @@
             
             <!-- MOBILE PROFILE HEADER (Sticky) -->
             <div class="mobile-brand-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="mobile-profile-group">
                     <i class="ri-shield-user-fill brand-icon"></i>
                     <div class="brand-info">
                         <span id="mobile-name" class="brand-name">DDN Admin</span>
                         <span id="mobile-jobtitle" class="brand-job">Super Admin</span>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px;">
+                
+                <!-- Action Buttons Group (Top Right Corner) -->
+                <div style="display: flex; gap: 8px; align-items: center;">
                     <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-icon-mobile" class="ri-moon-line"></i>
                     </button>
-                    <button class="action-btn sm-btn" onclick="handleLogout()" style="color:var(--danger); border-color:var(--danger);">Logout</button>
+                    <!-- Close/Logout Button at Edge Corner -->
+                    <button class="action-btn sm-btn" onclick="handleLogout()" style="color:var(--danger); border-color:var(--danger); padding: 8px 12px;" aria-label="Logout">
+                        <i class="ri-logout-box-line" style="font-size: 1.2rem;"></i>
+                    </button>
                 </div>
             </div>
 
@@ -1069,10 +1133,10 @@
     <!-- EDIT USER MODAL -->
     <div id="editUserModal" class="modal">
         <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Manage User</h3>
-                <i class="ri-close-line" onclick="closeModal('editUserModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            <div class="modal-close-btn" onclick="closeModal('editUserModal')">
+                <i class="ri-close-line"></i>
             </div>
+            <h3>Manage User</h3>
             <input type="hidden" id="edit-uid">
             <div class="form-row">
                 <label>Full Name</label>
@@ -1106,10 +1170,10 @@
     <!-- INTERNAL TICKET MODAL (POPUP) -->
     <div id="internalTicketModal" class="modal">
         <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Create Internal Ticket</h3>
-                <i class="ri-close-line" onclick="closeModal('internalTicketModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            <div class="modal-close-btn" onclick="closeModal('internalTicketModal')">
+                <i class="ri-close-line"></i>
             </div>
+            <h3>Create Internal Ticket</h3>
 
             <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
@@ -1151,10 +1215,10 @@
     <!-- CREATE USER MODAL -->
     <div id="createUserModal" class="modal">
         <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Create New User</h3>
-                <i class="ri-close-line" onclick="closeModal('createUserModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            <div class="modal-close-btn" onclick="closeModal('createUserModal')">
+                <i class="ri-close-line"></i>
             </div>
+            <h3>Create New User</h3>
             <div class="form-row">
                 <label>Full Name</label>
                 <input type="text" id="create-name" placeholder="John Doe">
@@ -1189,10 +1253,10 @@
     <!-- TICKET MODAL -->
     <div id="ticketModal" class="modal">
         <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Manage Ticket</h3>
-                <i class="ri-close-line" onclick="closeModal('ticketModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            <div class="modal-close-btn" onclick="closeModal('ticketModal')">
+                <i class="ri-close-line"></i>
             </div>
+            <h3>Manage Ticket</h3>
             <input type="hidden" id="ticket-id">
             
             <!-- Ticket Details View Only -->
@@ -1234,10 +1298,10 @@
     <!-- ORDER MODAL -->
     <div id="orderModal" class="modal">
         <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="margin:0;">Manage Order</h3>
-                <i class="ri-close-line" onclick="closeModal('orderModal')" style="cursor:pointer; color:var(--text-secondary); font-size:1.5rem;"></i>
+            <div class="modal-close-btn" onclick="closeModal('orderModal')">
+                <i class="ri-close-line"></i>
             </div>
+            <h3>Manage Order</h3>
             <input type="hidden" id="order-id">
             
             <div class="form-row">
@@ -1383,7 +1447,6 @@
             message: '', 
             prices: { html: 199, frontend: 599 }, 
             packageDetails: {},
-            // Updated defaults to match Main Website expectations
             discountActive: false, 
             discountPercent: 0
         };
@@ -1432,7 +1495,6 @@
         });
 
         function adjustUIForSuperAdmin() {
-            // Plan Discount accessible to SuperAdmin only
             const planDiscountCard = document.getElementById('config-discount');
             const logsTab = document.getElementById('tab-logs');
             const logsNav = document.getElementById('nav-logs');
@@ -1645,7 +1707,7 @@
                 if(doc.exists) {
                     siteConfig = doc.data();
                     updateMaintenanceUI();
-                    updateDiscountUI(); // UPDATED LOGIC
+                    updateDiscountUI(); 
                     updatePricingUI();
                     updateContentUI();
                 }
@@ -1815,7 +1877,6 @@
                 
                 const targetInfo = data.targetName ? `<div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target: <b>${data.targetName}</b></div>` : '';
                 
-                // Check for resolvedBy details
                 let resolvedByDisplay = '-';
                 if(data.status === 'Resolved' && data.resolvedBy) {
                     resolvedByDisplay = `<span style="font-size:0.8rem; font-weight:600; color:var(--success);">${data.resolvedBy}</span>`;
@@ -1939,7 +2000,6 @@
 
             ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
                 const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
-                // Use resolvedBy if available, otherwise try parsing adminNote
                 const resolvedBy = t.data.resolvedBy || (t.data.adminNote ? t.data.adminNote.split(' ')[0] : 'Admin');
                 
                 logEntries.push({
@@ -2004,18 +2064,16 @@
             db.collection("config").doc("site_settings").set({ packageDetails: siteConfig.packageDetails }, { merge: true }).then(() => showToast("Details Updated!", "success")).catch(err => showToast(err.message, "error"));
         }
 
-        /* --- DISCOUNT CONFIG LOGIC (UPDATED) --- */
+        /* --- DISCOUNT CONFIG LOGIC --- */
         function updateDiscountUI() {
             const toggleCircle = document.getElementById('discount-toggle-circle');
             
-            // Check for flat fields that Main Website expects
             const isActive = siteConfig.discountActive || false;
             const percent = siteConfig.discountPercent || 0;
 
             if (isActive) {
                 toggleCircle.style.left = '27px'; 
                 toggleCircle.style.background = '#10b981';
-                // Convert decimal 0.2 back to integer 20 for display
                 document.getElementById('discount-value').value = (percent * 100).toFixed(0);
             } else {
                 toggleCircle.style.left = '3px'; 
@@ -2025,7 +2083,6 @@
         }
 
         function toggleDiscountStatus() {
-            // Toggle the visual state and the config object
             siteConfig.discountActive = !siteConfig.discountActive;
             updateDiscountUI();
         }
@@ -2034,12 +2091,10 @@
             const inputVal = parseFloat(document.getElementById('discount-value').value);
             const isActive = siteConfig.discountActive;
 
-            // Input is "20". Save "0.20".
             if (isActive && (isNaN(inputVal) || inputVal <= 0)) return showToast("Invalid Discount Value", "error");
 
             const decimalVal = inputVal / 100;
 
-            // WRITE TO FIREBASE using flat fields
             const update = {
                 discountActive: isActive,
                 discountPercent: decimalVal
@@ -2211,7 +2266,6 @@
         }
 
         function openTicketModal(ticketId) {
-            // Find ticket data to populate read-only view
             const ticketObj = ticketCache.find(t => t.id === ticketId);
             if(!ticketObj) return;
             const data = ticketObj.data;
@@ -2220,7 +2274,6 @@
             document.getElementById('ticket-status-select').value = data.status || 'Open';
             document.getElementById('ticket-admin-note').value = data.adminNote || '';
 
-            // Populate View Fields
             document.getElementById('view-ticket-id').innerText = ticketId;
             document.getElementById('view-ticket-customer').innerText = `${data.name} (${data.email})`;
             document.getElementById('view-ticket-message').innerText = data.message;
@@ -2251,12 +2304,10 @@
 
             const updateData = { status: status, adminNote: note };
 
-            // If changing to resolved, record who and when
             if(status === 'Resolved') {
                 updateData.resolvedBy = currentAdminEmail;
                 updateData.resolvedAt = firebase.firestore.FieldValue.serverTimestamp();
             } else {
-                // If reopening, clear resolved info (optional logic, keeping it clean)
                 updateData.resolvedBy = firebase.firestore.FieldValue.delete();
                 updateData.resolvedAt = firebase.firestore.FieldValue.delete();
             }
