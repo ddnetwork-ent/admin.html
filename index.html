@@ -69,10 +69,10 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         html, body {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
+            height:100%;
+            width:100%;
+            margin:0;
+            padding:0;
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
@@ -87,8 +87,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 3rem 0;
-            gap: 1rem;
+            padding:3rem 0;
+            gap:1rem;
         }
         .loader {
             width: 48px;
@@ -118,7 +118,7 @@
             color: #ffffff;
             padding: 16px 20px;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
+            border:1px solid var(--border-color);
             box-shadow: var(--shadow-float);
             font-size: 0.9rem;
             display: flex;
@@ -277,7 +277,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
-            margin-top: 1rem;
+            margin-top:1rem;
             /* Custom Scrollbar for sidebar */
             scrollbar-width: thin;
             scrollbar-color: var(--border-color) transparent;
@@ -570,7 +570,7 @@
         th, td {
             text-align: left;
             padding: 1rem 1.25rem;
-            border-bottom:1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
         }
         th { 
@@ -600,10 +600,7 @@
         .status-paid, .status-completed { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
         .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-open { background: rgba(59, 130, 246, 0.15); color: var(--accent-primary); border: 1px solid rgba(59, 130, 246, 0.3); }
-        
-        /* APPROVAL BADGES */
-        .status-pending-approval { background: rgba(107, 114, 128, 0.2); color: #d1d5db; border: 1px solid rgba(107, 114, 128, 0.4); font-style: italic; }
-        .status-active { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-inactive { background: rgba(100, 100, 100, 0.15); color: #999; border: 1px solid rgba(100, 100, 100, 0.3); }
 
         /* ROLE BADGES */
         .role-badge {
@@ -621,7 +618,7 @@
         /* ACTION BUTTONS */
         .action-btn {
             background: transparent;
-            border:1px solid var(--border-color);
+            border: 1px solid var(--border-color);
             padding: 8px 14px;
             margin-right: 6px;
             font-size: 0.75rem;
@@ -632,6 +629,17 @@
             white-space: nowrap;
         }
         .action-btn:hover { background: var(--bg-input); color: var(--text-main); border-color: var(--text-secondary); }
+        
+        /* Payment specific styles */
+        .pay-url-text {
+            max-width: 250px; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+            display: inline-block; 
+            vertical-align: middle;
+            font-family: monospace;
+        }
 
         /* --- SOURCE BADGES --- */
         .source-badge {
@@ -1362,6 +1370,34 @@
                     </div>
                     <button onclick="savePricingConfig()" style="margin-top: 1rem;">Update Prices</button>
                 </div>
+
+                <!-- NEW: PAYMENT METHODS CONFIG -->
+                <div class="admin-card" id="config-payments">
+                    <h3>Payment Gateways</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Manage available payment methods, links, and status.</p>
+                    
+                    <!-- Add New Payment Form -->
+                    <div style="background: var(--bg-input); padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; border: 1px dashed var(--border-color);">
+                        <div style="font-weight: 700; margin-bottom: 15px; color: var(--text-main); display:flex; align-items:center; gap:8px;">
+                            <i class="ri-add-circle-line" style="color:var(--accent-primary)"></i> Add New Gateway
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <input type="text" id="new-pay-name" placeholder="Display Name (e.g. GrabPay)" style="margin:0;">
+                            <input type="text" id="new-pay-id" placeholder="Internal ID (e.g. grab)" style="margin:0;">
+                        </div>
+                        <input type="text" id="new-pay-url" placeholder="Redirect URL (https://...)" style="margin-bottom: 15px;">
+                        <button class="success" onclick="addPaymentMethod()" style="width:100%; padding: 12px;">Add Method</button>
+                    </div>
+                </div>
+
+                    <!-- Payment Methods List (Improved Table) -->
+                    <!-- Payment Methods List -->
+                    <div id="payment-methods-list">
+                    <!-- Populated via JS -->
+                    <div style="text-align:center; padding: 1rem; color: var(--text-secondary);">Loading...</div>
+                 </div>
+                </div>
+
             </div>
 
             <!-- CONTENT TAB -->
@@ -1435,6 +1471,34 @@
             <div id="edit-user-actions" style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveUser()" style="background: var(--success);">Update User</button>
                 <button class="secondary" onclick="closeModal('editUserModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT PAYMENT METHOD MODAL (NEW) -->
+    <div id="editPaymentModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-close-btn" onclick="closeModal('editPaymentModal')"><i class="ri-close-line"></i></div>
+            <h3>Edit Payment Gateway</h3>
+            <input type="hidden" id="edit-pay-index"> <!-- Store Index -->
+            
+            <div class="form-row">
+                <label>Display Name</label>
+                <input type="text" id="edit-pay-name" placeholder="e.g. GrabPay">
+            </div>
+            <div class="form-row">
+                <label>Internal ID</label>
+                <input type="text" id="edit-pay-id" placeholder="e.g. grab" readonly style="background:var(--bg-input); color:var(--text-tertiary); cursor:not-allowed;">
+                <span style="font-size:0.7rem; color:var(--text-secondary); padding-top:14px;">(Cannot change ID)</span>
+            </div>
+            <div class="form-row">
+                <label>Redirect URL</label>
+                <input type="text" id="edit-pay-url" placeholder="https://...">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                <button onclick="updatePaymentMethod()" style="background: var(--success); flex: 1;">Update Gateway</button>
+                <button class="secondary" onclick="closeModal('editPaymentModal')" style="width: auto;">Cancel</button>
             </div>
         </div>
     </div>
@@ -1690,6 +1754,7 @@
         let isSuperAdmin = false; 
         let currentAdminEmail = "";
         let currentLogFilter = 'all'; 
+        let currentPaymentEditIndex = -1; // NEW: Track which payment is being edited
 
         let searchStates = {
             dashboard: "", orders: "", users: "", support: "", vouchers: "", promos: "", logs: "", config: "", content: "", tasks: ""
@@ -1715,13 +1780,20 @@
             prices: { html: 199, frontend: 599 }, 
             packageDetails: {},
             discountActive: false, 
-            discountPercent: 0
+            discountPercent: 0,
+            payment_methods: [] 
         };
 
         const DEFAULT_DETAILS = {
             frontend: ["Up to 5 Pages", "Animations", "Contact Forms"],
             ai: ["All Frontend Features", "AI Chatbot", "Analytics"]
         };
+
+        // Default Payment Methods (Fallback)
+        const DEFAULT_PAYMENT_METHODS = [
+            { id: 'tng', name: 'TNG eWallet', url: 'https://payment.tngdigital.com.my/sc/bDLob7YcpG', active: true },
+            { id: 'fpx', name: 'Online Banking (FPX)', url: 'https://toyyibpay.com', active: true } 
+        ];
 
         // AUTH LOGIC
         auth.onAuthStateChanged((user) => {
@@ -1804,19 +1876,14 @@
             const helperVoucher = document.getElementById('voucher-helper-text');
             const helperPromo = document.getElementById('promo-helper-text');
 
-            // NOTE: We NO LONGER hide the voucher/promo queues entirely. 
-            // We just change their context based on role.
-            
             if(isSuperAdmin) {
                 if(planDiscountCard) planDiscountCard.style.display = 'block';
                 if(logsNav) logsNav.style.display = 'flex';
                 if(taskCreateBtn) taskCreateBtn.style.display = 'block';
                 
-                // Update Titles for SuperAdmin
                 if(voucherQueueTitle) voucherQueueTitle.innerText = "Pending Voucher Approvals";
                 if(promoQueueTitle) promoQueueTitle.innerText = "Pending Promo Approvals";
                 
-                // Helper Text
                 if(helperVoucher) helperVoucher.style.display = 'none';
                 if(helperPromo) helperPromo.style.display = 'none';
 
@@ -1826,16 +1893,13 @@
                 if(logsNav) logsNav.style.display = 'none';
                 if(taskCreateBtn) taskCreateBtn.style.display = 'none';
 
-                // Update Titles for Standard Admin
                 if(voucherQueueTitle) voucherQueueTitle.innerText = "My Pending Voucher Requests";
                 if(promoQueueTitle) promoQueueTitle.innerText = "My Pending Promo Requests";
 
-                // Show Helper Text
                 if(helperVoucher) helperVoucher.style.display = 'block';
                 if(helperPromo) helperPromo.style.display = 'block';
             }
             
-            // Refresh tables to apply filtering logic
             renderVoucherTable();
             renderPromoTable();
         }
@@ -1891,6 +1955,7 @@
                 sections.push({ id: 'config-discount', keywords: ['discount', 'sale', 'promo', 'badge'] });
                 sections.push({ id: 'config-maintenance', keywords: ['maintenance', 'banner', 'mode'] });
                 sections.push({ id: 'config-pricing', keywords: ['pricing', 'price', 'html', 'frontend'] });
+                sections.push({ id: 'config-payments', keywords: ['payment', 'gateway', 'banking', 'tng'] });
             } else if (context === 'content') {
                 sections.push({ id: 'content-frontend', keywords: ['frontend', 'features', 'standard'] });
                 sections.push({ id: 'content-ai', keywords: ['ai', 'artificial', 'intelligence', 'chatbot'] });
@@ -1910,7 +1975,7 @@
             if(!timestamp) return '-';
             const date = timestamp.toDate();
             const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const month = String(date.getMonth() +1).padStart(2, '0');
             const year = date.getFullYear();
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -1926,6 +1991,7 @@
                     updateDiscountUI(); 
                     updatePricingUI();
                     updateContentUI();
+                    updatePaymentMethodsUI(); 
                 }
             });
 
@@ -1949,7 +2015,6 @@
                     allUsers.push({ id: doc.id, ...data });
                     optionsHTML += `<option value="${doc.id}">${data.name} (${data.email})</option>`;
                     
-                    // Populate Admin Select for Task Assignment
                     if(data.role === 'admin') {
                         adminOptionsHTML += `<option value="${doc.id}">${data.name} (Admin)</option>`;
                     }
@@ -2008,7 +2073,7 @@
             const taskData = {
                 assignedTo: assigneeId,
                 assignedBy: currentAdminUID,
-                assignedByName: currentAdminEmail, // Denormalized for easier display
+                assignedByName: currentAdminEmail, 
                 title: title,
                 description: desc,
                 status: 'pending',
@@ -2034,9 +2099,6 @@
                 });
             }
 
-            // Filter logic:
-            // SuperAdmin sees ALL tasks.
-            // Admin sees ONLY tasks assigned to them.
             if(!isSuperAdmin) {
                 visibleTasks = visibleTasks.filter(t => t.data.assignedTo === currentAdminUID);
             }
@@ -2052,7 +2114,6 @@
                 if(d.status === 'completed') statusColor = 'var(--success)';
                 if(d.status === 'in_progress') statusColor = 'var(--accent-primary)';
 
-                // Get Assignee Name (if SuperAdmin view)
                 let assigneeName = "Me";
                 if(isSuperAdmin) {
                     const u = allUsers.find(u => u.id === d.assignedTo);
@@ -2060,7 +2121,6 @@
                 }
 
                 let actionBtn = '';
-                // If Admin assigned to this task
                 if(!isSuperAdmin) {
                     if(d.status === 'pending') {
                         actionBtn = `<button class="action-btn" onclick="updateTaskStatus('${task.id}', 'in_progress')">Start</button>`;
@@ -2068,7 +2128,6 @@
                         actionBtn = `<button class="action-btn success" style="color:white; border:none;" onclick="updateTaskStatus('${task.id}', 'completed')">Complete</button>`;
                     }
                 } else {
-                    // SuperAdmin can reset or delete
                     actionBtn = `<button class="action-btn danger" style="color:var(--danger);" onclick="deleteTask('${task.id}')">Delete</button>`;
                 }
 
@@ -2310,16 +2369,13 @@
             
             tbody.innerHTML = '';
             if(pendingTbody) pendingTbody.innerHTML = '';
-            if(queueContainer) queueContainer.style.display = 'none'; // Hide by default if empty
+            if(queueContainer) queueContainer.style.display = 'none'; 
 
             const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
             
-            // Split into Pending and Active
             let pendingVouchers = usersWithVouchers.filter(u => u.personalVoucher.status === 'pending');
             const activeVouchers = usersWithVouchers.filter(u => !u.personalVoucher.status || u.personalVoucher.status === 'active');
 
-            // --- LOGIC FOR PENDING VOUCHERS ---
-            // Filter: SuperAdmin sees all. Standard Admin sees ONLY theirs.
             if (!isSuperAdmin) {
                 pendingVouchers = pendingVouchers.filter(u => u.personalVoucher.voucherCreatedBy === currentAdminUID);
             }
@@ -2328,7 +2384,6 @@
                 if(queueContainer) queueContainer.style.display = 'block';
             }
 
-            // Render Active Table
             let visibleVouchers = activeVouchers;
             const s = searchStates.vouchers;
             if(s) visibleVouchers = visibleVouchers.filter(u => {
@@ -2351,7 +2406,6 @@
                     </tr>`;
             });
 
-            // Render Pending Table (Filtered by Role)
             pendingVouchers.forEach(u => {
                 const v = u.personalVoucher;
                 const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
@@ -2359,13 +2413,11 @@
                 let actionButtons = '';
                 
                 if (isSuperAdmin) {
-                    // SuperAdmin actions: Approve / Delete
                     actionButtons = `
                         <button class="action-btn success" style="border:none; color:white;" onclick="approveVoucher('${u.id}')"><i class="ri-check-line"></i> Approve</button>
                         <button class="action-btn danger" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')"><i class="ri-close-line"></i></button>
                     `;
                 } else {
-                    // Admin actions: Cancel Request (Delete)
                     actionButtons = `
                         <button class="action-btn warning" style="color:black;" onclick="deleteUserVoucher('${u.id}')">Cancel Request</button>
                     `;
@@ -2389,7 +2441,6 @@
             const type = document.getElementById('voucher-type').value;
             if(!uid || !code || isNaN(val)) return showToast("Invalid Voucher Details.", "error");
 
-            // Determine status based on role
             const status = isSuperAdmin ? 'active' : 'pending';
 
             const voucherData = {
@@ -2441,12 +2492,9 @@
 
             let visiblePromos = promoCache;
             
-            // Split into Pending and Active
             let pendingPromos = promoCache.filter(p => p.data.status === 'pending');
             const activePromos = promoCache.filter(p => !p.data.status || p.data.status === 'active');
 
-            // --- LOGIC FOR PENDING PROMOS ---
-            // Filter: SuperAdmin sees all. Standard Admin sees ONLY theirs.
             if (!isSuperAdmin) {
                 pendingPromos = pendingPromos.filter(p => p.data.createdBy === currentAdminUID);
             }
@@ -2455,7 +2503,6 @@
                 if(queueContainer) queueContainer.style.display = 'block';
             }
 
-            // Render Active
             const s = searchStates.promos;
             if(s) {
                 activePromos = activePromos.filter(p => p.id.toLowerCase().includes(s));
@@ -2474,7 +2521,6 @@
                     </tr>`;
             });
 
-            // Render Pending (Filtered)
             pendingPromos.forEach(doc => {
                 const data = doc.data;
 
@@ -2553,7 +2599,6 @@
             tbody.innerHTML = '';
             let logEntries = [];
 
-            // Log Vouchers
             allUsers.filter(u => u.personalVoucher).forEach(u => {
                 const v = u.personalVoucher;
                 const date = v.voucherTimestamp ? new Date(v.voucherTimestamp.toDate()).toLocaleString() : '-';
@@ -2566,7 +2611,6 @@
                 });
             });
 
-            // Log Tickets
             ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
                 const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
                 const resolvedBy = t.data.resolvedBy || (t.data.adminNote ? t.data.adminNote.split(' ')[0] : 'Admin');
@@ -2702,6 +2746,197 @@
             db.collection("config").doc("site_settings").update({ prices: siteConfig.prices }).then(() => showToast("Prices updated!", "success"));
         }
 
+        // --- NEW: PAYMENT METHODS CONFIG (UPDATED) ---
+        // --- HELPER: PAYMENT ICONS ---
+         function getPaymentIcon(id) {
+    const idLower = id.toLowerCase();
+    if(idLower.includes('tng') || idLower.includes('wallet') || idLower.includes('grab')) return 'ri-wallet-3-line';
+    if(idLower.includes('fpx') || idLower.includes('bank') || idLower.includes('maybank')) return 'ri-safe-2-line';
+    if(idLower.includes('qr') || idLower.includes('pay') || idLower.includes('bill')) return 'ri-qr-code-line';
+    if(idLower.includes('crypto') || idLower.includes('bitcoin')) return 'ri-btc-line';
+    if(idLower.includes('card') || idLower.includes('credit')) return 'ri-bank-card-line';
+    return 'ri-money-dollar-circle-line'; // Default
+}
+         // ---------------------------------------
+        // --- NEW: PAYMENT METHODS CONFIG (IMPROVED TABLE) ---
+function updatePaymentMethodsUI() {
+    // If DB has data, use it. Else use Defaults.
+    const methods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
+                    ? siteConfig.payment_methods 
+                    : DEFAULT_PAYMENT_METHODS;
+
+    const container = document.getElementById('payment-methods-list');
+    container.innerHTML = '';
+
+    if(methods.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-secondary);">No payment methods configured.</div>';
+        return;
+    }
+
+    // Better Table Structure (Matches Orders Table)
+    let html = `
+        <div class="table-responsive">
+            <table style="width:100%; border-collapse: collapse; margin-top:10px;">
+                <thead>
+                    <tr style="background:var(--bg-input);">
+                        <th style="padding:10px; text-align:left; font-size:0.75rem;">Icon</th>
+                        <th style="padding:10px; text-align:left; font-size:0.75rem;">Method Name</th>
+                        <th style="padding:10px; text-align:left; font-size:0.75rem;">ID</th>
+                        <th style="padding:10px; text-align:left; font-size:0.75rem;">Payment URL</th>
+                        <th style="padding:10px; text-align:center; font-size:0.75rem;">Status</th>
+                        <th style="padding:10px; text-align:right; font-size:0.75rem;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    methods.forEach((pm, index) => {
+        const statusBadge = pm.active 
+            ? `<span class="status-badge status-active"><i class="ri-checkbox-circle-line" style="margin-right:4px; font-size: 0.8rem;"></i> Active</span>` 
+            : `<span class="status-badge status-inactive"><i class="ri-close-circle-line" style="margin-right:4px; font-size: 0.8rem;"></i> Disabled</span>`;
+        
+        const icon = getPaymentIcon(pm.id);
+
+        html += `
+            <tr style="border-bottom:1px solid var(--border-color);">
+                <!-- Icon Column -->
+                <td style="padding:10px; text-align:center; vertical-align:middle;">
+                    <i class="${icon}" style="font-size: 1.2rem; color: var(--text-main);"></i>
+                </td>
+                
+                <!-- Name Column -->
+                <td style="padding:10px; font-weight:600;">${pm.name}</td>
+                
+                <!-- ID Column -->
+                <td style="padding:10px; font-family:monospace; font-size:0.85rem;">${pm.id}</td>
+                
+                <!-- URL Column (Truncated with tooltip) -->
+                <td style="padding:10px; font-size:0.9rem;">
+                    <div class="pay-url-text" title="${pm.url}">${pm.url}</div>
+                </td>
+                
+                <!-- Status Column -->
+                <td style="padding:10px; text-align:center;">${statusBadge}</td>
+                
+                <!-- Actions Column -->
+                <td style="padding:10px; text-align:right;">
+                    <button class="action-btn" onclick="openEditPaymentModal(${index})" title="Edit details">
+                        <i class="ri-edit-line"></i> Edit
+                    </button>
+                    <button class="action-btn" onclick="togglePaymentMethod(${index})">${pm.active ? 'Disable' : 'Enable'}</button>
+                    <button class="action-btn" style="color:var(--danger);" onclick="deletePaymentMethod(${index})" title="Delete Gateway">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+// --- END PAYMENT METHODS CONFIG ---
+
+        // OPEN EDIT MODAL
+        function openEditPaymentModal(index) {
+            const currentMethods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
+                                ? siteConfig.payment_methods 
+                                : DEFAULT_PAYMENT_METHODS;
+
+            const method = currentMethods[index];
+            currentPaymentEditIndex = index;
+
+            document.getElementById('edit-pay-name').value = method.name;
+            document.getElementById('edit-pay-id').value = method.id;
+            document.getElementById('edit-pay-url').value = method.url;
+
+            document.getElementById('editPaymentModal').classList.add('open');
+        }
+
+        function addPaymentMethod() {
+            const name = document.getElementById('new-pay-name').value.trim();
+            const id = document.getElementById('new-pay-id').value.trim().toLowerCase();
+            let url = document.getElementById('new-pay-url').value.trim();
+
+            if(!name || !id || !url) return showToast("All fields are required.", "error");
+            
+            // Auto-add https:// if missing
+            if(url && !url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+
+            const currentMethods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
+                                ? siteConfig.payment_methods 
+                                : DEFAULT_PAYMENT_METHODS;
+
+            if(currentMethods.some(m => m.id === id)) {
+                return showToast("Method ID already exists.", "error");
+            }
+
+            const newMethod = {
+                id: id,
+                name: name,
+                url: url,
+                active: true
+            };
+
+            currentMethods.push(newMethod);
+            savePaymentMethods(currentMethods);
+        }
+
+        function updatePaymentMethod() {
+            const index = currentPaymentEditIndex;
+            if(index === -1) return;
+
+            const name = document.getElementById('edit-pay-name').value.trim();
+            let url = document.getElementById('edit-pay-url').value.trim();
+
+            if(!name || !url) return showToast("Fields cannot be empty", "error");
+             if(url && !url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+
+            const currentMethods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
+                                ? siteConfig.payment_methods 
+                                : DEFAULT_PAYMENT_METHODS;
+
+            currentMethods[index].name = name;
+            currentMethods[index].url = url;
+
+            savePaymentMethods(currentMethods);
+            closeModal('editPaymentModal');
+        }
+
+        function togglePaymentMethod(index) {
+            const currentMethods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
+                                ? siteConfig.payment_methods 
+                                : DEFAULT_PAYMENT_METHODS;
+            currentMethods[index].active = !currentMethods[index].active;
+            savePaymentMethods(currentMethods);
+        }
+
+        function deletePaymentMethod(index) {
+            if(!confirm("Delete this payment gateway?")) return;
+            const currentMethods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
+                                ? siteConfig.payment_methods 
+                                : DEFAULT_PAYMENT_METHODS;
+            currentMethods.splice(index, 1);
+            savePaymentMethods(currentMethods);
+        }
+
+        function savePaymentMethods(methodsArray) {
+            db.collection("config").doc("site_settings").update({ payment_methods: methodsArray })
+                .then(() => {
+                    showToast("Payment methods updated!", "success");
+                    // Clear inputs
+                    document.getElementById('new-pay-name').value = '';
+                    document.getElementById('new-pay-id').value = '';
+                    document.getElementById('new-pay-url').value = '';
+                })
+                .catch(err => showToast(err.message, "error"));
+        }
+
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -2774,7 +3009,7 @@
         }
 
         function requestAdminReset() {
-            if(confirm("Send a password reset request to the SuperAdmin?")) {
+            if(confirm("Send a password reset request to SuperAdmin?")) {
                 const ticketData = {
                     name: currentAdminEmail,
                     email: currentAdminEmail,
@@ -2951,7 +3186,6 @@
         }
 
         function openOrderModal(orderId) {
-            // Simplified fetching for modal
             const orderObj = orderCache.find(o => o.id === orderId);
             if(!orderObj) return;
             const data = orderObj.data;
