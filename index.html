@@ -268,6 +268,29 @@
             z-index: 50;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            height: 100%; /* Ensure full height */
+        }
+
+        /* FIX: Scrollable Area inside Sidebar */
+        .sidebar-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 1rem;
+            /* Custom Scrollbar for sidebar */
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+        .sidebar-scroll-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-scroll-area::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 20px;
         }
 
         /* Sidebar Close Button */
@@ -298,7 +321,7 @@
 
         .brand {
             font-size:1rem;
-            margin-bottom: 1.5rem; /* Reduced margin */
+            margin-bottom: 0.5rem; /* Reduced margin */
             color: var(--text-main);
             display: flex;
             align-items: center;
@@ -306,6 +329,7 @@
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
             width: 100%;
+            flex-shrink: 0; /* Prevent shrinking */
         }
         .brand-icon {
             font-size: 1.2rem; /* Smaller icon */
@@ -360,7 +384,7 @@
             font-weight: 600;
         }
         
-        .logout-btn { margin-top: auto; color: var(--danger); }
+        .logout-btn { margin-top: auto; color: var(--danger); flex-shrink: 0; }
         .logout-btn:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-left-color: var(--danger); }
 
         /* THEME TOGGLE BUTTON */
@@ -724,8 +748,8 @@
             }
             .sidebar.mobile-open { transform: translateX(0); }
             .sidebar-close-btn { display: flex; }
-            .brand { margin-top: 2rem; border-bottom: none; margin-bottom: 2rem; }
-            .logout-btn { margin-bottom: 2rem; }
+            .brand { margin-top: 0; margin-bottom: 1.5rem; border-bottom: none; }
+            .logout-btn { margin-bottom: 0; }
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -807,39 +831,43 @@
                 </button>
             </div>
 
-            <!-- NAV ITEMS -->
-            <div class="nav-item active" onclick="switchTab('dashboard')">
-                <i class="ri-dashboard-line"></i> <span>Overview</span>
+            <!-- SCROLLABLE AREA WRAPPER ADDED -->
+            <div class="sidebar-scroll-area">
+                <!-- NAV ITEMS -->
+                <div class="nav-item active" onclick="switchTab('dashboard')">
+                    <i class="ri-dashboard-line"></i> <span>Overview</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('orders')">
+                    <i class="ri-shopping-bag-3-line"></i> <span>Orders</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('users')">
+                    <i class="ri-group-line"></i> <span>Users</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('tasks')">
+                    <i class="ri-task-line"></i> <span>Tasks</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('support')">
+                    <i class="ri-customer-service-2-line"></i> <span>Support</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('vouchers')">
+                    <i class="ri-gift-line"></i> <span>Vouchers</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('promos')">
+                    <i class="ri-coupon-3-line"></i> <span>Promo</span>
+                </div>
+                <!-- LOGS TAB (SuperAdmin Only) -->
+                <div class="nav-item" id="nav-logs" onclick="switchTab('logs')">
+                    <i class="ri-file-history-line"></i> <span>Logs</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('maintenance')">
+                    <i class="ri-settings-4-line"></i> <span>Config</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('content')">
+                    <i class="ri-file-list-3-line"></i> <span>Content</span>
+                </div>
             </div>
-            <div class="nav-item" onclick="switchTab('orders')">
-                <i class="ri-shopping-bag-3-line"></i> <span>Orders</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('users')">
-                <i class="ri-group-line"></i> <span>Users</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('tasks')">
-                <i class="ri-task-line"></i> <span>Tasks</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('support')">
-                <i class="ri-customer-service-2-line"></i> <span>Support</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('vouchers')">
-                <i class="ri-gift-line"></i> <span>Vouchers</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('promos')">
-                <i class="ri-coupon-3-line"></i> <span>Promo</span>
-            </div>
-            <!-- LOGS TAB (SuperAdmin Only) -->
-            <div class="nav-item" id="nav-logs" onclick="switchTab('logs')">
-                <i class="ri-file-history-line"></i> <span>Logs</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('maintenance')">
-                <i class="ri-settings-4-line"></i> <span>Config</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('content')">
-                <i class="ri-file-list-3-line"></i> <span>Content</span>
-            </div>
-            
+            <!-- END SCROLLABLE AREA -->
+
             <div class="nav-item logout-btn" onclick="handleLogout()">
                 <i class="ri-logout-box-r-line"></i> <span>Logout</span>
             </div>
@@ -853,6 +881,11 @@
                 <div style="display:flex; gap:15px; align-items:center;">
                     <button class="hamburger-btn" onclick="toggleSidebar()">
                         <i class="ri-menu-2-line"></i>
+                    </button>
+                    <div>
+                        <span id="mobile-name" style="display:block; font-weight:700; font-size:0.95rem;">DDN Admin</span>
+                        <span id="mobile-jobtitle" style="display:block; font-size:0.75rem; color:var(--text-secondary);">Super Admin</span>
+                    </div>
                 </div>
                 
                 <!-- Action Buttons Group -->
