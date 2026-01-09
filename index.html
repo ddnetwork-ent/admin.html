@@ -25,7 +25,7 @@
             --text-secondary: #a1a1aa;
             --text-muted: #52525b;
             
-            --border-color: rgba(255,255,255,0.1);
+            --border-color: rgba(255,255,255,0.08);
             --border-focus: #3b82f6;
             
             --accent-primary: #3b82f6;
@@ -35,8 +35,10 @@
             --danger: #ef4444;
             --warning: #f59e0b;
             
-            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            /* Shadows removed */
+            --shadow-card: none;
+            --shadow-modal: none;
+            --shadow-float: none;
             
             --nav-height-mobile: 70px;
             --header-height-mobile: 60px;
@@ -57,8 +59,10 @@
             --border-color: #e5e7eb;
             --border-focus: #3b82f6;
             
-            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            /* Shadows removed */
+            --shadow-card: none;
+            --shadow-modal: none;
+            --shadow-float: none;
         }
 
         /* Global Reset & Base */
@@ -72,46 +76,94 @@
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Prevent body scroll, handle internally */
+            overflow: hidden;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
+
+        /* --- LOADER ANIMATION --- */
+        .loader-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 0;
+            gap: 1rem;
+        }
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-color);
+            border-bottom-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* --- TOAST NOTIFICATIONS --- */
         #toast-container {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 24px;
+            right: 24px;
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             pointer-events: none;
         }
         .toast {
-            background: var(--bg-card);
-            color: var(--text-main);
-            padding: 12px 20px;
-            border-radius: 8px;
-            border-left: 4px solid var(--accent-primary);
-            box-shadow: var(--shadow-modal);
+            background: rgba(25, 25, 25, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: #ffffff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-float);
             font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 10px;
-            min-width: 250px;
-            animation: slideIn 0.3s ease forwards;
+            gap: 14px;
+            min-width: 300px;
+            position: relative;
+            overflow: hidden;
             pointer-events: auto;
+            transform-origin: right center;
+            animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-        .toast.success { border-left-color: var(--success); }
-        .toast.error { border-left-color: var(--danger); }
-        .toast i { font-size: 1.2rem; }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+
+        /* Progress Bar */
+        .toast::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            background: rgba(255,255,255,0.2);
+            animation: toastProgress 4s linear forwards;
         }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+
+        /* Toast Variants */
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.info { border-left: 4px solid var(--accent-primary); }
+        
+        .toast i { font-size: 1.35rem; flex-shrink: 0; }
+        .toast.success i { color: var(--success); text-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+        .toast.error i { color: var(--danger); text-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+        .toast.info i { color: var(--accent-primary); text-shadow: 0 0 10px rgba(59, 130, 246, 0.4); }
+
+        @keyframes toastIn {
+            from { transform: translateX(100%) scale(0.9); opacity: 0; }
+            to { transform: translateX(0) scale(1); opacity: 1; }
+        }
+        @keyframes toastOut {
+            to { transform: translateX(100%) scale(0.9); opacity: 0; }
+        }
+        @keyframes toastProgress {
+            from { width: 100%; }
+            to { width: 0%; }
         }
 
         /* --- LOGIN SCREEN --- */
@@ -131,40 +183,43 @@
         .login-card {
             background: var(--bg-card);
             padding: 2.5rem;
-            border-radius: 16px;
+            border-radius: 20px;
             border:1px solid var(--border-color);
             width: 100%;
             max-width: 400px;
             text-align: center;
-            box-shadow: var(--shadow-card);
+            box-shadow: var(--shadow-modal);
             position: relative;
         }
-        .login-card h2 { margin-bottom:1.5rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
+        .login-card h2 { margin-bottom:0.5rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .login-card p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 2rem; }
         
         /* Inputs & Buttons */
         input, select, textarea {
             width: 100%;
-            padding: 12px;
+            padding: 12px 14px;
             background: var(--bg-input);
             border:1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--text-main);
             margin-bottom:1rem;
             font-family: inherit;
-            transition: 0.2s;
+            transition: all 0.2s ease;
             -webkit-appearance: none; 
         }
         input:disabled, select:disabled, textarea:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
             background: var(--bg-body);
+            border-color: transparent;
         }
-        textarea { height: 150px; resize: vertical; }
+        textarea { height: 120px; resize: vertical; line-height: 1.5; }
         
         input:focus, select:focus, textarea:focus { 
             border-color: var(--border-focus); 
             outline: none; 
             background: var(--bg-input-focus); 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
         
         button {
@@ -173,18 +228,24 @@
             background: var(--accent-primary);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s ease;
             font-size: 0.95rem;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
         }
-        button:hover { opacity: 0.9; transform: translateY(-1px); }
-        button.secondary { background: var(--text-muted); color: var(--text-main); }
-        button.danger { background: var(--danger); }
-        button.sm-btn { width: auto; padding: 6px 12px; font-size: 0.8rem; }
-        button.success { background: var(--success); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 10px -1px rgba(59, 130, 246, 0.3); }
         button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        button.secondary { background: var(--text-muted); color: var(--text-main); box-shadow: none; }
+        button.secondary:hover { background: var(--text-secondary); }
+        button.danger { background: var(--danger); box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2); }
+        button.danger:hover { box-shadow: 0 6px 10px -1px rgba(239, 68, 68, 0.3); }
+        button.sm-btn { width: auto; padding: 8px 16px; font-size: 0.8rem; }
+        button.success { background: var(--success); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
+        button.success:hover { box-shadow: 0 6px 10px -1px rgba(16, 185, 129, 0.3); }
+        button.warning { background: var(--warning); color: black; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2); }
 
         /* --- DASHBOARD LAYOUT --- */
         #dashboard {
@@ -195,55 +256,87 @@
             flex-direction: row;
         }
         
-        /* --- SIDEBAR (DESKTOP) --- */
+        /* --- SIDEBAR --- */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background: var(--bg-sidebar);
             border-right:1px solid var(--border-color);
-            padding: 2rem 1rem;
+            padding: 2rem 1.25rem;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            z-index: 10;
-            transition: background 0.3s, border-color 0.3s;
+            z-index: 50;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
+
+        /* Sidebar Close Button */
+        .sidebar-close-btn {
+            display: none; /* Hidden on desktop */
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+            margin-left: auto; 
+            font-size: 1.5rem;
+            line-height: 1;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+        .sidebar-close-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
         .brand {
             font-size:1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem; /* Reduced margin */
             color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-right: 0.5rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
+            width: 100%;
         }
         .brand-icon {
-            font-size: 1.5rem;
+            font-size: 1.2rem; /* Smaller icon */
             color: var(--accent-primary);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 6px;
+            border-radius: 8px;
         }
         .brand-info {
             display: flex;
             flex-direction: column;
-            line-height: 1.2;
+            line-height: 1.1;
             flex: 1;
+            text-align: left;
+            margin-left: 10px;
         }
         .brand-name {
-            font-weight: 700;
-            font-size: 1rem;
-            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem; /* Smaller, cleaner font */
         }
         .brand-job {
-            font-size: 0.75rem;
+            font-size: 0.75rem; /* Smaller font */
             color: var(--text-secondary);
-            font-weight: 400;
-            text-align: left;
+            font-weight: 500;
+            margin-top: 2px;
         }
 
-        /* Desktop Nav Items */
+        /* Nav Items */
         .nav-item {
-            padding: 12px 1rem;
-            border-radius: 8px;
+            padding: 12px 16px;
+            border-radius: 10px;
             color: var(--text-secondary);
             cursor: pointer;
             margin-bottom: 0.5rem;
@@ -251,10 +344,11 @@
             align-items: center;
             gap: 12px;
             transition: 0.2s;
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Slightly smaller nav text */
             white-space: nowrap;
             border-left: 3px solid transparent;
         }
+        .nav-item i { font-size: 1.1rem; }
         .nav-item:hover {
             background: rgba(59, 130, 246, 0.08); 
             color: var(--text-main);
@@ -262,7 +356,7 @@
         .nav-item.active {
             background: var(--bg-input-focus);
             color: var(--accent-primary);
-            border-left: 3px solid var(--accent-primary);
+            border-left-color: var(--accent-primary);
             font-weight: 600;
         }
         
@@ -305,15 +399,34 @@
             display: none; 
             align-items: center;
             justify-content: space-between;
-            padding: 0.8rem 1rem;
-            margin: 0 -1rem; /* Negative margin to bleed to edges */
-            margin-bottom: 1rem;
+            padding: 0.8rem 1.2rem;
+            margin: 0 -1rem; 
+            margin-bottom: 1.5rem;
             position: sticky;
             top: 0;
-            z-index: 50;
+            z-index: 40;
             background: var(--bg-body); 
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Better Hamburger Button */
+        .hamburger-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .hamburger-btn:active {
+            transform: scale(0.95);
+            background: var(--bg-input);
         }
 
         /* --- TABS & TABLES --- */
@@ -329,8 +442,7 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-        .section-header h2 { margin: 0; font-size: 1.5rem; color: var(--text-main); }
-        .section-header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+        .section-header h2 { margin: 0; font-size: 1.75rem; color: var(--text-main); font-weight: 700; }
 
         /* SEARCH BAR */
         .search-container {
@@ -339,25 +451,63 @@
         }
         .search-container input {
             margin-bottom: 0;
-            padding-left: 2.5rem;
-            background: var(--bg-input);
-            border-color: var(--border-color);
+            padding-left: 3rem;
+            border-radius: 12px;
         }
         .search-icon {
             position: absolute;
-            left: 12px;
+            left: 14px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-secondary);
         }
 
+        /* --- STATS CARDS --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.15);
+        }
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+        }
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .stat-icon.purple { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        
+        .stat-info h3 { margin: 0; font-size: 1.8rem; font-weight: 700; color: var(--text-main); }
+        .stat-info p { margin: 0; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
         /* --- FILTER BUTTONS --- */
         .ticket-filters {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             background: var(--bg-card);
-            padding: 4px;
-            border-radius: 8px;
+            padding: 6px;
+            border-radius: 10px;
             border: 1px solid var(--border-color);
             flex-wrap: wrap;
         }
@@ -365,26 +515,28 @@
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
             font-size: 0.8rem;
             cursor: pointer;
             width: auto;
             margin: 0;
             transition: 0.2s;
-            font-weight: 500;
+            font-weight: 600;
         }
         .filter-btn:hover { background: var(--bg-input); color: var(--text-main); }
-        .filter-btn.active { background: var(--accent-primary); color: white; }
+        .filter-btn.active { background: var(--accent-primary); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
         /* --- TABLES --- */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            border-radius: 12px;
+            border-radius: 16px;
             background: var(--bg-card);
             border:1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 2rem;
         }
         table {
             width: 100%;
@@ -393,7 +545,7 @@
         }
         th, td {
             text-align: left;
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             border-bottom:1px solid var(--border-color);
             white-space: nowrap;
         }
@@ -403,9 +555,13 @@
             color: var(--text-secondary); 
             text-transform: uppercase; 
             letter-spacing: 0.05em; 
-            font-weight: 600;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-input); }
         
         /* STATUS BADGES */
         .status-badge {
@@ -414,32 +570,38 @@
             font-size: 0.7rem;
             font-weight: 700;
             display: inline-block;
+            letter-spacing: 0.5px;
         }
         .status-pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
         .status-paid, .status-completed { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
         .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-open { background: rgba(59, 130, 246, 0.15); color: var(--accent-primary); border: 1px solid rgba(59, 130, 246, 0.3); }
         
+        /* APPROVAL BADGES */
+        .status-pending-approval { background: rgba(107, 114, 128, 0.2); color: #d1d5db; border: 1px solid rgba(107, 114, 128, 0.4); font-style: italic; }
+        .status-active { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
         /* ROLE BADGES */
         .role-badge {
             padding: 4px 10px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.7rem;
             font-weight: 700;
             display: inline-block;
+            letter-spacing: 0.5px;
         }
-        .role-admin { background: var(--warning); color: black; }
-        .role-superadmin { background: var(--accent-primary); color: white; border: 1px solid rgba(255,255,255,0.2); }
-        .role-user { background: var(--text-muted); color: var(--text-main); }
+        .role-admin { background: var(--accent-primary); color: white; } 
+        .role-superadmin { background: var(--warning); color: black; border: 1px solid rgba(0,0,0,0.1); } 
+        .role-user { background: var(--text-muted); color: var(--text-main); } 
 
         /* ACTION BUTTONS */
         .action-btn {
             background: transparent;
             border:1px solid var(--border-color);
-            padding: 8px 12px; /* Slightly larger for touch */
-            margin-right: 5px;
+            padding: 8px 14px;
+            margin-right: 6px;
             font-size: 0.75rem;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             color: var(--text-secondary);
             transition: 0.2s;
@@ -460,42 +622,35 @@
         .badge-external { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
         .row-internal { background: rgba(245, 158, 11, 0.03); }
 
-        /* LOGS STYLES */
-        .log-entry { padding: 1rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; }
-        .log-entry:last-child { border-bottom: none; }
-        .log-timestamp { font-size: 0.85rem; color: var(--text-secondary); min-width: 150px; }
-        .log-admin { font-weight: 600; color: var(--accent-primary); min-width: 150px; }
-        .log-action { flex: 1; font-size: 0.9rem; color: var(--text-main); }
-        .log-detail { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
-
         /* ADMIN CARDS */
         .admin-card {
             background: var(--bg-card);
-            padding: 1.5rem;
-            border-radius: 12px;
+            padding: 1.75rem;
+            border-radius: 16px;
             border: 1px solid var(--border-color);
             margin-bottom: 2rem;
             scroll-margin-top: 100px; 
             transition: background 0.3s, border-color 0.3s;
+            box-shadow: var(--shadow-card);
         }
-        .admin-card h3 { margin-bottom: 1rem; color: var(--text-main); font-size: 1rem; margin-top: 0; }
-        .form-row { margin-bottom: 1rem; text-align: left; }
-        .form-row label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;}
+        .admin-card h3 { margin-bottom: 1rem; color: var(--text-main); font-size: 1.1rem; margin-top: 0; display: flex; align-items: center; gap: 8px; }
+        .form-row { margin-bottom: 1.2rem; text-align: left; }
+        .form-row label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;}
         .helper-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
         .form-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
         /* ALERTS */
         .alert-box {
             padding: 1rem;
-            border-radius: 8px;
+            border-radius: 12px;
             background: rgba(245, 158, 11, 0.1);
-            border-left: 4px solid var(--warning);
-            margin-bottom: 1rem;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            margin-bottom: 1.5rem;
         }
-        .alert-text { font-size: 0.9rem; color: var(--text-main); font-weight: 600; }
+        .alert-text { font-size: 0.9rem; color: var(--warning); font-weight: 600; line-height: 1.5; }
 
         /* --- MODAL --- */
-        .modal {
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -506,22 +661,27 @@
             backdrop-filter: blur(4px);
             padding: 1rem;
         }
-        .modal.open { display: flex; }
+        .modal-overlay.open { display: flex; }
         
         .modal-content {
             background: var(--bg-card);
             padding: 2rem;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 90%;
             max-width: 500px;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-modal);
             max-height: 90vh;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
             color: var(--text-main);
             position: relative;
+            animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
         .modal-close-btn {
             position: absolute;
             top: 1rem;
@@ -552,113 +712,50 @@
             #dashboard { flex-direction: column; }
             
             .sidebar {
-                width: 100%;
-                height: auto;
-                padding: 0;
-                flex-direction: row;
                 position: fixed;
-                bottom: 0; left: 0; top: auto; right: 0;
-                border-right: none;
-                border-top: 1px solid var(--border-color);
-                overflow-x: auto; 
-                overflow-y: hidden;
-                box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-                z-index: 100; 
-                justify-content: flex-start;
-                -ms-overflow-style: none; 
-                scrollbar-width: none; 
-                padding-bottom: env(safe-area-inset-bottom); /* iOS Home Indicator */
+                top: 0; left: 0; bottom: 0;
+                width: 85%;
+                max-width: 320px;
+                transform: translateX(-100%);
+                border-right: 1px solid var(--border-color);
+                z-index: 100;
+                padding: 1.5rem;
+                box-shadow: 10px 0 30px rgba(0,0,0,0.5);
             }
-            .sidebar::-webkit-scrollbar { display: none; }
-
-            .brand, .logout-btn { display: none; }
-
-            /* Mobile Header */
-            .mobile-brand-header {
-                display: flex;
-                /* Ensure it sits on top of main content */
-                background: var(--bg-body);
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar-close-btn { display: flex; }
+            .brand { margin-top: 2rem; border-bottom: none; margin-bottom: 2rem; }
+            .logout-btn { margin-bottom: 2rem; }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 90;
+                backdrop-filter: blur(2px);
             }
-
-            .mobile-brand-header .brand-name { font-size: 1.1rem; color: var(--text-main); font-weight: 700; }
-            .mobile-brand-header .brand-job { font-size: 0.85rem; color: var(--text-secondary); }
+            .sidebar-overlay.active { display: block; }
+            .mobile-brand-header { display: flex; }
             
-            /* Profile Info on Mobile */
-            .mobile-profile-group {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            /* Nav Items on Mobile (Bottom Bar) */
-            .nav-item {
-                flex: 0 0 auto; 
-                min-width: 75px; 
-                justify-content: center;
-                flex-direction: column;
-                gap: 4px;
-                margin-bottom: 0;
-                padding: 10px 8px;
-                font-size: 0.7rem;
-                border-radius: 0;
-                border-left: none;
-                border-bottom: 3px solid transparent;
-                color: var(--text-secondary);
-            }
-            .nav-item i { font-size: 1.5rem; margin-bottom: 2px; color: var(--text-muted); }
+            .nav-item { padding: 16px 12px; font-size: 1rem; border-radius: 10px; border-left: none; }
+            .nav-item.active { background: rgba(59, 130, 246, 0.15); color: var(--accent-primary); border-left: none; }
+            .main-content { padding: 1rem; padding-bottom: 2rem; }
+            .section-header { flex-direction: column; align-items: stretch; gap: 0.8rem; }
+            .section-header h2 { font-size: 1.5rem; }
             
-            .nav-item.active {
-                background: transparent;
-                color: var(--accent-primary);
-                border-bottom: 3px solid var(--accent-primary);
-            }
-            .nav-item.active i { color: var(--accent-primary); }
-            .nav-item:hover { background: transparent; }
-            
-            .main-content { 
-                padding: 1rem; 
-                padding-top: 1rem; /* Adjusted for sticky header */
-                /* Ensure content doesn't get hidden behind the bottom nav */
-                padding-bottom: 90px;
-                margin-bottom: 0;
-            }
-            
-            .section-header { flex-direction: column; align-items: stretch; gap: 0.5rem; }
-            .section-header h2 { font-size: 1.25rem; }
-            button { font-size: 0.95rem; padding: 14px; } /* Larger touch targets */
-            
-            /* Mobile Modals */
-            .modal {
-                align-items: flex-end; /* Slide up from bottom on mobile */
-                padding: 0;
-                background: rgba(0,0,0,0.8);
-            }
+            .modal-overlay { padding: 0; align-items: flex-end; background: rgba(0,0,0,0.8); }
             .modal-content {
                 width: 100%;
                 max-width: 100%;
-                height: auto;
                 max-height: 90vh;
-                border-radius: 16px 16px 0 0;
+                border-radius: 20px 20px 0 0;
                 border: none;
                 border-top: 1px solid var(--border-color);
                 padding: 1.5rem;
-                padding-top: 3rem; /* Space for close button */
-                animation: slideUp 0.3s ease forwards;
-                display: flex;
-                flex-direction: column;
+                animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             }
-            @keyframes slideUp {
-                from { transform: translateY(100%); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
-            }
-            
-            .form-row input, .form-row select { font-size: 16px; } /* Prevent iOS zoom */
-            .modal-close-btn {
-                top: 1rem;
-                right: 1rem;
-                width: 40px;
-                height: 40px;
-            }
+            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+            .form-row input, .form-row select { font-size: 16px; }
         }
     </style>
 </head>
@@ -675,13 +772,14 @@
 
         <div class="login-card">
             <div style="margin-bottom: 1.5rem;">
-                <i class="ri-shield-keyhole-line" style="font-size: 3rem; color: var(--accent-primary);"></i>
+                <i class="ri-shield-keyhole-fill" style="font-size: 3rem; color: var(--accent-primary);"></i>
             </div>
             <h2>Internal Portal</h2>
+            <p>Access Control System</p>
             <form onsubmit="handleAdminLogin(event)">
-                <input type="email" id="admin-email" placeholder="Admin Email" required autocomplete="email">
+                <input type="text" id="admin-email" placeholder="Email or Employee ID" required autocomplete="username">
                 <input type="password" id="admin-password" placeholder="Password" required autocomplete="current-password">
-                <button type="submit">Login</button>
+                <button type="submit">Secure Login</button>
             </form>
             <p id="login-error" style="color: var(--danger); font-size: 0.85rem; margin-top: 1rem; display: none;"></p>
         </div>
@@ -690,8 +788,11 @@
     <!-- DASHBOARD -->
     <div id="dashboard" style="display: none;">
         
-        <!-- SIDEBAR (Desktop) / BOTTOM NAV (Mobile) -->
-        <div class="sidebar">
+        <!-- SIDEBAR OVERLAY (Mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
             <div class="brand">
                 <div style="display:flex; align-items:center; gap:12px; flex:1;">
                     <i class="ri-shield-user-fill brand-icon"></i>
@@ -700,17 +801,24 @@
                         <span id="sidebar-jobtitle" class="brand-job">Super Admin</span>
                     </div>
                 </div>
-                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
-                    <i id="theme-icon-desktop" class="ri-moon-line"></i>
+                
+                <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close Menu">
+                    <i class="ri-close-line"></i>
                 </button>
             </div>
 
             <!-- NAV ITEMS -->
-            <div class="nav-item active" onclick="switchTab('orders')">
+            <div class="nav-item active" onclick="switchTab('dashboard')">
+                <i class="ri-dashboard-line"></i> <span>Overview</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('orders')">
                 <i class="ri-shopping-bag-3-line"></i> <span>Orders</span>
             </div>
             <div class="nav-item" onclick="switchTab('users')">
                 <i class="ri-group-line"></i> <span>Users</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tasks')">
+                <i class="ri-task-line"></i> <span>Tasks</span>
             </div>
             <div class="nav-item" onclick="switchTab('support')">
                 <i class="ri-customer-service-2-line"></i> <span>Support</span>
@@ -742,28 +850,73 @@
             
             <!-- MOBILE PROFILE HEADER (Sticky) -->
             <div class="mobile-brand-header">
-                <div class="mobile-profile-group">
-                    <i class="ri-shield-user-fill brand-icon"></i>
-                    <div class="brand-info">
-                        <span id="mobile-name" class="brand-name">DDN Admin</span>
-                        <span id="mobile-jobtitle" class="brand-job">Super Admin</span>
-                    </div>
+                <div style="display:flex; gap:15px; align-items:center;">
+                    <button class="hamburger-btn" onclick="toggleSidebar()">
+                        <i class="ri-menu-2-line"></i>
                 </div>
                 
-                <!-- Action Buttons Group (Top Right Corner) -->
+                <!-- Action Buttons Group -->
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
                         <i id="theme-icon-mobile" class="ri-moon-line"></i>
                     </button>
-                    <!-- Close/Logout Button at Edge Corner -->
                     <button class="action-btn sm-btn" onclick="handleLogout()" style="color:var(--danger); border-color:var(--danger); padding: 8px 12px;" aria-label="Logout">
                         <i class="ri-logout-box-line" style="font-size: 1.2rem;"></i>
                     </button>
                 </div>
             </div>
 
+            <!-- DASHBOARD TAB (OVERVIEW) -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="section-header">
+                    <h2>Dashboard Overview</h2>
+                    <div style="font-size: 0.8rem; color: var(--success); display: flex; align-items: center; gap: 6px;">
+                        <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; box-shadow: 0 0 8px var(--success);"></span>
+                        System Operational
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="ri-ticket-2-line"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-pending-tickets">0</h3>
+                            <p>Pending Tickets</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="ri-time-line"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-pending-orders">0</h3>
+                            <p>Pending Requests</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="ri-user-smile-line"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-total-clients">0</h3>
+                            <p>Total Clients</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="ri-admin-line"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-total-admins">0</h3>
+                            <p>Total Admins</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card" style="margin-top: 2rem;">
+                    <h3><i class="ri-pulse-line" style="color: var(--accent-primary);"></i> Recent Activity</h3>
+                    <div id="dashboard-logs-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+
             <!-- ORDERS TAB -->
-            <div id="tab-orders" class="tab-content active">
+            <div id="tab-orders" class="tab-content">
                 <div class="section-header">
                     <h2>Orders</h2>
                     <div style="font-size: 0.8rem; color: var(--text-secondary);">
@@ -799,12 +952,16 @@
                 </div>
             </div>
 
-            <!-- USERS TAB -->
+            <!-- USERS TAB (Split Tables) -->
             <div id="tab-users" class="tab-content">
                 <div class="section-header">
                     <h2>User Management</h2>
-                    <div class="section-header-actions">
-                        <button class="action-btn success" style="color:white; border:none; width:auto;" onclick="openCreateUserModal()">
+                    <div class="section-header-actions" style="display:flex; gap: 10px; flex-wrap:wrap;">
+                        <!-- Password Reset Request Moved Here -->
+                        <button class="action-btn warning" style="border-color: var(--warning); color: white;" onclick="requestAdminReset()">
+                            <i class="ri-lock-password-line"></i> Request My Pwd Reset
+                        </button>
+                        <button class="action-btn success" style="color:white; border:none;" onclick="openCreateUserModal()">
                             <i class="ri-user-add-line"></i> Create New User
                         </button>
                     </div>
@@ -812,27 +969,72 @@
 
                 <div class="search-container">
                     <i class="ri-search-line search-icon"></i>
-                    <input type="text" id="search-users" placeholder="Search Name, Email, Phone..." onkeyup="handleSearch('users', this.value)">
+                    <input type="text" id="search-users" placeholder="Search ID, Name, Email..." onkeyup="handleSearch('users', this.value)">
                 </div>
 
+                <!-- EMPLOYEES TABLE -->
+                <h3 style="margin: 2rem 0 1rem 0; font-size: 1.1rem; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
+                    <i class="ri-briefcase-4-line"></i> Employees (Admin & SuperAdmin)
+                </h3>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>Role</th>
+                                <th>Emp ID</th>
                                 <th>Name</th>
+                                <th>Category</th>
                                 <th>Job Title</th>
                                 <th>Email</th>
-                                <th>Phone</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="users-table-body">
-                            <tr>
-                                <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading users...</td>
-                            </tr>
+                        <tbody id="employees-table-body">
+                            <!-- Populated JS -->
                         </tbody>
                     </table>
+                </div>
+
+                <!-- CLIENTS TABLE -->
+                <h3 style="margin: 2rem 0 1rem 0; font-size: 1.1rem; color: var(--success); display: flex; align-items: center; gap: 8px;">
+                    <i class="ri-user-heart-line"></i> Clients
+                </h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Client ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-table-body">
+                            <!-- Populated JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TASKS TAB (NEW FEATURE) -->
+            <div id="tab-tasks" class="tab-content">
+                <div class="section-header">
+                    <h2>Task Management</h2>
+                    <div id="task-create-btn-container" style="display:none;">
+                        <button class="action-btn success" style="color:white; border:none;" onclick="openCreateTaskModal()">
+                            <i class="ri-add-line"></i> Assign Task
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-tasks" placeholder="Search Tasks..." onkeyup="handleSearch('tasks', this.value)">
+                </div>
+
+                <!-- Tasks List -->
+                <div id="tasks-list-container">
+                    <!-- Dynamic Task Cards injected here -->
                 </div>
             </div>
 
@@ -841,33 +1043,25 @@
                 <div class="section-header">
                     <h2>Support Desk</h2>
                     <div class="section-header-actions">
-                         <button class="action-btn success" style="color:white; border:none; width:auto;" onclick="openInternalTicketModal()">
+                         <button class="action-btn success" style="color:white; border:none;" onclick="openInternalTicketModal()">
                             <i class="ri-add-box-line"></i> Create Ticket
                         </button>
                         <div class="ticket-filters">
-                            <button class="filter-btn active" onclick="filterTickets('all', this)">
-                                <i class="ri-list-check"></i> All
-                            </button>
-                            <button class="filter-btn" onclick="filterTickets('internal', this)">
-                                <i class="ri-bug-line"></i> Internal
-                            </button>
-                            <button class="filter-btn" onclick="filterTickets('external', this)">
-                                <i class="ri-user-line"></i> External
-                            </button>
+                            <button class="filter-btn active" onclick="filterTickets('all', this)">All</button>
+                            <button class="filter-btn" onclick="filterTickets('internal', this)">Internal</button>
+                            <button class="filter-btn" onclick="filterTickets('external', this)">External</button>
                         </div>
                     </div>
                 </div>
-
                 <div class="search-container">
                     <i class="ri-search-line search-icon"></i>
                     <input type="text" id="search-support" placeholder="Search Name, Type, Message..." onkeyup="handleSearch('support', this.value)">
                 </div>
-
                 <div class="table-responsive" style="margin-bottom: 2rem;">
                     <table>
                         <thead>
                             <tr>
-                                <th>Date</th>
+                                <th>Date & Time</th>
                                 <th>Case ID</th>
                                 <th>Source</th>
                                 <th>Type</th>
@@ -891,7 +1085,8 @@
                     <h2>Assign Voucher</h2>
                 </div>
                 
-                <div class="admin-card">
+                <!-- Create Form (Visible to Admin/SuperAdmin) -->
+                <div id="voucher-create-wrapper" class="admin-card">
                     <h3>Send Gift Voucher</h3>
                     <div class="form-row" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                         <div style="grid-column: 1 / -1;">
@@ -918,8 +1113,30 @@
                             </div>
                         </div>
                     </div>
+                    <p class="helper-text" id="voucher-helper-text">
+                        As an Admin, this voucher will be created as <b>Pending</b> until SuperAdmin approval.
+                    </p>
 
                     <button onclick="assignVoucher()" style="margin-top: 1rem;">Assign Voucher</button>
+                </div>
+
+                <!-- Pending Requests Queue (Visible to All, filtered by role) -->
+                <div id="voucher-approval-queue" class="admin-card" style="border-color: var(--warning);">
+                    <h3 style="color: var(--warning);"><i class="ri-alert-line"></i> <span id="voucher-queue-title">Pending Voucher Requests</span></h3>
+                    <div class="table-responsive" style="margin-bottom: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Code</th>
+                                    <th>Value</th>
+                                    <th>Created By</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-vouchers-table-body"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="search-container">
@@ -928,14 +1145,13 @@
                 </div>
 
                 <div class="table-responsive" style="margin-top: 2rem;">
-                    <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Recent Assignments</h3>
+                    <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">Active Assignments</h3>
                     <table>
                         <thead>
                             <tr>
                                 <th>User</th>
                                 <th>Code</th>
                                 <th>Value</th>
-                                <th id="th-created-by" style="display:none;">Created By</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -952,7 +1168,8 @@
                     <h2>Promo Codes</h2>
                 </div>
                 
-                <div class="admin-card">
+                <!-- Create Form -->
+                <div id="promo-create-wrapper" class="admin-card">
                     <h3>Create Global Promo</h3>
                     <form onsubmit="event.preventDefault(); createPromo();">
                         <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;">
@@ -961,6 +1178,27 @@
                             <button type="submit" style="width: auto; white-space: nowrap;">Add</button>
                         </div>
                     </form>
+                    <p class="helper-text" id="promo-helper-text">
+                        As an Admin, this promo will be created as <b>Pending</b> until SuperAdmin approval.
+                    </p>
+                </div>
+
+                <!-- Pending Requests Queue (Visible to All, filtered by role) -->
+                <div id="promo-approval-queue" class="admin-card" style="border-color: var(--warning);">
+                    <h3 style="color: var(--warning);"><i class="ri-alert-line"></i> <span id="promo-queue-title">Pending Promo Requests</span></h3>
+                    <div class="table-responsive" style="margin-bottom: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Created By</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-promos-table-body"></tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="search-container">
@@ -974,12 +1212,13 @@
                             <tr>
                                 <th>Code</th>
                                 <th>Discount</th>
+                                <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="promo-table-body">
                              <tr>
-                                <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading promos...</td>
+                                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Loading promos...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -992,7 +1231,6 @@
                     <h2>System Logs</h2>
                     <p style="font-size: 0.8rem; color: var(--text-secondary);">Audit trail of recent administrative actions.</p>
                 </div>
-
                 <div class="admin-card">
                     <div style="display: flex; gap: 10px; margin-bottom: 1rem; overflow-x: auto;">
                         <button id="btn-log-all" class="sm-btn secondary active" onclick="loadLogsTab('all')">All Activity</button>
@@ -1000,12 +1238,10 @@
                         <button id="btn-log-vouchers" class="sm-btn secondary" onclick="loadLogsTab('vouchers')">Vouchers</button>
                     </div>
                 </div>
-
                 <div class="search-container">
                     <i class="ri-search-line search-icon"></i>
                     <input type="text" id="search-logs" placeholder="Search Admin, Action..." onkeyup="handleSearch('logs', this.value)">
                 </div>
-
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -1033,10 +1269,10 @@
 
                 <div class="search-container">
                     <i class="ri-search-line search-icon"></i>
-                    <input type="text" id="search-config" placeholder="Jump to section (e.g. Discount, Maintenance, Pricing)..." onkeyup="handleSearch('config', this.value)">
+                    <input type="text" id="search-config" placeholder="Jump to section..." onkeyup="handleSearch('config', this.value)">
                 </div>
 
-                <!-- PLAN DISCOUNT CONFIG (UPDATED) -->
+                <!-- PLAN DISCOUNT CONFIG -->
                 <div class="admin-card" id="config-discount">
                     <h3>Global Plan Discount</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 1rem;">Activate a discount badge displayed on main website pricing tables.</p>
@@ -1103,7 +1339,7 @@
 
                 <div class="search-container">
                     <i class="ri-search-line search-icon"></i>
-                    <input type="text" id="search-content" placeholder="Jump to section (e.g. Frontend, AI)..." onkeyup="handleSearch('content', this.value)">
+                    <input type="text" id="search-content" placeholder="Jump to section..." onkeyup="handleSearch('content', this.value)">
                 </div>
 
                 <div class="admin-card" id="content-frontend">
@@ -1131,13 +1367,16 @@
     </div>
 
     <!-- EDIT USER MODAL -->
-    <div id="editUserModal" class="modal">
+    <div id="editUserModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-close-btn" onclick="closeModal('editUserModal')">
-                <i class="ri-close-line"></i>
-            </div>
+            <div class="modal-close-btn" onclick="closeModal('editUserModal')"><i class="ri-close-line"></i></div>
             <h3>Manage User</h3>
+            <div id="edit-permission-warning" class="alert-box" style="display:none;"></div>
             <input type="hidden" id="edit-uid">
+            <div class="form-row">
+                <label>Employee ID</label>
+                <input type="text" id="edit-emp-id" placeholder="e.g. 001">
+            </div>
             <div class="form-row">
                 <label>Full Name</label>
                 <input type="text" id="edit-name" placeholder="John Doe">
@@ -1154,27 +1393,48 @@
             <div class="form-row">
                 <label>Role</label>
                 <select id="edit-role" style="width: 100%;">
-                    <option value="user">Standard User</option>
+                    <option value="user">Client / Customer</option>
                     <option value="admin">Admin</option>
                     <option value="superadmin">Super Admin</option>
                 </select>
             </div>
             <div id="edit-restriction-msg" style="display:none; color:var(--warning); font-size:0.8rem; margin-bottom:1rem;"></div>
-            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+            <div id="edit-user-actions" style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveUser()" style="background: var(--success);">Update User</button>
                 <button class="secondary" onclick="closeModal('editUserModal')">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- INTERNAL TICKET MODAL (POPUP) -->
-    <div id="internalTicketModal" class="modal">
+    <!-- CREATE TASK MODAL (SuperAdmin) -->
+    <div id="createTaskModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-close-btn" onclick="closeModal('internalTicketModal')">
-                <i class="ri-close-line"></i>
+            <div class="modal-close-btn" onclick="closeModal('createTaskModal')"><i class="ri-close-line"></i></div>
+            <h3>Assign New Task</h3>
+            <div class="form-row">
+                <label>Assign To (Admin)</label>
+                <select id="task-assignee-select"></select>
             </div>
-            <h3>Create Internal Ticket</h3>
+            <div class="form-row">
+                <label>Task Title</label>
+                <input type="text" id="task-title-input" placeholder="e.g. Update Client X">
+            </div>
+            <div class="form-row">
+                <label>Description</label>
+                <textarea id="task-desc-input" placeholder="Detailed instructions..."></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                <button onclick="createTask()" style="background: var(--success);">Assign Task</button>
+                <button class="secondary" onclick="closeModal('createTaskModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
 
+    <!-- INTERNAL TICKET MODAL -->
+    <div id="internalTicketModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-close-btn" onclick="closeModal('internalTicketModal')"><i class="ri-close-line"></i></div>
+            <h3>Create Internal Ticket</h3>
             <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                     <label>Type</label>
@@ -1190,10 +1450,8 @@
                     <select id="ticket-target-user-select" style="width: 100%;">
                         <option value="">General (Myself)</option>
                     </select>
-                    <input type="text" id="ticket-target-user-input" placeholder="Search user..." style="margin-top: 5px; display: none;">
                 </div>
             </div>
-
             <div class="form-group">
                 <div>
                     <label>Message</label>
@@ -1204,7 +1462,6 @@
                     <input type="text" id="ticket-target-user-name" placeholder="Auto-filled if user selected" readonly style="background: rgba(0,0,0,0.1);">
                 </div>
             </div>
-
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="submitInternalTicket()" style="background: var(--success);">Create Ticket</button>
                 <button class="secondary" onclick="closeModal('internalTicketModal')">Cancel</button>
@@ -1213,12 +1470,15 @@
     </div>
 
     <!-- CREATE USER MODAL -->
-    <div id="createUserModal" class="modal">
+    <div id="createUserModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-close-btn" onclick="closeModal('createUserModal')">
-                <i class="ri-close-line"></i>
-            </div>
+            <div class="modal-close-btn" onclick="closeModal('createUserModal')"><i class="ri-close-line"></i></div>
             <h3>Create New User</h3>
+            <div class="form-row">
+                <label>Employee ID</label>
+                <input type="text" id="create-emp-id" placeholder="e.g. 001" required onblur="checkEmpIdUnique(this.value)">
+                <p id="emp-id-error" style="color:var(--danger); font-size:0.75rem; display:none; margin-top:-0.5rem;">ID already exists.</p>
+            </div>
             <div class="form-row">
                 <label>Full Name</label>
                 <input type="text" id="create-name" placeholder="John Doe">
@@ -1238,7 +1498,7 @@
             <div class="form-row">
                 <label>Assign Role</label>
                 <select id="create-role" style="width: 100%;">
-                    <option value="user">Standard User</option>
+                    <option value="user">Client / Customer</option>
                     <option value="admin">Admin</option>
                     <option value="superadmin">Super Admin</option>
                 </select>
@@ -1251,32 +1511,24 @@
     </div>
 
     <!-- TICKET MODAL -->
-    <div id="ticketModal" class="modal">
+    <div id="ticketModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-close-btn" onclick="closeModal('ticketModal')">
-                <i class="ri-close-line"></i>
-            </div>
+            <div class="modal-close-btn" onclick="closeModal('ticketModal')"><i class="ri-close-line"></i></div>
             <h3>Manage Ticket</h3>
             <input type="hidden" id="ticket-id">
-            
-            <!-- Ticket Details View Only -->
-            <div style="background: var(--bg-input); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="background: var(--bg-input); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">Case ID</div>
                 <div id="view-ticket-id" style="font-family: monospace; font-weight: 700; color: var(--accent-primary); margin-bottom: 8px;">-</div>
-                
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">Customer</div>
                 <div id="view-ticket-customer" style="font-weight: 600; margin-bottom: 8px;">-</div>
-
                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">Message</div>
                 <div id="view-ticket-message" style="font-size: 0.9rem; margin-bottom: 8px;">-</div>
-
                 <div id="view-resolved-by-container" style="display: none; margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
                     <div style="font-size: 0.8rem; color: var(--success); margin-bottom: 4px;">Resolved By</div>
                     <div id="view-ticket-resolved-by" style="font-weight: 600;">-</div>
                     <div id="view-ticket-resolved-at" style="font-size: 0.75rem; color: var(--text-secondary);">-</div>
                 </div>
             </div>
-
             <div class="form-row">
                 <label>Status</label>
                 <select id="ticket-status-select" style="width: 100%;">
@@ -1296,19 +1548,15 @@
     </div>
 
     <!-- ORDER MODAL -->
-    <div id="orderModal" class="modal">
+    <div id="orderModal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-close-btn" onclick="closeModal('orderModal')">
-                <i class="ri-close-line"></i>
-            </div>
+            <div class="modal-close-btn" onclick="closeModal('orderModal')"><i class="ri-close-line"></i></div>
             <h3>Manage Order</h3>
             <input type="hidden" id="order-id">
-            
             <div class="form-row">
                 <label>Company Name (Optional)</label>
                 <input type="text" id="order-company-name" placeholder="e.g. ABC Corp">
             </div>
-
             <div class="form-row">
                 <label>Package</label>
                 <select id="order-package">
@@ -1318,17 +1566,14 @@
                     <option value="Custom">Custom Package</option>
                 </select>
             </div>
-
             <div class="form-row">
                 <label>Total (RM)</label>
                 <input type="number" id="order-total" step="0.01" placeholder="0.00">
             </div>
-
             <div class="form-row">
                 <label>Voucher Applied</label>
                 <input type="text" id="order-voucher" readonly style="background: var(--bg-input); color: var(--text-secondary);" placeholder="-">
             </div>
-
             <div class="form-row">
                 <label>Order Status</label>
                 <select id="order-status-select" style="width: 100%;">
@@ -1338,12 +1583,10 @@
                     <option value="Cancelled">Cancelled</option>
                 </select>
             </div>
-
             <div class="form-row">
                 <label>Admin Notes</label>
                 <textarea id="order-admin-note"></textarea>
             </div>
-
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveOrder()" style="background: var(--success);">Update Order</button>
                 <button class="secondary" onclick="closeModal('orderModal')">Cancel</button>
@@ -1372,13 +1615,12 @@
             if (type === 'error') icon = 'ri-error-warning-line';
 
             toast.innerHTML = `<i class="${icon}"></i> <span>${message}</span>`;
-            
             container.appendChild(toast);
             
             setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                toast.style.animation = 'toastOut 0.4s ease forwards';
+                setTimeout(() => toast.remove(), 400);
+            }, 4000); 
         }
 
         // --- THEME MANAGEMENT ---
@@ -1397,18 +1639,12 @@
         }
 
         function updateThemeIcon(theme) {
-            const icons = document.querySelectorAll('#theme-icon-mobile, #theme-icon-desktop, #theme-icon-login');
+            const icons = document.querySelectorAll('#theme-icon-mobile, #theme-icon-login');
             icons.forEach(icon => {
-                if(theme === 'dark') {
-                    icon.className = 'ri-moon-line';
-                } else {
-                    icon.className = 'ri-sun-line';
-                }
+                icon.className = theme === 'dark' ? 'ri-moon-line' : 'ri-sun-line';
             });
         }
-
         initTheme();
-
 
         // --- FIREBASE & APP LOGIC ---
         let db, auth;
@@ -1416,20 +1652,18 @@
         let ticketCache = []; 
         let orderCache = []; 
         let promoCache = []; 
+        let taskCache = [];
         let currentAdminUID = ""; 
         let isSuperAdmin = false; 
         let currentAdminEmail = "";
         let currentLogFilter = 'all'; 
 
         let searchStates = {
-            orders: "",
-            users: "",
-            support: "",
-            vouchers: "",
-            promos: "",
-            logs: "",
-            config: "",
-            content: ""
+            dashboard: "", orders: "", users: "", support: "", vouchers: "", promos: "", logs: "", config: "", content: "", tasks: ""
+        };
+
+        const dataLoaded = {
+            orders: false, users: false, tickets: false, promos: false, logs: false, tasks: false
         };
 
         try {
@@ -1478,7 +1712,7 @@
                             adjustUIForSuperAdmin();
                         } else {
                             auth.signOut();
-                            showToast("ACCESS DENIED: You do not have permission to access this portal.", "error");
+                            showToast("ACCESS DENIED", "error");
                             document.getElementById('login-screen').style.display = 'flex';
                             document.getElementById('dashboard').style.display = 'none';
                         }
@@ -1494,19 +1728,83 @@
             }
         });
 
+        async function handleAdminLogin(e) {
+            e.preventDefault();
+            const input = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            let emailToUse = input;
+
+            if (!input.includes('@')) {
+                try {
+                    const snapshot = await db.collection('users').where('employeeId', '==', input).limit(1).get();
+                    if (snapshot.empty) {
+                        showToast("Employee ID not found.", "error");
+                        return;
+                    }
+                    const userDoc = snapshot.docs[0];
+                    emailToUse = userDoc.data().email;
+                } catch (error) {
+                    console.error("Error finding ID:", error);
+                    showToast("Error verifying ID.", "error");
+                    return;
+                }
+            }
+
+            auth.signInWithEmailAndPassword(emailToUse, password)
+                .then(() => {
+                    document.getElementById('login-error').style.display = 'none';
+                })
+                .catch((error) => {
+                    const errBox = document.getElementById('login-error');
+                    errBox.innerText = error.message;
+                    errBox.style.display = 'block';
+                });
+        }
+
         function adjustUIForSuperAdmin() {
             const planDiscountCard = document.getElementById('config-discount');
             const logsTab = document.getElementById('tab-logs');
             const logsNav = document.getElementById('nav-logs');
+            const taskCreateBtn = document.getElementById('task-create-btn-container');
+            const voucherQueueTitle = document.getElementById('voucher-queue-title');
+            const promoQueueTitle = document.getElementById('promo-queue-title');
+            const helperVoucher = document.getElementById('voucher-helper-text');
+            const helperPromo = document.getElementById('promo-helper-text');
 
+            // NOTE: We NO LONGER hide the voucher/promo queues entirely. 
+            // We just change their context based on role.
+            
             if(isSuperAdmin) {
                 if(planDiscountCard) planDiscountCard.style.display = 'block';
                 if(logsNav) logsNav.style.display = 'flex';
+                if(taskCreateBtn) taskCreateBtn.style.display = 'block';
+                
+                // Update Titles for SuperAdmin
+                if(voucherQueueTitle) voucherQueueTitle.innerText = "Pending Voucher Approvals";
+                if(promoQueueTitle) promoQueueTitle.innerText = "Pending Promo Approvals";
+                
+                // Helper Text
+                if(helperVoucher) helperVoucher.style.display = 'none';
+                if(helperPromo) helperPromo.style.display = 'none';
+
             } else {
                 if(planDiscountCard) planDiscountCard.style.display = 'none';
                 if(logsTab) logsTab.style.display = 'none';
                 if(logsNav) logsNav.style.display = 'none';
+                if(taskCreateBtn) taskCreateBtn.style.display = 'none';
+
+                // Update Titles for Standard Admin
+                if(voucherQueueTitle) voucherQueueTitle.innerText = "My Pending Voucher Requests";
+                if(promoQueueTitle) promoQueueTitle.innerText = "My Pending Promo Requests";
+
+                // Show Helper Text
+                if(helperVoucher) helperVoucher.style.display = 'block';
+                if(helperPromo) helperPromo.style.display = 'block';
             }
+            
+            // Refresh tables to apply filtering logic
+            renderVoucherTable();
+            renderPromoTable();
         }
 
         function loadSidebarProfile() {
@@ -1515,7 +1813,8 @@
                     if(doc.exists) {
                         const data = doc.data();
                         const name = data.name || "DDN Admin";
-                        const title = data.jobTitle || (isSuperAdmin ? "Super Admin" : "Admin");
+                        let title = data.jobTitle;
+                        if(!title) title = (data.role === 'superadmin') ? 'Super Admin' : (data.role === 'admin' ? 'Admin' : 'Client');
 
                         document.getElementById('sidebar-name').innerText = name;
                         document.getElementById('sidebar-jobtitle').innerText = title;
@@ -1526,50 +1825,948 @@
             }
         }
 
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    const userRef = db.collection("users").doc(user.uid);
-                    userRef.get().then((docSnapshot) => {
-                        if (!docSnapshot.exists) {
-                            userRef.set({
-                                email: user.email,
-                                role: 'user',
-                                name: "New User",
-                                phone: ""
-                            }).then(() => showToast("Account created. Please contact admin for access.", "warning"))
-                            .catch(err => showToast(err.message, "error"));
-                        }
-                    });
-                })
-                .catch((error) => {
-                    const errBox = document.getElementById('login-error');
-                    errBox.innerText = error.message;
-                    errBox.style.display = 'block';
-                });
-        }
-
         function handleLogout() {
             if(confirm("Logout?")) auth.signOut();
         }
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        // --- SEARCH ---
+        function handleSearch(tab, value) {
+            searchStates[tab] = value.toLowerCase();
+            if (tab === 'orders') renderOrdersTable();
+            if (tab === 'users') renderSplitUserTables();
+            if (tab === 'support') renderTicketsTable();
+            if (tab === 'vouchers') renderVoucherTable();
+            if (tab === 'promos') renderPromoTable();
+            if (tab === 'logs') renderLogsTable();
+            if (tab === 'config') scrollToSection('config', value);
+            if (tab === 'content') scrollToSection('content', value);
+            if (tab === 'tasks') renderTasks();
+        }
+
+        function scrollToSection(context, text) {
+            const textLower = text.toLowerCase();
+            if (!textLower) return;
+            const sections = [];
+            if (context === 'config') {
+                sections.push({ id: 'config-discount', keywords: ['discount', 'sale', 'promo', 'badge'] });
+                sections.push({ id: 'config-maintenance', keywords: ['maintenance', 'banner', 'mode'] });
+                sections.push({ id: 'config-pricing', keywords: ['pricing', 'price', 'html', 'frontend'] });
+            } else if (context === 'content') {
+                sections.push({ id: 'content-frontend', keywords: ['frontend', 'features', 'standard'] });
+                sections.push({ id: 'content-ai', keywords: ['ai', 'artificial', 'intelligence', 'chatbot'] });
+            }
+            for (let sec of sections) {
+                if (sec.keywords.some(k => textLower.includes(k))) {
+                    const el = document.getElementById(sec.id);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        break;
+                    }
+                }
+            }
+        }
+
+        function formatDateTime(timestamp) {
+            if(!timestamp) return '-';
+            const date = timestamp.toDate();
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+
+        // --- DATA LOADING ---
+        function loadDashboardData() {
+            db.collection("config").doc("site_settings").onSnapshot(doc => {
+                if(doc.exists) {
+                    siteConfig = doc.data();
+                    updateMaintenanceUI();
+                    updateDiscountUI(); 
+                    updatePricingUI();
+                    updateContentUI();
+                }
+            });
+
+            db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                orderCache = []; 
+                snapshot.forEach(doc => orderCache.push({ id: doc.id, data: doc.data() }));
+                dataLoaded.orders = true;
+                renderOrdersTable();
+                updateDashboardStats();
+            });
+
+            db.collection("users").onSnapshot((snapshot) => {
+                const select = document.getElementById('voucher-user-select');
+                const adminSelect = document.getElementById('task-assignee-select');
+                allUsers = []; 
+                let optionsHTML = '<option value="" disabled selected>Select a User</option>';
+                let adminOptionsHTML = '<option value="" disabled selected>Select an Admin</option>';
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    allUsers.push({ id: doc.id, ...data });
+                    optionsHTML += `<option value="${doc.id}">${data.name} (${data.email})</option>`;
+                    
+                    // Populate Admin Select for Task Assignment
+                    if(data.role === 'admin') {
+                        adminOptionsHTML += `<option value="${doc.id}">${data.name} (Admin)</option>`;
+                    }
+                });
+                select.innerHTML = optionsHTML;
+                if(adminSelect) adminSelect.innerHTML = adminOptionsHTML;
+
+                dataLoaded.users = true;
+                renderSplitUserTables();
+                refreshVoucherTable();
+                updateDashboardStats();
+            });
+
+            db.collection("tickets").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                ticketCache = []; 
+                snapshot.forEach(doc => ticketCache.push({ id: doc.id, data: doc.data() }));
+                dataLoaded.tickets = true;
+                renderTicketsTable();
+                updateDashboardStats();
+                if(currentLogFilter && document.getElementById('tab-logs').classList.contains('active')) {
+                    renderLogsTable();
+                }
+            });
+
+            db.collection("promo_codes").onSnapshot((snapshot) => {
+                promoCache = [];
+                snapshot.forEach(doc => promoCache.push({ id: doc.id, data: doc.data() }));
+                dataLoaded.promos = true;
+                renderPromoTable();
+            });
+
+            // TASKS COLLECTION
+            db.collection("admin_tasks").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                taskCache = [];
+                snapshot.forEach(doc => taskCache.push({ id: doc.id, data: doc.data() }));
+                dataLoaded.tasks = true;
+                renderTasks();
+            });
+        }
+
+        // --- TASKS LOGIC ---
+        function openCreateTaskModal() {
+            const modal = document.getElementById('createTaskModal');
+            document.getElementById('task-title-input').value = '';
+            document.getElementById('task-desc-input').value = '';
+            modal.classList.add('open');
+        }
+
+        function createTask() {
+            const assigneeId = document.getElementById('task-assignee-select').value;
+            const title = document.getElementById('task-title-input').value;
+            const desc = document.getElementById('task-desc-input').value;
+
+            if(!assigneeId || !title || !desc) return showToast("Please fill all fields", "error");
+
+            const taskData = {
+                assignedTo: assigneeId,
+                assignedBy: currentAdminUID,
+                assignedByName: currentAdminEmail, // Denormalized for easier display
+                title: title,
+                description: desc,
+                status: 'pending',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection("admin_tasks").add(taskData).then(() => {
+                closeModal('createTaskModal');
+                showToast("Task Assigned!", "success");
+            }).catch(err => showToast(err.message, "error"));
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasks-list-container');
+            container.innerHTML = '';
+            
+            let visibleTasks = taskCache;
+            const s = searchStates.tasks;
+            if(s) {
+                visibleTasks = visibleTasks.filter(t => {
+                    const d = t.data;
+                    return d.title.toLowerCase().includes(s) || d.description.toLowerCase().includes(s);
+                });
+            }
+
+            // Filter logic:
+            // SuperAdmin sees ALL tasks.
+            // Admin sees ONLY tasks assigned to them.
+            if(!isSuperAdmin) {
+                visibleTasks = visibleTasks.filter(t => t.data.assignedTo === currentAdminUID);
+            }
+
+            if(visibleTasks.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:2rem; color:var(--text-secondary);">No tasks found.</div>';
+                return;
+            }
+
+            visibleTasks.forEach(task => {
+                const d = task.data;
+                let statusColor = 'var(--warning)';
+                if(d.status === 'completed') statusColor = 'var(--success)';
+                if(d.status === 'in_progress') statusColor = 'var(--accent-primary)';
+
+                // Get Assignee Name (if SuperAdmin view)
+                let assigneeName = "Me";
+                if(isSuperAdmin) {
+                    const u = allUsers.find(u => u.id === d.assignedTo);
+                    assigneeName = u ? u.name : "Unknown Admin";
+                }
+
+                let actionBtn = '';
+                // If Admin assigned to this task
+                if(!isSuperAdmin) {
+                    if(d.status === 'pending') {
+                        actionBtn = `<button class="action-btn" onclick="updateTaskStatus('${task.id}', 'in_progress')">Start</button>`;
+                    } else if(d.status === 'in_progress') {
+                        actionBtn = `<button class="action-btn success" style="color:white; border:none;" onclick="updateTaskStatus('${task.id}', 'completed')">Complete</button>`;
+                    }
+                } else {
+                    // SuperAdmin can reset or delete
+                    actionBtn = `<button class="action-btn danger" style="color:var(--danger);" onclick="deleteTask('${task.id}')">Delete</button>`;
+                }
+
+                const card = `
+                <div class="admin-card" style="padding: 1.5rem; border-left: 4px solid ${statusColor};">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                        <h4 style="margin:0; font-size:1.1rem;">${d.title}</h4>
+                        <span class="status-badge" style="background:${statusColor}20; color:${statusColor};">${d.status.toUpperCase().replace('_', ' ')}</span>
+                    </div>
+                    <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:1rem; line-height:1.5;">${d.description}</p>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:0.8rem; color:var(--text-secondary);">
+                            Assigned to: <b>${assigneeName}</b> &bull; ${formatDateTime(d.timestamp)}
+                        </div>
+                        <div>${actionBtn}</div>
+                    </div>
+                </div>`;
+                container.innerHTML += card;
+            });
+        }
+
+        function updateTaskStatus(taskId, newStatus) {
+            db.collection("admin_tasks").doc(taskId).update({ status: newStatus }).then(() => {
+                showToast("Task updated", "success");
+            }).catch(err => showToast(err.message, "error"));
+        }
+
+        function deleteTask(taskId) {
+            if(confirm("Delete this task?")) {
+                db.collection("admin_tasks").doc(taskId).delete();
+            }
+        }
+
+        // --- DASHBOARD STATS ---
+        function updateDashboardStats() {
+            const pendingTickets = ticketCache.filter(t => t.data.status === 'Open').length;
+            const pendingOrders = orderCache.filter(o => o.data.status === 'Pending').length;
+            const totalClients = allUsers.filter(u => u.role === 'user').length;
+            const totalAdmins = allUsers.filter(u => u.role === 'admin' || u.role === 'superadmin').length;
+
+            document.getElementById('stat-pending-tickets').innerText = pendingTickets;
+            document.getElementById('stat-pending-orders').innerText = pendingOrders;
+            document.getElementById('stat-total-clients').innerText = totalClients;
+            document.getElementById('stat-total-admins').innerText = totalAdmins;
+
+            const logsList = document.getElementById('dashboard-logs-list');
+            logsList.innerHTML = '';
+            let logs = [];
+            ticketCache.slice(0, 5).forEach(t => logs.push({ time: formatDateTime(t.data.timestamp), icon: t.data.source === 'internal' ? 'ri-bug-line' : 'ri-user-voice-line', text: `New Ticket: ${t.data.type}`, detail: t.data.name }));
+            orderCache.slice(0, 3).forEach(o => logs.push({ time: formatDateTime(o.data.timestamp), icon: 'ri-shopping-bag-3-line', text: `New Order: ${o.data.package}`, detail: o.data.customerName }));
+            taskCache.slice(0, 3).forEach(t => logs.push({ time: formatDateTime(t.data.timestamp), icon: 'ri-task-line', text: `Task Assigned: ${t.data.title}`, detail: isSuperAdmin ? t.data.assignedByName : 'Me' }));
+
+            logs.sort((a,b) => new Date(b.time) - new Date(a.time)); 
+            logs.slice(0, 5).forEach(log => {
+                logsList.innerHTML += `
+                    <div style="display:flex; gap:12px; align-items:center; padding-bottom:12px; border-bottom:1px solid var(--border-color);">
+                        <div style="background:var(--bg-input); padding:10px; border-radius:10px; color:var(--accent-primary);"><i class="${log.icon}"></i></div>
+                        <div style="flex:1;">
+                            <div style="font-size:0.9rem; font-weight:600;">${log.text}</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">${log.detail} &bull; <span style="font-family:monospace;">${log.time}</span></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // --- ORDERS ---
+        function renderOrdersTable() {
+            const tbody = document.getElementById('orders-table-body');
+            if (!dataLoaded.orders) {
+                tbody.innerHTML = `<tr><td colspan="8"><div class="loader-container"><div class="loader"></div></div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            let visibleOrders = orderCache;
+            const s = searchStates.orders;
+            if(s) {
+                visibleOrders = visibleOrders.filter(o => {
+                    const d = o.data;
+                    const str = `${d.customerName} ${d.customerEmail} ${d.companyName || ''} ${o.id}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+            if(visibleOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
+                return;
+            }
+            visibleOrders.forEach(doc => {
+                const data = doc.data;
+                const date = formatDateTime(data.timestamp);
+                let statusClass = 'status-pending';
+                if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
+                if(data.status === 'Cancelled') statusClass = 'status-cancelled';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
+                        <td><div style="font-weight:600;">${data.customerName}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div></td>
+                        <td style="color:var(--text-secondary); font-size:0.85rem;">${data.companyName || '-'}</td>
+                        <td>${data.package || '-'}</td>
+                        <td style="color:var(--success); font-weight:600;">${data.voucherCode || '-'}</td>
+                        <td style="font-weight:700;">${data.total || '-'}</td>
+                        <td><span class="status-badge ${statusClass}">${data.status}</span></td>
+                        <td><button class="action-btn" onclick="openOrderModal('${doc.id}')">Manage</button></td>
+                    </tr>`;
+            });
+        }
+
+        // --- USERS ---
+        function renderSplitUserTables() {
+            const empBody = document.getElementById('employees-table-body');
+            const clientBody = document.getElementById('clients-table-body');
+
+            if (!dataLoaded.users) {
+                const loaderHTML = `<tr><td colspan="6"><div class="loader-container"><div class="loader"></div></div></td></tr>`;
+                empBody.innerHTML = loaderHTML;
+                clientBody.innerHTML = loaderHTML;
+                return;
+            }
+
+            empBody.innerHTML = '';
+            clientBody.innerHTML = '';
+            let visibleUsers = allUsers;
+            const s = searchStates.users;
+            if(s) {
+                visibleUsers = visibleUsers.filter(u => {
+                    const str = `${u.employeeId || ''} ${u.name} ${u.email} ${u.phone}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+
+            visibleUsers.forEach(u => {
+                const role = u.role || 'user';
+                let roleClass = 'role-user';
+                let roleLabel = 'Client';
+                if(role === 'admin') { roleClass = 'role-admin'; roleLabel = 'Admin'; }
+                if(role === 'superadmin') { roleClass = 'role-superadmin'; roleLabel = 'Super Admin'; }
+
+                const rowHTML = `
+                    <tr>
+                        <td style="font-family:monospace; font-weight:600;">${u.employeeId || '-'}</td>
+                        <td>${u.name}</td>
+                        <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
+                        ${role !== 'user' ? `<td style="color:var(--text-secondary); font-size:0.9rem;">${u.jobTitle || '-'}</td>` : ''}
+                        <td style="font-size:0.9rem;">${u.email}</td>
+                        <td>
+                            <button class="action-btn" onclick="openEditUser('${u.id}')">Edit</button>
+                            ${role === 'user' ? `<button class="action-btn" onclick="resetUserPass('${u.email}')">Pwd</button>` : ''}
+                        </td>
+                    </tr>`;
+
+                if (role === 'user') {
+                    const clientRowHTML = `
+                    <tr>
+                        <td style="font-family:monospace; font-weight:600;">${u.employeeId || '-'}</td>
+                        <td>${u.name}</td>
+                        <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
+                        <td style="font-size:0.9rem;">${u.email}</td>
+                        <td>
+                            <button class="action-btn" onclick="openEditUser('${u.id}')">Edit</button>
+                            <button class="action-btn" onclick="resetUserPass('${u.email}')">Pwd</button>
+                        </td>
+                    </tr>`;
+                    clientBody.innerHTML += clientRowHTML;
+                } else {
+                    empBody.innerHTML += rowHTML;
+                }
+            });
+            
+            if(empBody.innerHTML === '') empBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No employees found.</td></tr>';
+            if(clientBody.innerHTML === '') clientBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">No clients found.</td></tr>';
+        }
+
+        function filterTickets(type, btnElement) {
+            ticketFilter = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            renderTicketsTable();
+        }
+
+        function renderTicketsTable() {
+            const tbody = document.getElementById('tickets-table-body');
+            if (!dataLoaded.tickets) {
+                tbody.innerHTML = `<tr><td colspan="9"><div class="loader-container"><div class="loader"></div></div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = '';
+            let visibleTickets = ticketCache;
+            if (ticketFilter === 'internal') visibleTickets = visibleTickets.filter(t => t.data.source === "internal");
+            else if (ticketFilter === 'external') visibleTickets = visibleTickets.filter(t => t.data.source !== "internal");
+
+            const s = searchStates.support;
+            if(s) {
+                visibleTickets = visibleTickets.filter(t => {
+                    const d = t.data;
+                    const str = `${d.name} ${d.type} ${d.message} ${t.id}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+
+            if(visibleTickets.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem;">No tickets.</td></tr>`;
+                return;
+            }
+            visibleTickets.forEach(item => {
+                const doc = item;
+                const data = item.data;
+                const date = formatDateTime(data.timestamp);
+                let statusClass = data.status === 'Resolved' ? 'status-paid' : 'status-open';
+                const isInternal = data.source === "internal";
+                const rowClass = isInternal ? "row-internal" : "";
+                const sourceBadge = isInternal ? `<span class="source-badge badge-internal">Team</span>` : `<span class="source-badge badge-external">User</span>`;
+                const targetInfo = data.targetName ? `<div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target: <b>${data.targetName}</b></div>` : '';
+                let resolvedByDisplay = '-';
+                if(data.status === 'Resolved' && data.resolvedBy) {
+                    resolvedByDisplay = `<span style="font-size:0.8rem; font-weight:600; color:var(--success);">${data.resolvedBy}</span>`;
+                }
+                tbody.innerHTML += `
+                    <tr class="${rowClass}">
+                        <td style="color:var(--text-secondary); font-size:0.8rem; font-family:monospace;">${date}</td>
+                        <td><span style="font-family:monospace; font-size:0.8rem; color:var(--accent-primary); font-weight:700;">${doc.id.substring(0,8)}...</span></td>
+                        <td>${sourceBadge}</td>
+                        <td style="font-weight:700;">${data.type}</td>
+                        <td><div style="font-weight:600;">${data.name}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div></td>
+                        <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; position: relative;">
+                            ${data.message} ${targetInfo}
+                        </td>
+                        <td><span class="status-badge ${statusClass}">${data.status}</span></td>
+                        <td style="font-size:0.85rem;">${resolvedByDisplay}</td>
+                        <td><button class="action-btn" onclick="openTicketModal('${doc.id}')">View</button></td>
+                    </tr>`;
+            });
+        }
+
+        // --- VOUCHERS (WITH APPROVAL) ---
+        function renderVoucherTable() {
+            const tbody = document.getElementById('voucher-table-body');
+            const pendingTbody = document.getElementById('pending-vouchers-table-body');
+            const queueContainer = document.getElementById('voucher-approval-queue');
+            
+            tbody.innerHTML = '';
+            if(pendingTbody) pendingTbody.innerHTML = '';
+            if(queueContainer) queueContainer.style.display = 'none'; // Hide by default if empty
+
+            const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
+            
+            // Split into Pending and Active
+            let pendingVouchers = usersWithVouchers.filter(u => u.personalVoucher.status === 'pending');
+            const activeVouchers = usersWithVouchers.filter(u => !u.personalVoucher.status || u.personalVoucher.status === 'active');
+
+            // --- LOGIC FOR PENDING VOUCHERS ---
+            // Filter: SuperAdmin sees all. Standard Admin sees ONLY theirs.
+            if (!isSuperAdmin) {
+                pendingVouchers = pendingVouchers.filter(u => u.personalVoucher.voucherCreatedBy === currentAdminUID);
+            }
+
+            if (pendingVouchers.length > 0) {
+                if(queueContainer) queueContainer.style.display = 'block';
+            }
+
+            // Render Active Table
+            let visibleVouchers = activeVouchers;
+            const s = searchStates.vouchers;
+            if(s) visibleVouchers = visibleVouchers.filter(u => {
+                const v = u.personalVoucher;
+                const str = `${u.name} ${v.code}`.toLowerCase();
+                return str.includes(s);
+            });
+
+            if(visibleVouchers.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No active vouchers.</td></tr>';
+            
+            visibleVouchers.forEach(u => {
+                const v = u.personalVoucher;
+                const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600;">${u.name}</td>
+                        <td style="color:var(--accent-primary);">${v.code}</td>
+                        <td style="color:var(--success);">${displayVal}</td>
+                        <td><button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button></td>
+                    </tr>`;
+            });
+
+            // Render Pending Table (Filtered by Role)
+            pendingVouchers.forEach(u => {
+                const v = u.personalVoucher;
+                const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
+                
+                let actionButtons = '';
+                
+                if (isSuperAdmin) {
+                    // SuperAdmin actions: Approve / Delete
+                    actionButtons = `
+                        <button class="action-btn success" style="border:none; color:white;" onclick="approveVoucher('${u.id}')"><i class="ri-check-line"></i> Approve</button>
+                        <button class="action-btn danger" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')"><i class="ri-close-line"></i></button>
+                    `;
+                } else {
+                    // Admin actions: Cancel Request (Delete)
+                    actionButtons = `
+                        <button class="action-btn warning" style="color:black;" onclick="deleteUserVoucher('${u.id}')">Cancel Request</button>
+                    `;
+                }
+
+                pendingTbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600;">${u.name}</td>
+                        <td style="color:var(--accent-primary);">${v.code}</td>
+                        <td style="color:var(--success);">${displayVal}</td>
+                        <td style="font-size:0.8rem; color:var(--text-secondary);">${v.voucherCreatedByEmail || 'Unknown'}</td>
+                        <td>${actionButtons}</td>
+                    </tr>`;
+            });
+        }
+
+        function assignVoucher() {
+            const uid = document.getElementById('voucher-user-select').value;
+            const code = document.getElementById('voucher-code').value.trim().toUpperCase();
+            const val = parseFloat(document.getElementById('voucher-val').value);
+            const type = document.getElementById('voucher-type').value;
+            if(!uid || !code || isNaN(val)) return showToast("Invalid Voucher Details.", "error");
+
+            // Determine status based on role
+            const status = isSuperAdmin ? 'active' : 'pending';
+
+            const voucherData = {
+                code: code,
+                value: val,
+                type: type,
+                status: status,
+                voucherCreatedBy: currentAdminUID,
+                voucherCreatedByEmail: currentAdminEmail,
+                voucherTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection("users").doc(uid).update({ personalVoucher: voucherData }).then(() => {
+                showToast(`Voucher ${code} created! Status: ${status.toUpperCase()}`, status === 'active' ? 'success' : 'info');
+                refreshVoucherTable();
+            }).catch(err => showToast(err.message, "error"));
+        }
+
+        function approveVoucher(uid) {
+            db.collection("users").doc(uid).update({
+                "personalVoucher.status": "active"
+            }).then(() => {
+                showToast("Voucher Approved!", "success");
+            });
+        }
+
+        function refreshVoucherTable() {
+            renderVoucherTable();
+        }
+
+        function deleteUserVoucher(uid) {
+            if(confirm("Remove voucher?")) db.collection("users").doc(uid).update({ personalVoucher: firebase.firestore.FieldValue.delete() });
+        }
+
+        // --- PROMOS (WITH APPROVAL) ---
+        function renderPromoTable() {
+            const tbody = document.getElementById('promo-table-body');
+            const pendingTbody = document.getElementById('pending-promos-table-body');
+            const queueContainer = document.getElementById('promo-approval-queue');
+
+            if (!dataLoaded.promos) {
+                tbody.innerHTML = `<tr><td colspan="4"><div class="loader-container"><div class="loader"></div></div></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            if(pendingTbody) pendingTbody.innerHTML = '';
+            if(queueContainer) queueContainer.style.display = 'none';
+
+            let visiblePromos = promoCache;
+            
+            // Split into Pending and Active
+            let pendingPromos = promoCache.filter(p => p.data.status === 'pending');
+            const activePromos = promoCache.filter(p => !p.data.status || p.data.status === 'active');
+
+            // --- LOGIC FOR PENDING PROMOS ---
+            // Filter: SuperAdmin sees all. Standard Admin sees ONLY theirs.
+            if (!isSuperAdmin) {
+                pendingPromos = pendingPromos.filter(p => p.data.createdBy === currentAdminUID);
+            }
+
+            if (pendingPromos.length > 0) {
+                if(queueContainer) queueContainer.style.display = 'block';
+            }
+
+            // Render Active
+            const s = searchStates.promos;
+            if(s) {
+                activePromos = activePromos.filter(p => p.id.toLowerCase().includes(s));
+            }
+
+            if(activePromos.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem;">No active promos found.</td></tr>';
+            
+            activePromos.forEach(doc => {
+                const data = doc.data;
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:700; color: var(--accent-primary);">${doc.id}</td>
+                        <td style="font-weight:700; color: var(--success);">${(data.discount * 100).toFixed(0)}%</td>
+                        <td><span class="status-badge status-active">Active</span></td>
+                        <td><button class="action-btn" style="color: var(--danger);" onclick="deletePromo('${doc.id}')">Del</button></td>
+                    </tr>`;
+            });
+
+            // Render Pending (Filtered)
+            pendingPromos.forEach(doc => {
+                const data = doc.data;
+
+                let actionButtons = '';
+                if (isSuperAdmin) {
+                    actionButtons = `
+                        <button class="action-btn success" style="border:none; color:white;" onclick="approvePromo('${doc.id}')"><i class="ri-check-line"></i> Approve</button>
+                        <button class="action-btn danger" style="color:var(--danger);" onclick="deletePromo('${doc.id}')"><i class="ri-close-line"></i></button>
+                    `;
+                } else {
+                    actionButtons = `
+                        <button class="action-btn warning" style="color:black;" onclick="deletePromo('${doc.id}')">Cancel Request</button>
+                    `;
+                }
+
+                pendingTbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:700; color: var(--accent-primary);">${doc.id}</td>
+                        <td style="font-weight:700; color: var(--success);">${(data.discount * 100).toFixed(0)}%</td>
+                        <td style="font-size:0.8rem; color:var(--text-secondary);">${data.createdByEmail || 'Unknown'}</td>
+                        <td>${actionButtons}</td>
+                    </tr>`;
+            });
+        }
+
+        function createPromo() {
+            const code = document.getElementById('new-promo-code').value.trim().toUpperCase();
+            const val = parseFloat(document.getElementById('new-promo-val').value);
+            if(!code || isNaN(val)) return showToast("Invalid input", "error");
+            if(val <= 0 || val >= 1) return showToast("Discount must be between 0 and 1", "error");
+
+            const status = isSuperAdmin ? 'active' : 'pending';
+
+            db.collection("promo_codes").doc(code).set({ 
+                discount: val, 
+                status: status,
+                createdBy: currentAdminUID,
+                createdByEmail: currentAdminEmail,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => { 
+                document.getElementById('new-promo-code').value = ''; 
+                document.getElementById('new-promo-val').value = ''; 
+                showToast(`Promo created! Status: ${status.toUpperCase()}`, status === 'active' ? 'success' : 'info'); 
+            }).catch(err => showToast(err.message, "error"));
+        }
+
+        function approvePromo(code) {
+            db.collection("promo_codes").doc(code).update({ status: 'active' }).then(() => {
+                showToast("Promo Approved!", "success");
+            });
+        }
+
+        function deletePromo(code) {
+            if(confirm(`Delete code ${code}?`)) db.collection("promo_codes").doc(code).delete();
+        }
+
+        // --- LOGS ---
+        function loadLogsTab(type) {
+            const buttons = document.querySelectorAll('#tab-logs .sm-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            let activeBtnId = 'btn-log-all';
+            if(type === 'tickets') activeBtnId = 'btn-log-tickets';
+            if(type === 'vouchers') activeBtnId = 'btn-log-vouchers';
+            const activeBtn = document.getElementById(activeBtnId);
+            if(activeBtn) activeBtn.classList.add('active');
+            currentLogFilter = type;
+            renderLogsTable();
+        }
+
+        function renderLogsTable() {
+            const tbody = document.getElementById('logs-table-body');
+            if (!dataLoaded.tickets || !dataLoaded.users) {
+                 tbody.innerHTML = `<tr><td colspan="4"><div class="loader-container"><div class="loader"></div></div></td></tr>`;
+                 return;
+            }
+            tbody.innerHTML = '';
+            let logEntries = [];
+
+            // Log Vouchers
+            allUsers.filter(u => u.personalVoucher).forEach(u => {
+                const v = u.personalVoucher;
+                const date = v.voucherTimestamp ? new Date(v.voucherTimestamp.toDate()).toLocaleString() : '-';
+                logEntries.push({
+                    timestamp: date,
+                    admin: v.voucherCreatedByEmail || 'Admin',
+                    action: 'Assigned Voucher',
+                    detail: `Code: ${v.code} to ${u.name}`,
+                    type: 'voucher'
+                });
+            });
+
+            // Log Tickets
+            ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
+                const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
+                const resolvedBy = t.data.resolvedBy || (t.data.adminNote ? t.data.adminNote.split(' ')[0] : 'Admin');
+                logEntries.push({
+                    timestamp: date,
+                    admin: resolvedBy,
+                    action: 'Resolved Ticket',
+                    detail: `Case #${t.id.substring(0,6)}: ${t.data.name}`,
+                    type: 'ticket'
+                });
+            });
+
+            logEntries.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if(currentLogFilter !== 'all') {
+                if(currentLogFilter === 'vouchers') logEntries = logEntries.filter(l => l.type === 'voucher');
+                if(currentLogFilter === 'tickets') logEntries = logEntries.filter(l => l.type === 'ticket');
+            }
+
+            const s = searchStates.logs;
+            if(s) {
+                logEntries = logEntries.filter(l => {
+                    const str = `${l.admin} ${l.action} ${l.detail}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
+
+            if(logEntries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">No logs found.</td></tr>`;
+                return;
+            }
+
+            logEntries.forEach(log => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="log-timestamp">${log.timestamp}</td>
+                        <td class="log-admin">${log.admin}</td>
+                        <td style="font-weight:600; font-size:0.85rem;">${log.action}</td>
+                        <td class="log-detail">${log.detail}</td>
+                    </tr>`;
+            });
+        }
+
+        // --- CONFIG & CONTENT ---
+        function updateContentUI() {
+            if(siteConfig.packageDetails) {
+                const frontData = siteConfig.packageDetails.frontend || DEFAULT_DETAILS.frontend;
+                const aiData = siteConfig.packageDetails.ai || DEFAULT_DETAILS.ai;
+                document.getElementById('details-frontend').value = frontData.join('\n');
+                document.getElementById('details-ai').value = aiData.join('\n');
+            } else {
+                document.getElementById('details-frontend').value = DEFAULT_DETAILS.frontend.join('\n');
+                document.getElementById('details-ai').value = DEFAULT_DETAILS.ai.join('\n');
+            }
+        }
+
+        function saveContentConfig() {
+            const frontText = document.getElementById('details-frontend').value;
+            const aiText = document.getElementById('details-ai').value;
+            siteConfig.packageDetails = {
+                frontend: frontText.split('\n').filter(line => line.trim() !== ''),
+                ai: aiText.split('\n').filter(line => line.trim() !== '')
+            };
+            db.collection("config").doc("site_settings").set({ packageDetails: siteConfig.packageDetails }, { merge: true }).then(() => showToast("Details Updated!", "success")).catch(err => showToast(err.message, "error"));
+        }
+
+        function updateDiscountUI() {
+            const toggleCircle = document.getElementById('discount-toggle-circle');
+            const isActive = siteConfig.discountActive || false;
+            const percent = siteConfig.discountPercent || 0;
+
+            if (isActive) {
+                toggleCircle.style.left = '27px'; toggleCircle.style.background = '#10b981';
+                document.getElementById('discount-value').value = (percent * 100).toFixed(0);
+            } else {
+                toggleCircle.style.left = '3px'; toggleCircle.style.background = '#555';
+                document.getElementById('discount-value').value = "";
+            }
+        }
+
+        function toggleDiscountStatus() {
+            siteConfig.discountActive = !siteConfig.discountActive;
+            updateDiscountUI();
+        }
+
+        function saveDiscountConfig() {
+            const inputVal = parseFloat(document.getElementById('discount-value').value);
+            const isActive = siteConfig.discountActive;
+
+            if (isActive && (isNaN(inputVal) || inputVal <= 0)) return showToast("Invalid Discount Value", "error");
+
+            const decimalVal = inputVal / 100;
+            const update = { discountActive: isActive, discountPercent: decimalVal };
+
+            db.collection("config").doc("site_settings").update(update)
+                .then(() => showToast("Discount Config Saved!", "success"))
+                .catch(err => showToast(err.message, "error"));
+        }
+
+        function updateMaintenanceUI() {
+            const toggleCircle = document.getElementById('maintenance-toggle-circle');
+            if(siteConfig.maintenance_active) {
+                toggleCircle.style.left = '27px'; toggleCircle.style.background = '#10b981';
+                document.getElementById('maintenance-msg').value = siteConfig.message || "Site is under maintenance.";
+            } else {
+                toggleCircle.style.left = '3px'; toggleCircle.style.background = '#555';
+                document.getElementById('maintenance-msg').value = "";
+            }
+        }
+
+        function toggleMaintenanceStatus() {
+            siteConfig.maintenance_active = !siteConfig.maintenance_active;
+            updateMaintenanceUI();
+        }
+
+        function saveMaintenanceConfig() {
+            const msg = document.getElementById('maintenance-msg').value;
+            siteConfig.message = msg;
+            db.collection("config").doc("site_settings").set({ maintenance_active: siteConfig.maintenance_active, message: msg }, { merge: true }).then(() => showToast("Saved!", "success"));
+        }
+
+        function updatePricingUI() {
+            if(siteConfig.prices) {
+                document.getElementById('price-html').value = siteConfig.prices.html || 199;
+                document.getElementById('price-frontend').value = siteConfig.prices.frontend || 599;
+            }
+        }
+
+        function savePricingConfig() {
+            const htmlPrice = parseFloat(document.getElementById('price-html').value);
+            const frontendPrice = parseFloat(document.getElementById('price-frontend').value);
+            siteConfig.prices = { html: htmlPrice, frontend: frontendPrice };
+            db.collection("config").doc("site_settings").update({ prices: siteConfig.prices }).then(() => showToast("Prices updated!", "success"));
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            const navItems = Array.from(document.querySelectorAll('.sidebar .nav-item'));
+            const mapping = ['dashboard','orders','users','tasks','support','vouchers','promos','logs','maintenance','content'];
+            const index = mapping.indexOf(tabId);
+            if(index !== -1 && navItems[index]) navItems[index].classList.add('active');
+            
+            if(window.innerWidth <= 768) toggleSidebar();
+            if(tabId === 'logs') loadLogsTab(currentLogFilter || 'all');
+        }
+
+        // --- USER MANAGEMENT MODALS ---
         function openCreateUserModal() {
             document.getElementById('create-name').value = '';
             document.getElementById('create-email').value = '';
             document.getElementById('create-password').value = '';
             document.getElementById('create-phone').value = '';
             document.getElementById('create-role').value = 'user';
+            document.getElementById('create-emp-id').value = '';
+            document.getElementById('emp-id-error').style.display = 'none';
             document.getElementById('createUserModal').classList.add('open');
+        }
+
+        function checkEmpIdUnique(val) {
+            const exists = allUsers.some(u => u.employeeId === val);
+            const err = document.getElementById('emp-id-error');
+            if(exists) {
+                err.style.display = 'block';
+                return false;
+            } else {
+                err.style.display = 'none';
+                return true;
+            }
+        }
+
+        function createNewUser() {
+            const empId = document.getElementById('create-emp-id').value.trim();
+            const name = document.getElementById('create-name').value;
+            const email = document.getElementById('create-email').value;
+            const password = document.getElementById('create-password').value;
+            const phone = document.getElementById('create-phone').value;
+            const role = document.getElementById('create-role').value;
+
+            if(!checkEmpIdUnique(empId)) return showToast("Employee ID already exists.", "error");
+            if(!empId || !name || !email || !password) return showToast("All fields are required.", "error");
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return db.collection("users").doc(user.uid).set({
+                        employeeId: empId,
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        role: role,
+                        jobTitle: role === 'superadmin' ? 'Super Admin' : '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    closeModal('createUserModal');
+                    showToast("User Created Successfully!", "success");
+                })
+                .catch((error) => {
+                    showToast("Error creating user: " + error.message, "error");
+                });
+        }
+
+        function requestAdminReset() {
+            if(confirm("Send a password reset request to the SuperAdmin?")) {
+                const ticketData = {
+                    name: currentAdminEmail,
+                    email: currentAdminEmail,
+                    phone: "",
+                    type: "Password Reset Request",
+                    message: `Admin ${currentAdminEmail} is requesting a password reset. Please reset my credentials.`,
+                    status: 'Open',
+                    source: "internal",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    adminNote: '',
+                    targetName: "Super Admin",
+                    adminEmail: currentAdminEmail,
+                    resolvedBy: null,
+                    resolvedAt: null
+                };
+
+                db.collection("tickets").add(ticketData).then(() => {
+                    showToast("Reset Request Sent to SuperAdmin", "success");
+                }).catch(err => showToast("Error: " + err.message, "error"));
+            }
         }
 
         function openInternalTicketModal() {
             document.getElementById('ticket-message').value = '';
             document.getElementById('ticket-target-user-select').value = '';
-            document.getElementById('ticket-target-user-input').value = '';
             document.getElementById('ticket-target-user-name').value = '';
             document.getElementById('ticket-type').value = 'Internal Bug';
 
@@ -1631,577 +2828,57 @@
             }).catch(err => showToast("Error creating ticket: " + err.message, "error"));
         }
 
-        function createNewUser() {
-            const name = document.getElementById('create-name').value;
-            const email = document.getElementById('create-email').value;
-            const password = document.getElementById('create-password').value;
-            const phone = document.getElementById('create-phone').value;
-            const role = document.getElementById('create-role').value;
+        function openEditUser(uid) {
+            const userObj = allUsers.find(u => u.id === uid);
+            if(!userObj) return;
+            const data = userObj;
+            const isTargetSuperAdmin = (data.role === 'superadmin');
+            const isCurrentUserAdmin = (!isSuperAdmin);
 
-            if(!name || !email || !password) return showToast("Name, Email, and Password are required.", "error");
+            document.getElementById('edit-permission-warning').style.display = 'none';
+            document.getElementById('edit-user-actions').style.display = 'flex';
+            document.querySelectorAll('#editUserModal input, #editUserModal select, #editUserModal button:not(.modal-close-btn)').forEach(el => el.disabled = false);
 
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    return db.collection("users").doc(user.uid).set({
-                        name: name,
-                        email: email,
-                        phone: phone,
-                        role: role,
-                        jobTitle: role === 'superadmin' ? 'Super Admin' : '',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                })
-                .then(() => {
-                    closeModal('createUserModal');
-                    showToast("User Created Successfully!", "success");
-                })
-                .catch((error) => {
-                    showToast("Error creating user: " + error.message, "error");
-                });
-        }
-
-        // SEARCH HANDLER
-        function handleSearch(tab, value) {
-            searchStates[tab] = value.toLowerCase();
-            if (tab === 'orders') renderOrdersTable();
-            if (tab === 'users') renderUsersTable();
-            if (tab === 'support') renderTicketsTable();
-            if (tab === 'vouchers') renderVoucherTable();
-            if (tab === 'promos') renderPromoTable();
-            if (tab === 'logs') renderLogsTable();
-            if (tab === 'config') scrollToSection('config', value);
-            if (tab === 'content') scrollToSection('content', value);
-        }
-
-        function scrollToSection(context, text) {
-            const textLower = text.toLowerCase();
-            if (!textLower) return;
-            
-            const sections = [];
-            if (context === 'config') {
-                sections.push({ id: 'config-discount', keywords: ['discount', 'sale', 'promo', 'badge'] });
-                sections.push({ id: 'config-maintenance', keywords: ['maintenance', 'banner', 'mode'] });
-                sections.push({ id: 'config-pricing', keywords: ['pricing', 'price', 'html', 'frontend'] });
-            } else if (context === 'content') {
-                sections.push({ id: 'content-frontend', keywords: ['frontend', 'features', 'standard'] });
-                sections.push({ id: 'content-ai', keywords: ['ai', 'artificial', 'intelligence', 'chatbot'] });
-            }
-
-            for (let sec of sections) {
-                if (sec.keywords.some(k => textLower.includes(k))) {
-                    const el = document.getElementById(sec.id);
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        el.style.transition = 'background 0.3s';
-                        el.style.background = 'rgba(59, 130, 246, 0.2)';
-                        setTimeout(() => { el.style.background = ''; }, 500);
-                        break;
-                    }
-                }
-            }
-        }
-
-        function loadDashboardData() {
-            db.collection("config").doc("site_settings").onSnapshot(doc => {
-                if(doc.exists) {
-                    siteConfig = doc.data();
-                    updateMaintenanceUI();
-                    updateDiscountUI(); 
-                    updatePricingUI();
-                    updateContentUI();
-                }
-            });
-
-            db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                orderCache = []; 
-                snapshot.forEach(doc => orderCache.push({ id: doc.id, data: doc.data() }));
-                renderOrdersTable();
-            });
-
-            db.collection("users").onSnapshot((snapshot) => {
-                const select = document.getElementById('voucher-user-select');
-                allUsers = []; 
-                let optionsHTML = '<option value="" disabled selected>Select a User</option>';
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    allUsers.push({ id: doc.id, ...data });
-                    optionsHTML += `<option value="${doc.id}">${data.name} (${data.email})</option>`;
-                });
-                select.innerHTML = optionsHTML;
-                renderUsersTable();
-                refreshVoucherTable();
-            });
-
-            db.collection("tickets").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                ticketCache = []; 
-                snapshot.forEach(doc => ticketCache.push({ id: doc.id, data: doc.data() }));
-                renderTicketsTable();
-                if(currentLogFilter && document.getElementById('tab-logs').classList.contains('active')) {
-                    renderLogsTable();
-                }
-            });
-
-            db.collection("promo_codes").onSnapshot((snapshot) => {
-                promoCache = [];
-                snapshot.forEach(doc => promoCache.push({ id: doc.id, data: doc.data() }));
-                renderPromoTable();
-            });
-        }
-
-        function renderOrdersTable() {
-            const tbody = document.getElementById('orders-table-body');
-            tbody.innerHTML = '';
-            
-            let visibleOrders = orderCache;
-            const s = searchStates.orders;
-            if(s) {
-                visibleOrders = visibleOrders.filter(o => {
-                    const d = o.data;
-                    const str = `${d.customerName} ${d.customerEmail} ${d.companyName || ''} ${o.id}`.toLowerCase();
-                    return str.includes(s);
-                });
-            }
-
-            if(visibleOrders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem;">No orders found.</td></tr>';
+            if(isCurrentUserAdmin) {
+                document.getElementById('edit-permission-warning').style.display = 'block';
+                document.getElementById('edit-permission-warning').querySelector('.alert-text').innerHTML = "Access Restricted. Contact SuperAdmin.";
+                document.getElementById('edit-user-actions').style.display = 'none';
+                
+                document.getElementById('edit-uid').value = uid;
+                document.getElementById('edit-name').value = data.name || '';
+                document.getElementById('edit-phone').value = data.phone || '';
+                document.getElementById('edit-role').value = data.role || 'user';
+                document.getElementById('edit-emp-id').value = data.employeeId || '';
+                document.getElementById('edit-jobtitle').value = data.jobTitle || '';
+                
+                document.querySelectorAll('#editUserModal input, #editUserModal select').forEach(el => el.disabled = true);
+                document.getElementById('editUserModal').classList.add('open');
                 return;
             }
 
-            visibleOrders.forEach(doc => {
-                const data = doc.data;
-                const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
-                let statusClass = 'status-pending';
-                if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
-                if(data.status === 'Cancelled') statusClass = 'status-cancelled';
-                
-                const safeCompany = (data.companyName || '').replace(/'/g, "\\'");
-                const safePackage = (data.package || '').replace(/'/g, "\\'");
-                const safeTotal = (data.total || '').replace(/'/g, "\\'");
-                const safeVoucher = (data.voucherCode || '').replace(/'/g, "\\'");
-                const safeNote = (data.adminNote || '').replace(/'/g, "\\'");
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
-                        <td><div style="font-weight:600;">${data.customerName}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.customerEmail}</div></td>
-                        <td style="color:var(--text-secondary); font-size:0.85rem;">${data.companyName || '-'}</td>
-                        <td>${data.package || '-'}</td>
-                        <td style="color:var(--success); font-weight:600;">${data.voucherCode || '-'}</td>
-                        <td style="font-weight:700;">${data.total || '-'}</td>
-                        <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                        <td><button class="action-btn" onclick="openOrderModal('${doc.id}', '${data.status}', '${safeNote}', '${safeCompany}', '${safePackage}', '${safeTotal}', '${safeVoucher}')">Manage</button></td>
-                    </tr>`;
-            });
-        }
-
-        function renderUsersTable() {
-            const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = '';
-            
-            let visibleUsers = allUsers;
-            const s = searchStates.users;
-            if(s) {
-                visibleUsers = visibleUsers.filter(u => {
-                    const str = `${u.name} ${u.email} ${u.phone}`.toLowerCase();
-                    return str.includes(s);
-                });
-            }
-
-            if(visibleUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem;">No users found.</td></tr>';
-                return;
-            }
-
-            visibleUsers.forEach(u => {
-                const role = u.role || 'user';
-                let roleClass = 'role-user';
-                let roleLabel = 'User';
-                
-                if(role === 'admin') { roleClass = 'role-admin'; roleLabel = 'Admin'; }
-                if(role === 'superadmin') { roleClass = 'role-superadmin'; roleLabel = 'Super Admin'; }
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
-                        <td>${u.name}</td>
-                        <td style="color:var(--text-secondary); font-size:0.9rem;">${u.jobTitle || '-'}</td>
-                        <td style="font-size:0.9rem;">${u.email}</td>
-                        <td>${u.phone}</td>
-                        <td>
-                            <button class="action-btn" onclick="openEditUser('${u.id}', '${(u.name || '').replace(/'/g, "\\'")}', '${(u.phone || '').replace(/'/g, "\\'")}', '${role}', '${(u.jobTitle || '').replace(/'/g, "\\'")}')">Edit</button>
-                            <button class="action-btn" onclick="resetUserPass('${u.email}')">Pwd</button>
-                        </td>
-                    </tr>`;
-            });
-        }
-
-        function filterTickets(type, btnElement) {
-            ticketFilter = type;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
-            renderTicketsTable();
-        }
-
-        function renderTicketsTable() {
-            const tbody = document.getElementById('tickets-table-body');
-            tbody.innerHTML = '';
-            let visibleTickets = ticketCache;
-            
-            if (ticketFilter === 'internal') visibleTickets = visibleTickets.filter(t => t.data.source === "internal");
-            else if (ticketFilter === 'external') visibleTickets = visibleTickets.filter(t => t.data.source !== "internal");
-
-            const s = searchStates.support;
-            if(s) {
-                visibleTickets = visibleTickets.filter(t => {
-                    const d = t.data;
-                    const str = `${d.name} ${d.type} ${d.message} ${t.id}`.toLowerCase();
-                    return str.includes(s);
-                });
-            }
-
-            if(visibleTickets.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:2rem;">No tickets.</td></tr>`;
-                return;
-            }
-            visibleTickets.forEach(item => {
-                const doc = item;
-                const data = item.data;
-                const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString() : '-';
-                let statusClass = data.status === 'Resolved' ? 'status-paid' : 'status-open';
-                
-                const isInternal = data.source === "internal";
-                const rowClass = isInternal ? "row-internal" : "";
-                const sourceBadge = isInternal ? `<span class="source-badge badge-internal">Team</span>` : `<span class="source-badge badge-external">User</span>`;
-                
-                const targetInfo = data.targetName ? `<div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">Target: <b>${data.targetName}</b></div>` : '';
-                
-                let resolvedByDisplay = '-';
-                if(data.status === 'Resolved' && data.resolvedBy) {
-                    resolvedByDisplay = `<span style="font-size:0.8rem; font-weight:600; color:var(--success);">${data.resolvedBy}</span>`;
-                }
-
-                tbody.innerHTML += `
-                    <tr class="${rowClass}">
-                        <td style="color:var(--text-secondary); font-size:0.9rem;">${date}</td>
-                        <td><span style="font-family:monospace; font-size:0.8rem; color:var(--accent-primary); font-weight:700;">${doc.id.substring(0,8)}...</span></td>
-                        <td>${sourceBadge}</td>
-                        <td style="font-weight:700;">${data.type}</td>
-                        <td><div style="font-weight:600;">${data.name}</div><div style="font-size:0.8rem; color:var(--text-secondary);">${data.email}</div></td>
-                        <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; position: relative;">
-                            ${data.message}
-                            ${targetInfo}
-                        </td>
-                        <td><span class="status-badge ${statusClass}">${data.status}</span></td>
-                        <td style="font-size:0.85rem;">${resolvedByDisplay}</td>
-                        <td><button class="action-btn" onclick="openTicketModal('${doc.id}')">View</button></td>
-                    </tr>`;
-            });
-        }
-
-        function renderVoucherTable() {
-            const tbody = document.getElementById('voucher-table-body');
-            tbody.innerHTML = '';
-            const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
-            
-            let visibleVouchers = usersWithVouchers;
-            const s = searchStates.vouchers;
-            if(s) {
-                visibleVouchers = visibleVouchers.filter(u => {
-                    const v = u.personalVoucher;
-                    const str = `${u.name} ${v.code}`.toLowerCase();
-                    return str.includes(s);
-                });
-            }
-
-            if(visibleVouchers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem; color:var(--text-secondary);">No vouchers.</td></tr>';
-                return;
-            }
-            visibleVouchers.forEach(u => {
-                const v = u.personalVoucher;
-                const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
-                const createdBy = v.voucherCreatedBy || '-';
-
-                const createdByCell = isSuperAdmin ? `<td style="font-size:0.8rem;">${createdBy}</td>` : '';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight:600;">${u.name}</td>
-                        <td style="color:var(--accent-primary);">${v.code}</td>
-                        <td style="color:var(--success);">${displayVal}</td>
-                        ${createdByCell}
-                        <td><button class="action-btn" style="color:var(--danger);" onclick="deleteUserVoucher('${u.id}')">Remove</button></td>
-                    </tr>`;
-            });
-        }
-
-        function renderPromoTable() {
-            const tbody = document.getElementById('promo-table-body');
-            tbody.innerHTML = '';
-            
-            let visiblePromos = promoCache;
-            const s = searchStates.promos;
-            if(s) {
-                visiblePromos = visiblePromos.filter(p => {
-                    const str = `${p.id}`.toLowerCase();
-                    return str.includes(s);
-                });
-            }
-
-            if(visiblePromos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:2rem;">No promos found.</td></tr>';
-                return;
-            }
-            visiblePromos.forEach(doc => {
-                const data = doc.data;
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight:700; color: var(--accent-primary);">${doc.id}</td>
-                        <td style="font-weight:700; color: var(--success);">${(data.discount * 100).toFixed(0)}%</td>
-                        <td><button class="action-btn" style="color: var(--danger);" onclick="deletePromo('${doc.id}')">Del</button></td>
-                    </tr>`;
-            });
-        }
-
-        function loadLogsTab(type) {
-            const buttons = document.querySelectorAll('#tab-logs .sm-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            let activeBtnId = 'btn-log-all';
-            if(type === 'tickets') activeBtnId = 'btn-log-tickets';
-            if(type === 'vouchers') activeBtnId = 'btn-log-vouchers';
-            
-            const activeBtn = document.getElementById(activeBtnId);
-            if(activeBtn) activeBtn.classList.add('active');
-
-            currentLogFilter = type;
-            renderLogsTable();
-        }
-
-        function renderLogsTable() {
-            const tbody = document.getElementById('logs-table-body');
-            tbody.innerHTML = '';
-            
-            let logEntries = [];
-
-            allUsers.filter(u => u.personalVoucher).forEach(u => {
-                const v = u.personalVoucher;
-                const date = v.voucherTimestamp ? new Date(v.voucherTimestamp.toDate()).toLocaleString() : '-';
-                logEntries.push({
-                    timestamp: date,
-                    admin: v.voucherCreatedBy || 'Admin',
-                    action: 'Assigned Voucher',
-                    detail: `Code: ${v.code} to ${u.name}`,
-                    type: 'voucher'
-                });
-            });
-
-            ticketCache.filter(t => t.data.status === 'Resolved').slice(0, 20).forEach(t => {
-                const date = t.data.timestamp ? new Date(t.data.timestamp.toDate()).toLocaleString() : '-';
-                const resolvedBy = t.data.resolvedBy || (t.data.adminNote ? t.data.adminNote.split(' ')[0] : 'Admin');
-                
-                logEntries.push({
-                    timestamp: date,
-                    admin: resolvedBy,
-                    action: 'Resolved Ticket',
-                    detail: `Case #${t.id.substring(0,6)}: ${t.data.name}`,
-                    type: 'ticket'
-                });
-            });
-
-            logEntries.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            if(currentLogFilter !== 'all') {
-                if(currentLogFilter === 'vouchers') logEntries = logEntries.filter(l => l.type === 'voucher');
-                if(currentLogFilter === 'tickets') logEntries = logEntries.filter(l => l.type === 'ticket');
-            }
-
-            const s = searchStates.logs;
-            if(s) {
-                logEntries = logEntries.filter(l => {
-                    const str = `${l.admin} ${l.action} ${l.detail}`.toLowerCase();
-                    return str.includes(s);
-                });
-            }
-
-            if(logEntries.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-secondary);">No logs found.</td></tr>`;
-                return;
-            }
-
-            logEntries.forEach(log => {
-                tbody.innerHTML += `
-                    <tr class="log-entry">
-                        <td class="log-timestamp">${log.timestamp}</td>
-                        <td class="log-admin">${log.admin}</td>
-                        <td style="font-weight:600; font-size:0.85rem;">${log.action}</td>
-                        <td class="log-detail">${log.detail}</td>
-                    </tr>`;
-            });
-        }
-
-        function updateContentUI() {
-            if(siteConfig.packageDetails) {
-                const frontData = siteConfig.packageDetails.frontend || DEFAULT_DETAILS.frontend;
-                const aiData = siteConfig.packageDetails.ai || DEFAULT_DETAILS.ai;
-                document.getElementById('details-frontend').value = frontData.join('\n');
-                document.getElementById('details-ai').value = aiData.join('\n');
-            } else {
-                document.getElementById('details-frontend').value = DEFAULT_DETAILS.frontend.join('\n');
-                document.getElementById('details-ai').value = DEFAULT_DETAILS.ai.join('\n');
-            }
-        }
-
-        function saveContentConfig() {
-            const frontText = document.getElementById('details-frontend').value;
-            const aiText = document.getElementById('details-ai').value;
-            siteConfig.packageDetails = {
-                frontend: frontText.split('\n').filter(line => line.trim() !== ''),
-                ai: aiText.split('\n').filter(line => line.trim() !== '')
-            };
-            db.collection("config").doc("site_settings").set({ packageDetails: siteConfig.packageDetails }, { merge: true }).then(() => showToast("Details Updated!", "success")).catch(err => showToast(err.message, "error"));
-        }
-
-        /* --- DISCOUNT CONFIG LOGIC --- */
-        function updateDiscountUI() {
-            const toggleCircle = document.getElementById('discount-toggle-circle');
-            
-            const isActive = siteConfig.discountActive || false;
-            const percent = siteConfig.discountPercent || 0;
-
-            if (isActive) {
-                toggleCircle.style.left = '27px'; 
-                toggleCircle.style.background = '#10b981';
-                document.getElementById('discount-value').value = (percent * 100).toFixed(0);
-            } else {
-                toggleCircle.style.left = '3px'; 
-                toggleCircle.style.background = '#555';
-                document.getElementById('discount-value').value = "";
-            }
-        }
-
-        function toggleDiscountStatus() {
-            siteConfig.discountActive = !siteConfig.discountActive;
-            updateDiscountUI();
-        }
-
-        function saveDiscountConfig() {
-            const inputVal = parseFloat(document.getElementById('discount-value').value);
-            const isActive = siteConfig.discountActive;
-
-            if (isActive && (isNaN(inputVal) || inputVal <= 0)) return showToast("Invalid Discount Value", "error");
-
-            const decimalVal = inputVal / 100;
-
-            const update = {
-                discountActive: isActive,
-                discountPercent: decimalVal
-            };
-
-            db.collection("config").doc("site_settings").update(update)
-                .then(() => showToast("Discount Config Saved!", "success"))
-                .catch(err => showToast(err.message, "error"));
-        }
-        /* --- END DISCOUNT CONFIG --- */
-
-        function updateMaintenanceUI() {
-            const toggleCircle = document.getElementById('maintenance-toggle-circle');
-            if(siteConfig.maintenance_active) {
-                toggleCircle.style.left = '27px'; toggleCircle.style.background = '#10b981';
-                document.getElementById('maintenance-msg').value = siteConfig.message || "Site is under maintenance.";
-            } else {
-                toggleCircle.style.left = '3px'; toggleCircle.style.background = '#555';
-                document.getElementById('maintenance-msg').value = "";
-            }
-        }
-
-        function toggleMaintenanceStatus() {
-            siteConfig.maintenance_active = !siteConfig.maintenance_active;
-            updateMaintenanceUI();
-        }
-
-        function saveMaintenanceConfig() {
-            const msg = document.getElementById('maintenance-msg').value;
-            siteConfig.message = msg;
-            db.collection("config").doc("site_settings").set({ maintenance_active: siteConfig.maintenance_active, message: msg }, { merge: true }).then(() => showToast("Saved!", "success"));
-        }
-
-        function updatePricingUI() {
-            if(siteConfig.prices) {
-                document.getElementById('price-html').value = siteConfig.prices.html || 199;
-                document.getElementById('price-frontend').value = siteConfig.prices.frontend || 599;
-            }
-        }
-
-        function savePricingConfig() {
-            const htmlPrice = parseFloat(document.getElementById('price-html').value);
-            const frontendPrice = parseFloat(document.getElementById('price-frontend').value);
-            siteConfig.prices = { html: htmlPrice, frontend: frontendPrice };
-            db.collection("config").doc("site_settings").update({ prices: siteConfig.prices }).then(() => showToast("Prices updated!", "success"));
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            
-            const navItems = Array.from(document.querySelectorAll('.sidebar .nav-item'));
-            const mapping = ['orders','users','support','vouchers','promos','logs','maintenance','content'];
-            const index = mapping.indexOf(tabId);
-            
-            if(index !== -1 && navItems[index]) {
-                navItems[index].classList.add('active');
-            }
-
-            if(tabId === 'logs') {
-                loadLogsTab(currentLogFilter || 'all');
-            }
-        }
-
-        function openEditUser(uid, name, phone, role, jobTitle) {
             document.getElementById('edit-uid').value = uid;
-            document.getElementById('edit-name').value = name;
-            document.getElementById('edit-phone').value = phone;
-            document.getElementById('edit-role').value = role || 'user';
+            document.getElementById('edit-name').value = data.name || '';
+            document.getElementById('edit-phone').value = data.phone || '';
+            document.getElementById('edit-role').value = data.role || 'user';
+            document.getElementById('edit-emp-id').value = data.employeeId || '';
             
             const roleSelect = document.getElementById('edit-role');
             const jobTitleInput = document.getElementById('edit-jobtitle');
             const nameInput = document.getElementById('edit-name');
             const phoneInput = document.getElementById('edit-phone');
+            const empIdInput = document.getElementById('edit-emp-id');
             const helperLabel = document.getElementById('jobtitle-helper');
             const restrictionMsg = document.getElementById('edit-restriction-msg');
 
-            const isTargetSuperAdmin = (role === 'superadmin');
-
-            if (!isSuperAdmin) {
-                if (isTargetSuperAdmin) {
-                    nameInput.disabled = true;
-                    phoneInput.disabled = true;
-                    roleSelect.disabled = true;
-                    jobTitleInput.disabled = true;
-                    restrictionMsg.style.display = 'block';
-                    restrictionMsg.innerText = "Standard Admins cannot edit SuperAdmin accounts.";
-                    restrictionMsg.style.color = 'var(--warning)';
-                    helperLabel.style.display = 'none';
-                } else {
-                    nameInput.disabled = false;
-                    phoneInput.disabled = false;
-                    roleSelect.disabled = true; 
-                    jobTitleInput.disabled = true; 
-                    restrictionMsg.style.display = 'none';
-                    helperLabel.style.display = 'none';
-                }
-            } else {
-                nameInput.disabled = false;
-                phoneInput.disabled = false;
-                roleSelect.disabled = false;
-                jobTitleInput.disabled = false;
-                jobTitleInput.value = jobTitle || "";
-                helperLabel.style.display = 'inline';
-                restrictionMsg.style.display = 'none';
-            }
+            nameInput.disabled = false;
+            phoneInput.disabled = false;
+            empIdInput.disabled = false;
+            roleSelect.disabled = false;
+            jobTitleInput.disabled = false;
+            jobTitleInput.value = data.jobTitle || "";
+            helperLabel.style.display = 'inline';
+            restrictionMsg.style.display = 'none';
+            
             document.getElementById('editUserModal').classList.add('open');
         }
 
@@ -2210,6 +2887,7 @@
             const name = document.getElementById('edit-name').value;
             const phone = document.getElementById('edit-phone').value;
             const role = document.getElementById('edit-role').value;
+            const empId = document.getElementById('edit-emp-id').value;
             
             if (!isSuperAdmin && role === 'superadmin') {
                 showToast("You do not have permission to modify SuperAdmin accounts.", "error");
@@ -2217,12 +2895,14 @@
             }
 
             if(!name || !phone) return showToast("Fields cannot be empty", "error");
+
+            const existingUser = allUsers.find(u => u.id !== uid && u.employeeId === empId);
+            if(existingUser) {
+                showToast("Employee ID already exists.", "error");
+                return;
+            }
             
-            const updateData = { 
-                name: name, 
-                phone: phone, 
-                role: role
-            };
+            const updateData = { name: name, phone: phone, role: role, employeeId: empId };
 
             if (isSuperAdmin) {
                 updateData.jobTitle = document.getElementById('edit-jobtitle').value;
@@ -2237,14 +2917,19 @@
             }
         }
 
-        function openOrderModal(orderId, currentStatus, note, companyName, pkg, total, voucher) {
+        function openOrderModal(orderId) {
+            // Simplified fetching for modal
+            const orderObj = orderCache.find(o => o.id === orderId);
+            if(!orderObj) return;
+            const data = orderObj.data;
+
             document.getElementById('order-id').value = orderId;
-            document.getElementById('order-status-select').value = currentStatus || 'Pending';
-            document.getElementById('order-admin-note').value = note || '';
-            document.getElementById('order-company-name').value = companyName || ''; 
-            document.getElementById('order-package').value = pkg || ''; 
-            document.getElementById('order-total').value = total || ''; 
-            document.getElementById('order-voucher').value = voucher || '-'; 
+            document.getElementById('order-status-select').value = data.status || 'Pending';
+            document.getElementById('order-admin-note').value = data.adminNote || '';
+            document.getElementById('order-company-name').value = data.companyName || ''; 
+            document.getElementById('order-package').value = data.package || ''; 
+            document.getElementById('order-total').value = data.total || ''; 
+            document.getElementById('order-voucher').value = data.voucherCode || '-'; 
             document.getElementById('orderModal').classList.add('open');
         }
 
@@ -2313,48 +2998,6 @@
             }
 
             db.collection("tickets").doc(id).update(updateData).then(() => { closeModal('ticketModal'); showToast("Ticket updated", "success"); }).catch(err => showToast(err.message, "error"));
-        }
-
-        function assignVoucher() {
-            const uid = document.getElementById('voucher-user-select').value;
-            const code = document.getElementById('voucher-code').value.trim().toUpperCase();
-            const val = parseFloat(document.getElementById('voucher-val').value);
-            const type = document.getElementById('voucher-type').value;
-            if(!uid) return showToast("Please select a user.", "error");
-            if(!code || isNaN(val)) return showToast("Invalid Voucher Details.", "error");
-
-            const voucherData = {
-                code: code,
-                value: val,
-                type: type,
-                voucherCreatedBy: currentAdminEmail,
-                voucherTimestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            db.collection("users").doc(uid).update({ personalVoucher: voucherData }).then(() => {
-                showToast(`Voucher ${code} assigned!`, "success");
-                refreshVoucherTable();
-            }).catch(err => showToast(err.message, "error"));
-        }
-
-        function refreshVoucherTable() {
-            renderVoucherTable();
-        }
-
-        function deleteUserVoucher(uid) {
-            if(confirm("Remove voucher?")) db.collection("users").doc(uid).update({ personalVoucher: firebase.firestore.FieldValue.delete() });
-        }
-
-        function createPromo() {
-            const code = document.getElementById('new-promo-code').value.trim().toUpperCase();
-            const val = parseFloat(document.getElementById('new-promo-val').value);
-            if(!code || isNaN(val)) return showToast("Invalid input", "error");
-            if(val <= 0 || val >= 1) return showToast("Discount must be between 0 and 1", "error");
-            db.collection("promo_codes").doc(code).set({ discount: val }).then(() => { document.getElementById('new-promo-code').value = ''; document.getElementById('new-promo-val').value = ''; showToast("Promo Code Created!", "success"); }).catch(err => showToast(err.message, "error"));
-        }
-
-        function deletePromo(code) {
-            if(confirm(`Delete code ${code}?`)) db.collection("promo_codes").doc(code).delete();
         }
 
         function closeModal(id) {
