@@ -573,6 +573,7 @@
         .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-open { background: rgba(59, 130, 246, 0.15); color: var(--accent-primary); border: 1px solid rgba(59, 130, 246, 0.3); }
         .status-inactive { background: rgba(100, 100, 100, 0.15); color: #999; border: 1px solid rgba(100, 100, 100, 0.3); }
+        .status-expired { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid #94a3b8; text-decoration: line-through; } /* NEW: Expired Style */
 
         /* PLAN BADGES */
         .plan-badge {
@@ -1587,7 +1588,7 @@
         </div>
     </div>
 
-    <!-- MANAGE VOUCHER MODAL (NEW) -->
+    <!-- MANAGE VOUCHER MODAL (NEW LOGIC) -->
     <div id="manageVoucherModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-close-btn" onclick="closeModal('manageVoucherModal')"><i class="ri-close-line"></i></div>
@@ -1602,6 +1603,12 @@
             <div class="form-row">
                 <label>Current Value</label>
                 <div id="manage-voucher-value-display" style="font-weight:700; color:var(--text-main); margin-top:10px;"></div>
+            </div>
+
+            <!-- WARNING BOX FOR EXPIRED VOUCHERS -->
+            <div id="voucher-expired-warning" class="alert-box" style="display:none; border-color:var(--warning); background:rgba(245, 158, 11, 0.05);">
+                <i class="ri-time-line" style="color:var(--warning); margin-right:5px;"></i> 
+                <span style="color:var(--warning); font-weight:600;">This voucher is expired.</span>
             </div>
 
             <div class="form-row" style="border-top:1px solid var(--border-color); padding-top:1rem;">
@@ -1780,7 +1787,7 @@
             
             <div id="renewal-alert" style="background: rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.3); padding:10px; border-radius:8px; margin-bottom:1rem; display:none;">
                 <div style="font-size:0.85rem; color:var(--success); font-weight:700;"><i class="ri-refresh-line"></i> Auto-Renewal</div>
-                <div style="font-size:0.8rem;">Setting status to Paid will renew the client's subscription.</div>
+                <div style="font-size:0.8rem;">Setting status to Paid will renew client's subscription.</div>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
@@ -2510,7 +2517,7 @@
                 // Delete Button (SuperAdmin Only)
                 let deleteBtn = '';
                 if(isSuperAdmin) {
-                    deleteBtn = `<button class="action-btn danger" style="color:white; margin-left:5px;" onclick="deleteOrder('${doc.id}')"><i class="ri-delete-bin-line"></i></button>`;
+                    deleteBtn = `<button class="action-btn danger" style="color:var(--danger); margin-left:5px;" onclick="deleteOrder('${doc.id}')"><i class="ri-delete-bin-line"></i></button>`;
                 }
 
                 tbody.innerHTML += `
@@ -2564,7 +2571,7 @@
 
             if (status === 'Paid' && oldStatus !== 'Paid') {
                 // Auto Renew Logic
-                if(confirm("Mark as Paid? This will renew the client's subscription.")) {
+                if(confirm("Mark as Paid? This will renew client's subscription.")) {
                     renewalPromise = autoRenewSubscription(orderObj.data.customerEmail, pkg);
                 } else {
                     return; // Cancel save if they deny renewal
@@ -2871,8 +2878,7 @@
                                 Manage ${adminNoteDisplay}
                             </button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
@@ -3006,14 +3012,20 @@
                 const v = u.personalVoucher;
                 const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
                 
-                // Status & Expiry Text
-                let statusText = 'Active';
-                if(v.isRedeemed) statusText = '<span style="color:var(--text-muted)">Redeemed</span>';
-                else if(v.status === 'disabled') statusText = '<span style="color:var(--danger)">Disabled</span>';
-                else if(v.expiryDate) {
+                // UPDATED: Determine Status with Badges
+                let statusHtml = '<span class="status-badge status-active">Active</span>';
+                
+                if(v.isRedeemed) {
+                    statusHtml = '<span class="status-badge status-inactive">Redeemed</span>';
+                } else if(v.status === 'disabled') {
+                    statusHtml = '<span class="status-badge status-cancelled">Disabled</span>';
+                } else if(v.expiryDate) {
+                    // EXPIRY LOGIC
                     const now = new Date();
                     const exp = v.expiryDate.toDate();
-                    if(now > exp) statusText = '<span style="color:var(--danger)">Expired</span>';
+                    if(now > exp) {
+                        statusHtml = '<span class="status-badge status-expired">Expired</span>';
+                    }
                 }
 
                 tbody.innerHTML += `
@@ -3021,7 +3033,7 @@
                         <td style="font-weight:600;">${u.name}</td>
                         <td style="color:var(--accent-primary);">${v.code}</td>
                         <td style="color:var(--success);">${displayVal}</td>
-                        <td style="font-size:0.85rem;">${statusText}</td>
+                        <td style="font-size:0.85rem;">${statusHtml}</td>
                         <td>
                             <button class="action-btn" onclick="openManageVoucher('${u.id}')">Manage</button>
                         </td>
@@ -3107,7 +3119,7 @@
             if(confirm("Remove voucher?")) db.collection("users").doc(uid).update({ personalVoucher: firebase.firestore.FieldValue.delete() });
         }
 
-        // --- MANAGE VOUCHER MODAL (NEW LOGIC) ---
+        // --- MANAGE VOUCHER MODAL (UPDATED WITH EXPIRY LOGIC) ---
         function openManageVoucher(uid) {
             const user = allUsers.find(u => u.id === uid);
             if(!user || !user.personalVoucher) return;
@@ -3126,11 +3138,25 @@
             if(v.expiryDate) {
                 const d = v.expiryDate.toDate();
                 const yyyy = d.getFullYear();
-                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const mm = String(d.getMonth() +1).padStart(2, '0');
                 const dd = String(d.getDate()).padStart(2, '0');
                 document.getElementById('manage-voucher-expiry').value = `${yyyy}-${mm}-${dd}`;
             } else {
                 document.getElementById('manage-voucher-expiry').value = '';
+            }
+
+            // NEW: Check if currently expired
+            const warningBox = document.getElementById('voucher-expired-warning');
+            if(v.expiryDate && !v.isRedeemed && v.status === 'active') {
+                const now = new Date();
+                const exp = v.expiryDate.toDate();
+                if(now > exp) {
+                    warningBox.style.display = 'block';
+                } else {
+                    warningBox.style.display = 'none';
+                }
+            } else {
+                warningBox.style.display = 'none';
             }
 
             document.getElementById('manageVoucherModal').classList.add('open');
@@ -3144,7 +3170,7 @@
             const isRedeemed = document.getElementById('manage-voucher-redeemed').checked;
             const newExpiryStr = document.getElementById('manage-voucher-expiry').value;
             
-            // We must fetch the full user object to avoid overwriting other fields
+            // We must fetch full user object to avoid overwriting other fields
             const user = allUsers.find(u => u.id === uid);
             if(!user) return;
             
@@ -3221,7 +3247,7 @@
                 if (isSuperAdmin) {
                     actionButtons = `
                         <button class="action-btn success" style="border:none; color:white;" onclick="approvePromo('${doc.id}')"><i class="ri-check-line"></i> Approve</button>
-                        <button class="action-btn danger" style="color:var(--danger);" onclick="deletePromo('${doc.id}')"><i class="ri-close-line"></i></button>
+                        <button class="action-btn danger" style="color:black;" onclick="deletePromo('${doc.id}')"><i class="ri-close-line"></i></button>
                     `;
                 } else {
                     actionButtons = `
@@ -3393,7 +3419,7 @@
             const inputVal = parseFloat(document.getElementById('discount-value').value);
             const isActive = siteConfig.discountActive;
 
-            if (isActive && (isNaN(inputVal) || inputVal <= 0)) return showToast("Invalid Discount Value", "error");
+            if (isActive && (isNaN(inputVal) || inputVal <=0)) return showToast("Invalid Discount Value", "error");
 
             const decimalVal = inputVal / 100;
             const update = { discountActive: isActive, discountPercent: decimalVal };
@@ -3428,7 +3454,7 @@
         function updatePricingUI() {
             if(siteConfig.prices) {
                 document.getElementById('price-html').value = siteConfig.prices.html || 199;
-                document.getElementById('price-frontend').value = siteConfig.prices.frontend || 599;
+                document.getElementById('price-frontend').value = siteConfig.prices.frontend ||599;
                 document.getElementById('price-ai').value = siteConfig.prices.ai || 999;
             }
         }
@@ -3453,7 +3479,7 @@
         }
 
         function updatePaymentMethodsUI() {
-            const methods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
+            const methods = siteConfig.payment_methods && siteConfig.payment_methods.length >0 
                             ? siteConfig.payment_methods 
                             : DEFAULT_PAYMENT_METHODS;
 
@@ -3504,7 +3530,7 @@
                                 <i class="ri-edit-line"></i> Edit
                             </button>
                             <button class="action-btn" onclick="togglePaymentMethod(${index})">${pm.active ? 'Disable' : 'Enable'}</button>
-                            <button class="action-btn" style="color:white;" onclick="deletePaymentMethod(${index})" title="Delete Gateway">
+                            <button class="action-btn" style="color:var(--danger);" onclick="deletePaymentMethod(${index})" title="Delete Gateway">
                                 <i class="ri-delete-bin-line"></i>
                             </button>
                         </td>
@@ -3597,7 +3623,7 @@
             const currentMethods = siteConfig.payment_methods && siteConfig.payment_methods.length > 0 
                                 ? siteConfig.payment_methods 
                                 : DEFAULT_PAYMENT_METHODS;
-            currentMethods.splice(index, 1);
+            currentMethods.splice(index,1);
             savePaymentMethods(currentMethods);
         }
 
@@ -3907,7 +3933,7 @@
                     const date = data.expiryDate.toDate();
                     // Format for date input (YYYY-MM-DD)
                     const yyyy = date.getFullYear();
-                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                    const mm = String(date.getMonth() +1).padStart(2, '0');
                     const dd = String(date.getDate()).padStart(2, '0');
                     document.getElementById('edit-expiry-date').value = `${yyyy}-${mm}-${dd}`;
                 } else {
