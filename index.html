@@ -573,7 +573,7 @@
         .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-open { background: rgba(59, 130, 246, 0.15); color: var(--accent-primary); border: 1px solid rgba(59, 130, 246, 0.3); }
         .status-inactive { background: rgba(100, 100, 100, 0.15); color: #999; border: 1px solid rgba(100, 100, 100, 0.3); }
-        .status-expired { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid #94a3b8; text-decoration: line-through; } /* NEW: Expired Style */
+        .status-expired { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid #94a3b8; text-decoration: line-through; } 
 
         /* PLAN BADGES */
         .plan-badge {
@@ -1204,6 +1204,25 @@
                             </tr>
                         </thead>
                         <tbody id="voucher-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- NEW TABLE: REDEMPTION HISTORY -->
+                <div class="table-responsive" style="margin-top: 2rem;">
+                    <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-history-line"></i> Redemption & History
+                    </h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Code</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                                <th>Expiry</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voucher-history-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -2341,7 +2360,7 @@
                         reassignBtn = `<button class="action-btn warning" style="color:black; margin-left:5px;" onclick="openReassignModal('${task.id}')">Reassign</button>`;
                     }
                 } else {
-                    actionBtn = `<button class="action-btn danger" style="color:var(--danger);" onclick="deleteTask('${task.id}')">Delete</button>`;
+                    actionBtn = `<button class="action-btn danger" style="white;" onclick="deleteTask('${task.id}')">Delete</button>`;
                 }
 
                 const assignedByHtml = assignedByName ? `<div style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">Assigned by: ${assignedByName}</div>` : '';
@@ -2508,16 +2527,36 @@
                 if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
                 if(data.status === 'Cancelled') statusClass = 'status-cancelled';
                 
-                // Voucher Used Logic
+                // Voucher Used Logic (Updated: Show Assigned vs Global)
                 let voucherDisplay = '-';
                 if(data.voucherCode) {
-                    voucherDisplay = `<span style="color:var(--success); font-weight:600;"><i class="ri-ticket-2-line"></i> ${data.voucherCode}</span>`;
+                    // Find user to check if they have a matching personal voucher
+                    const orderUser = allUsers.find(u => u.email === data.customerEmail);
+                    let voucherType = 'Global'; // Default
+                    
+                    if (orderUser && orderUser.personalVoucher && orderUser.personalVoucher.code === data.voucherCode) {
+                        voucherType = 'Assigned'; // User used their assigned voucher
+                    }
+
+                    // Style based on type
+                    const typeIcon = voucherType === 'Assigned' ? 'ri-user-gift-line' : 'ri-global-line';
+                    const typeColor = voucherType === 'Assigned' ? 'var(--accent-primary)' : 'var(--warning)';
+                    const typeBg = voucherType === 'Assigned' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(245, 158, 11, 0.15)';
+                    
+                    voucherDisplay = `
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <span style="font-weight:600; color:var(--success);"><i class="ri-ticket-2-line"></i> ${data.voucherCode}</span>
+                            <span class="source-badge" style="background:${typeBg}; color:${typeColor}; border-color:${typeColor}40;">
+                                ${typeIcon} ${voucherType}
+                            </span>
+                        </div>
+                    `;
                 }
 
                 // Delete Button (SuperAdmin Only)
                 let deleteBtn = '';
                 if(isSuperAdmin) {
-                    deleteBtn = `<button class="action-btn danger" style="color:var(--danger); margin-left:5px;" onclick="deleteOrder('${doc.id}')"><i class="ri-delete-bin-line"></i></button>`;
+                    deleteBtn = `<button class="action-btn danger" style="color:white; margin-left:5px;" onclick="deleteOrder('${doc.id}')"><i class="ri-delete-bin-line"></i></button>`;
                 }
 
                 tbody.innerHTML += `
@@ -2975,20 +3014,50 @@
             }
         }
 
-        // --- VOUCHERS (WITH APPROVAL, EXPIRY, REDEEM) ---
+        // --- VOUCHERS (FIXED LOGIC) ---
         function renderVoucherTable() {
             const tbody = document.getElementById('voucher-table-body');
             const pendingTbody = document.getElementById('pending-vouchers-table-body');
+            const historyBody = document.getElementById('voucher-history-body');
             const queueContainer = document.getElementById('voucher-approval-queue');
             
             tbody.innerHTML = '';
             if(pendingTbody) pendingTbody.innerHTML = '';
+            if(historyBody) historyBody.innerHTML = '';
             if(queueContainer) queueContainer.style.display = 'none'; 
 
             const usersWithVouchers = allUsers.filter(u => u.personalVoucher);
-            
+            const now = new Date();
+
+            // Helper to check if voucher is expired
+            const isExpired = (v) => v.expiryDate && now > v.expiryDate.toDate();
+
+            // Pending
             let pendingVouchers = usersWithVouchers.filter(u => u.personalVoucher.status === 'pending');
-            const activeVouchers = usersWithVouchers.filter(u => !u.personalVoucher.status || u.personalVoucher.status === 'active');
+            
+            // Active Logic
+            let activeVouchers = usersWithVouchers.filter(u => {
+                const v = u.personalVoucher;
+                // Must be active or undefined, not redeemed, and not expired
+                const isActive = (!v.status || v.status === 'active');
+                const isRedeemed = !!v.isRedeemed;
+                const expired = isExpired(v);
+                
+                return isActive && !isRedeemed && !expired;
+            });
+
+            // History Logic
+            let historyVouchers = usersWithVouchers.filter(u => {
+                const v = u.personalVoucher;
+                const isRedeemed = !!v.isRedeemed;
+                const isActive = (!v.status || v.status === 'active');
+                const expired = isExpired(v);
+
+                // History includes: Redeemed, Disabled, or Active but Expired
+                if (isRedeemed || v.status === 'disabled') return true;
+                if (isActive && expired) return true;
+                return false;
+            });
 
             if (!isSuperAdmin) {
                 pendingVouchers = pendingVouchers.filter(u => u.personalVoucher.voucherCreatedBy === currentAdminUID);
@@ -3000,11 +3069,13 @@
 
             let visibleVouchers = activeVouchers;
             const s = searchStates.vouchers;
-            if(s) visibleVouchers = visibleVouchers.filter(u => {
-                const v = u.personalVoucher;
-                const str = `${u.name} ${v.code}`.toLowerCase();
-                return str.includes(s);
-            });
+            if(s) {
+                visibleVouchers = visibleVouchers.filter(u => {
+                    const v = u.personalVoucher;
+                    const str = `${u.name} ${v.code}`.toLowerCase();
+                    return str.includes(s);
+                });
+            }
 
             if(visibleVouchers.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-secondary);">No active vouchers.</td></tr>';
             
@@ -3012,22 +3083,8 @@
                 const v = u.personalVoucher;
                 const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
                 
-                // UPDATED: Determine Status with Badges
                 let statusHtml = '<span class="status-badge status-active">Active</span>';
                 
-                if(v.isRedeemed) {
-                    statusHtml = '<span class="status-badge status-inactive">Redeemed</span>';
-                } else if(v.status === 'disabled') {
-                    statusHtml = '<span class="status-badge status-cancelled">Disabled</span>';
-                } else if(v.expiryDate) {
-                    // EXPIRY LOGIC
-                    const now = new Date();
-                    const exp = v.expiryDate.toDate();
-                    if(now > exp) {
-                        statusHtml = '<span class="status-badge status-expired">Expired</span>';
-                    }
-                }
-
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-weight:600;">${u.name}</td>
@@ -3066,6 +3123,43 @@
                         <td>${actionButtons}</td>
                     </tr>`;
             });
+
+            // --- FIXED: VOUCHER HISTORY TABLE ---
+            if(historyVouchers.length === 0) {
+                historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-secondary);">No history found.</td></tr>';
+            } else {
+                historyVouchers.forEach(u => {
+                    const v = u.personalVoucher;
+                    const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
+                    let statusHtml = '';
+
+                    // Determine Badge Logic for History
+                    if(v.isRedeemed) {
+                        statusHtml = '<span class="status-badge status-inactive">Redeemed</span>';
+                    } else if(v.status === 'disabled') {
+                        statusHtml = '<span class="status-badge status-cancelled">Disabled</span>';
+                    } else if(isExpired(v)) {
+                        // If it's here because it's active but expired
+                        statusHtml = '<span class="status-badge status-expired">Expired</span>';
+                    } else {
+                        statusHtml = '<span class="status-badge status-inactive">Unknown</span>';
+                    }
+
+                    let expiryDisplay = '-';
+                    if(v.expiryDate) {
+                        expiryDisplay = formatDateTime(v.expiryDate).split(' ')[0]; // Date only
+                    }
+
+                    historyBody.innerHTML += `
+                        <tr>
+                            <td style="font-weight:600;">${u.name}</td>
+                            <td style="color:var(--text-muted);">${v.code}</td>
+                            <td style="color:var(--text-muted);">${displayVal}</td>
+                            <td>${statusHtml}</td>
+                            <td style="font-size:0.8rem; color:var(--text-muted);">${expiryDisplay}</td>
+                        </tr>`;
+                });
+            }
         }
 
         function assignVoucher() {
