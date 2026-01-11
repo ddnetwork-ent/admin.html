@@ -1207,7 +1207,7 @@
                     </table>
                 </div>
 
-                <!-- NEW TABLE: REDEMPTION HISTORY -->
+                <!-- NEW TABLE: REDEMPTION & HISTORY -->
                 <div class="table-responsive" style="margin-top: 2rem;">
                     <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
                         <i class="ri-history-line"></i> Redemption & History
@@ -1607,7 +1607,7 @@
         </div>
     </div>
 
-    <!-- MANAGE VOUCHER MODAL (NEW LOGIC) -->
+    <!-- MANAGE VOUCHER MODAL (UPDATED WITH EXPIRY & REDEEMED LOGIC) -->
     <div id="manageVoucherModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-close-btn" onclick="closeModal('manageVoucherModal')"><i class="ri-close-line"></i></div>
@@ -1638,18 +1638,20 @@
                 </select>
             </div>
 
+            <!-- NEW: REDEEMED CHECKBOX -->
             <div class="form-row">
-                <label>Redeemed</label>
+                <label>Mark as Redeemed</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
                     <input type="checkbox" id="manage-voucher-redeemed" style="width:auto; margin:0;">
-                    <span style="font-size:0.9rem; color:var(--text-secondary);">Mark as Redeemed (Cannot be used)</span>
+                    <span style="font-size:0.9rem; color:var(--text-secondary);">Check to mark as used</span>
                 </div>
             </div>
 
+            <!-- NEW: EXPIRY DATE EDITOR -->
             <div class="form-row">
                 <label>Expiry Date</label>
                 <input type="date" id="manage-voucher-expiry">
-                <p class="helper-text">Set to empty to remove expiry.</p>
+                <p class="helper-text">Set date to extend. Leave empty to remove expiry.</p>
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
@@ -1766,7 +1768,7 @@
         </div>
     </div>
 
-    <!-- ORDER MODAL (UPDATED FOR RENEWAL) -->
+    <!-- ORDER MODAL (UPDATED FOR RENEWAL & VOUCHER TYPE) -->
     <div id="orderModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-close-btn" onclick="closeModal('orderModal')"><i class="ri-close-line"></i></div>
@@ -1788,6 +1790,8 @@
             <div class="form-row">
                 <label>Voucher Used</label>
                 <input type="text" id="order-voucher" readonly style="background:var(--bg-input); color:var(--text-muted);">
+                <!-- VOUCHER TYPE BADGE DISPLAY IN MODAL -->
+                <div id="order-voucher-type-badge" style="margin-top: 5px; font-size: 0.8rem;"></div>
             </div>
             
             <div class="form-row">
@@ -2499,7 +2503,7 @@
             });
         }
 
-        // --- ORDERS (UPDATED WITH RENEWAL LOGIC & VOUCHER DISPLAY) ---
+        // --- ORDERS (UPDATED WITH RENEWAL LOGIC & VOUCHER SOURCE TYPE) ---
         function renderOrdersTable() {
             const tbody = document.getElementById('orders-table-body');
             if (!dataLoaded.orders) {
@@ -2527,7 +2531,7 @@
                 if(data.status === 'Paid' || data.status === 'Completed') statusClass = 'status-paid status-completed';
                 if(data.status === 'Cancelled') statusClass = 'status-cancelled';
                 
-                // Voucher Used Logic (Updated: Show Assigned vs Global)
+                // Voucher Source Logic (Check if Assigned vs Global)
                 let voucherDisplay = '-';
                 if(data.voucherCode) {
                     // Find user to check if they have a matching personal voucher
@@ -2588,6 +2592,19 @@
             document.getElementById('order-package').value = data.package || ''; 
             document.getElementById('order-total').value = data.total || ''; 
             document.getElementById('order-voucher').value = data.voucherCode || '-'; 
+
+            // Show Voucher Source Type in Modal
+            const badgeContainer = document.getElementById('order-voucher-type-badge');
+            if(data.voucherCode) {
+                const orderUser = allUsers.find(u => u.email === data.customerEmail);
+                let voucherType = 'Global';
+                if (orderUser && orderUser.personalVoucher && orderUser.personalVoucher.code === data.voucherCode) {
+                    voucherType = 'Assigned';
+                }
+                badgeContainer.innerHTML = `<span style="background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; font-size:0.75rem;">Source: ${voucherType}</span>`;
+            } else {
+                badgeContainer.innerHTML = '';
+            }
             
             const renewalAlert = document.getElementById('renewal-alert');
             renewalAlert.style.display = 'none';
@@ -3014,7 +3031,7 @@
             }
         }
 
-        // --- VOUCHERS (FIXED LOGIC) ---
+        // --- VOUCHERS (UPDATED WITH EXPIRY EDIT & MANUAL REDEEM) ---
         function renderVoucherTable() {
             const tbody = document.getElementById('voucher-table-body');
             const pendingTbody = document.getElementById('pending-vouchers-table-body');
@@ -3124,7 +3141,7 @@
                     </tr>`;
             });
 
-            // --- FIXED: VOUCHER HISTORY TABLE ---
+            // --- VOUCHER HISTORY TABLE (UPDATED) ---
             if(historyVouchers.length === 0) {
                 historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-secondary);">No history found.</td></tr>';
             } else {
@@ -3157,6 +3174,9 @@
                             <td style="color:var(--text-muted);">${displayVal}</td>
                             <td>${statusHtml}</td>
                             <td style="font-size:0.8rem; color:var(--text-muted);">${expiryDisplay}</td>
+                            <td>
+                                <button class="action-btn" onclick="openManageVoucher('${u.id}')">View/Edit</button>
+                            </td>
                         </tr>`;
                 });
             }
@@ -3213,7 +3233,7 @@
             if(confirm("Remove voucher?")) db.collection("users").doc(uid).update({ personalVoucher: firebase.firestore.FieldValue.delete() });
         }
 
-        // --- MANAGE VOUCHER MODAL (UPDATED WITH EXPIRY LOGIC) ---
+        // --- MANAGE VOUCHER MODAL (UPDATED LOGIC) ---
         function openManageVoucher(uid) {
             const user = allUsers.find(u => u.id === uid);
             if(!user || !user.personalVoucher) return;
@@ -3226,6 +3246,8 @@
             document.getElementById('manage-voucher-value-display').innerText = valDisplay;
             
             document.getElementById('manage-voucher-status').value = v.status || 'active';
+            
+            // Set Redeemed Checkbox
             document.getElementById('manage-voucher-redeemed').checked = !!v.isRedeemed;
             
             // Format expiry for input (YYYY-MM-DD)
