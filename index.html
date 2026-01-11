@@ -14,7 +14,7 @@
     <style>
         /* --- THEME VARIABLES --- */
         :root {
-            /* Dark Mode (Default) - Optimized Contrast */
+            /* Dark Mode (Default) */
             --bg-body: #050505;
             --bg-card: #121212;
             --bg-input: rgba(255,255,255,0.07);
@@ -44,21 +44,20 @@
         }
 
         [data-theme="light"] {
-            /* Light Mode - Clean White & High Contrast */
+            /* Light Mode */
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
             --bg-input: #f1f5f9;
             --bg-input-focus: #eff6ff;
             --bg-sidebar: #ffffff;
 
-            --text-main: #0f172a; /* Dark Navy */
-            --text-secondary: #64748b; /* Slate Gray */
+            --text-main: #0f172a;
+            --text-secondary: #64748b;
             --text-muted: #94a3b8;
 
-            --border-color: #e2e8f0; /* Light Gray borders */
-            --border-focus: #3b82f6;
+            --border-color: #e2e8f0;
             
-            --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
             --shadow-modal: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             --shadow-float: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
@@ -121,8 +120,6 @@
             align-items: center;
             gap: 14px;
             min-width: 300px;
-            position: relative;
-            overflow: hidden;
             pointer-events: auto;
             transform-origin: right center;
             animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -1221,6 +1218,7 @@
                                 <th>Value</th>
                                 <th>Status</th>
                                 <th>Expiry</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="voucher-history-body"></tbody>
@@ -1631,7 +1629,7 @@
                 <span style="color:var(--warning); font-weight:600;">This voucher is expired.</span>
             </div>
 
-            <!-- UNIFIED STATUS DROPDOWN (Replaces Checkbox + Separate Status) -->
+            <!-- UNIFIED STATUS DROPDOWN -->
             <div class="form-row" style="border-top:1px solid var(--border-color); padding-top:1rem;">
                 <label>Voucher Status</label>
                 <select id="manage-voucher-status" style="width: 100%;">
@@ -1971,6 +1969,7 @@
             { id: 'tng', name: 'TNG eWallet', url: 'https://payment.tngdigital.com.my/sc/bDLob7YcpG', active: true },
             { id: 'fpx', name: 'Online Banking (FPX)', url: 'https://toyyibpay.com', active: true } 
         ];
+
         // AUTH LOGIC
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -2247,7 +2246,7 @@
             });
         }
 
-        // --- TASKS LOGIC (UPDATED) ---
+        // --- TASKS LOGIC ---
         function openCreateTaskModal() {
             const modal = document.getElementById('createTaskModal');
             document.getElementById('task-title-input').value = '';
@@ -3024,7 +3023,10 @@
             const now = new Date();
 
             // Helper to check if voucher is expired
-            const isExpired = (v) => v.expiryDate && now > v.expiryDate.toDate();
+            const isExpired = (v) => {
+                if (!v.expiryDate) return false;
+                return now > v.expiryDate.toDate();
+            };
 
             let pendingVouchers = usersWithVouchers.filter(u => u.personalVoucher.status === 'pending');
             
@@ -3113,9 +3115,9 @@
                     </tr>`;
             });
 
-            // VOUCHER HISTORY TABLE
+            // VOUCHER HISTORY TABLE (UPDATED LOGIC)
             if(historyVouchers.length === 0) {
-                historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-secondary);">No history found.</td></tr>';
+                historyBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem; color:var(--text-secondary);">No history found.</td></tr>';
             } else {
                 historyVouchers.forEach(u => {
                     const v = u.personalVoucher;
