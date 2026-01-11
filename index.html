@@ -572,6 +572,7 @@
         .status-paid, .status-completed { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
         .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
         .status-open { background: rgba(59, 130, 246, 0.15); color: var(--accent-primary); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .status-active { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
         .status-inactive { background: rgba(100, 100, 100, 0.15); color: #999; border: 1px solid rgba(100, 100, 100, 0.3); }
         .status-expired { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid #94a3b8; text-decoration: line-through; } 
 
@@ -1153,7 +1154,7 @@
                         </div>
                     </div>
                     
-                    <!-- NEW: Expiry Date Input -->
+                    <!-- Expiry Date Input -->
                     <div class="form-row">
                          <label>Expiry Date (Optional)</label>
                          <input type="date" id="voucher-expiry-date">
@@ -1207,7 +1208,7 @@
                     </table>
                 </div>
 
-                <!-- NEW TABLE: REDEMPTION & HISTORY -->
+                <!-- TABLE: REDEMPTION & HISTORY -->
                 <div class="table-responsive" style="margin-top: 2rem;">
                     <h3 style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
                         <i class="ri-history-line"></i> Redemption & History
@@ -1288,7 +1289,7 @@
                 </div>
             </div>
 
-            <!-- CONTENT REQUESTS TAB (UPDATED) -->
+            <!-- CONTENT REQUESTS TAB -->
             <div id="tab-content-requests" class="tab-content">
                 <div class="section-header">
                     <h2>Content Requests</h2>
@@ -1487,7 +1488,7 @@
         </div>
     </div>
 
-    <!-- EDIT USER MODAL (UPDATED) -->
+    <!-- EDIT USER MODAL -->
     <div id="editUserModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-close-btn" onclick="closeModal('editUserModal')"><i class="ri-close-line"></i></div>
@@ -1528,7 +1529,7 @@
                 </select>
             </div>
 
-            <!-- SUBSCRIPTION MANAGEMENT (NEW) -->
+            <!-- SUBSCRIPTION MANAGEMENT -->
             <div id="edit-subscription-management" style="display:none; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
                 <h4 style="margin: 0 0 1rem 0; color: var(--accent-primary);">Subscription Settings</h4>
                 
@@ -1607,7 +1608,7 @@
         </div>
     </div>
 
-    <!-- MANAGE VOUCHER MODAL (UPDATED WITH EXPIRY & REDEEMED LOGIC) -->
+    <!-- MANAGE VOUCHER MODAL (UPDATED WITH UNIFIED STATUS DROPDOWN) -->
     <div id="manageVoucherModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-close-btn" onclick="closeModal('manageVoucherModal')"><i class="ri-close-line"></i></div>
@@ -1630,24 +1631,18 @@
                 <span style="color:var(--warning); font-weight:600;">This voucher is expired.</span>
             </div>
 
+            <!-- UNIFIED STATUS DROPDOWN (Replaces Checkbox + Separate Status) -->
             <div class="form-row" style="border-top:1px solid var(--border-color); padding-top:1rem;">
-                <label>Status</label>
+                <label>Voucher Status</label>
                 <select id="manage-voucher-status" style="width: 100%;">
-                    <option value="active">Active</option>
-                    <option value="disabled">Disabled</option>
+                    <option value="active">Active (Unused)</option>
+                    <option value="redeemed">Redeemed</option>
+                    <option value="disabled">Disabled / Void</option>
+                    <option value="expired">Expired</option>
                 </select>
             </div>
 
-            <!-- NEW: REDEEMED CHECKBOX -->
-            <div class="form-row">
-                <label>Mark as Redeemed</label>
-                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
-                    <input type="checkbox" id="manage-voucher-redeemed" style="width:auto; margin:0;">
-                    <span style="font-size:0.9rem; color:var(--text-secondary);">Check to mark as used</span>
-                </div>
-            </div>
-
-            <!-- NEW: EXPIRY DATE EDITOR -->
+            <!-- EXPIRY DATE EDITOR -->
             <div class="form-row">
                 <label>Expiry Date</label>
                 <input type="date" id="manage-voucher-expiry">
@@ -1657,6 +1652,10 @@
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
                 <button onclick="saveManagedVoucher()" style="background: var(--success); flex: 1;">Save Changes</button>
                 <button class="secondary" onclick="closeModal('manageVoucherModal')" style="width: auto;">Cancel</button>
+                <!-- DELETE BUTTON -->
+                <button class="danger" onclick="deleteVoucherFromModal()" style="width: auto;" title="Permanently Delete Voucher">
+                    <i class="ri-delete-bin-line"></i> Delete
+                </button>
             </div>
         </div>
     </div>
@@ -1768,7 +1767,7 @@
         </div>
     </div>
 
-    <!-- ORDER MODAL (UPDATED FOR RENEWAL & VOUCHER TYPE) -->
+    <!-- ORDER MODAL -->
     <div id="orderModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-close-btn" onclick="closeModal('orderModal')"><i class="ri-close-line"></i></div>
@@ -1933,7 +1932,7 @@
         let currentAdminEmail = "";
         let currentLogFilter = 'all'; 
         let currentPaymentEditIndex = -1; 
-        let currentManageVoucherUID = null; // Tracks which user's voucher is being edited
+        let currentManageVoucherUID = null; 
 
         let searchStates = {
             dashboard: "", orders: "", users: "", support: "", vouchers: "", promos: "", logs: "", config: "", content: "", tasks: "", "content-requests": ""
@@ -2090,7 +2089,6 @@
                         let title = data.jobTitle;
                         if(!title) title = (data.role === 'superadmin') ? 'Super Admin' : (data.role === 'admin' ? 'Admin' : 'Client');
 
-                        // UPDATES IDs IN HTML
                         document.getElementById('sidebar-name').innerText = name;
                         document.getElementById('sidebar-jobtitle').innerText = title;
                         document.getElementById('mobile-name').innerText = name;
@@ -2534,15 +2532,13 @@
                 // Voucher Source Logic (Check if Assigned vs Global)
                 let voucherDisplay = '-';
                 if(data.voucherCode) {
-                    // Find user to check if they have a matching personal voucher
                     const orderUser = allUsers.find(u => u.email === data.customerEmail);
-                    let voucherType = 'Global'; // Default
+                    let voucherType = 'Global'; 
                     
                     if (orderUser && orderUser.personalVoucher && orderUser.personalVoucher.code === data.voucherCode) {
-                        voucherType = 'Assigned'; // User used their assigned voucher
+                        voucherType = 'Assigned'; 
                     }
 
-                    // Style based on type
                     const typeIcon = voucherType === 'Assigned' ? 'ri-user-gift-line' : 'ri-global-line';
                     const typeColor = voucherType === 'Assigned' ? 'var(--accent-primary)' : 'var(--warning)';
                     const typeBg = voucherType === 'Assigned' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(245, 158, 11, 0.15)';
@@ -2593,7 +2589,6 @@
             document.getElementById('order-total').value = data.total || ''; 
             document.getElementById('order-voucher').value = data.voucherCode || '-'; 
 
-            // Show Voucher Source Type in Modal
             const badgeContainer = document.getElementById('order-voucher-type-badge');
             if(data.voucherCode) {
                 const orderUser = allUsers.find(u => u.email === data.customerEmail);
@@ -2619,18 +2614,16 @@
             const pkg = document.getElementById('order-package').value;
             const total = document.getElementById('order-total').value;
 
-            // RENEWAL LOGIC
             const orderObj = orderCache.find(o => o.id === id);
             const oldStatus = orderObj ? orderObj.data.status : '';
 
             let renewalPromise = Promise.resolve();
 
             if (status === 'Paid' && oldStatus !== 'Paid') {
-                // Auto Renew Logic
                 if(confirm("Mark as Paid? This will renew client's subscription.")) {
                     renewalPromise = autoRenewSubscription(orderObj.data.customerEmail, pkg);
                 } else {
-                    return; // Cancel save if they deny renewal
+                    return; 
                 }
             }
 
@@ -2655,18 +2648,15 @@
         }
 
         function autoRenewSubscription(email, packageRaw) {
-            // Find user by email
             const user = allUsers.find(u => u.email === email);
             if(!user) {
                 showToast("User not found for auto-renewal", "warning");
                 return Promise.reject("User not found");
             }
 
-            // Calculate New Date
             let newExpiry = new Date();
-            newExpiry.setFullYear(newExpiry.getFullYear() + 1); // Add 1 year
+            newExpiry.setFullYear(newExpiry.getFullYear() + 1); 
             
-            // Determine Plan Type
             let planType = 'frontend';
             if(packageRaw.toUpperCase().includes('AI')) planType = 'ai';
             if(packageRaw.toUpperCase().includes('HTML')) planType = 'html';
@@ -2723,7 +2713,6 @@
                     </tr>`;
 
                 if (role === 'user') {
-                    // SUBSCRIPTION & EXPIRY LOGIC
                     let planBadge = '<span class="plan-badge plan-expired">Inactive</span>';
                     let expiryDisplay = '-';
                     
@@ -2743,7 +2732,6 @@
                         }
                     }
 
-                    // Website Link Logic
                     let linkHtml = '-';
                     if(u.websiteLink) {
                         linkHtml = `<a href="${u.websiteLink}" target="_blank" style="color:var(--accent-primary); text-decoration:none;"><i class="ri-external-link-line"></i> Visit</a>`;
@@ -2824,7 +2812,6 @@
                     resolvedByDisplay = `<span style="font-size:0.8rem; font-weight:600; color:var(--success);">${data.resolvedBy}</span>`;
                 }
                 
-                // Assigned To Logic
                 let assignedDisplay = '-';
                 if(data.assignedTo) {
                     const u = allUsers.find(user => user.id === data.assignedTo);
@@ -2942,14 +2929,12 @@
             const req = contentReqCache.find(r => r.id === reqId);
             if(!req) return;
 
-            // Reuse Ticket Modal structure but adapt logic for Content Requests
             const data = req.data;
-            document.getElementById('ticket-id').value = reqId; // Reuse hidden input
+            document.getElementById('ticket-id').value = reqId; 
             document.getElementById('view-ticket-id').innerText = reqId;
             document.getElementById('view-ticket-customer').innerText = `${data.customerName} (${data.requestType})`;
             document.getElementById('view-ticket-message').innerText = `${data.pageSection ? 'Section: '+data.pageSection+'\n' : ''}${data.details}`;
 
-            // Status Select adaptation
             const select = document.getElementById('ticket-status-select');
             select.innerHTML = '';
             select.innerHTML += `<option value="pending" ${data.status==='pending'?'selected':''}>Pending</option>`;
@@ -2957,36 +2942,30 @@
             select.innerHTML += `<option value="completed" ${data.status==='completed'?'selected':''}>Completed</option>`;
             select.innerHTML += `<option value="rejected" ${data.status==='rejected'?'selected':''}>Rejected</option>`;
 
-            // Note & Price
             document.getElementById('ticket-admin-note').value = data.adminNote || '';
             
-            // Add Price Input temporarily
             const container = document.querySelector('#ticketModal .modal-content');
             let priceInput = document.getElementById('content-req-price');
             if(!priceInput) {
                 const div = document.createElement('div');
                 div.className = 'form-row';
                 div.innerHTML = `<label>Price Quote (RM)</label><input type="number" id="content-req-price" placeholder="e.g. 50">`;
-                // Insert before status select
                 container.insertBefore(div, container.children[container.children.length - 3]);
             }
             priceInput = document.getElementById('content-req-price');
             priceInput.value = data.priceQuote || '';
 
-            // Assign To (Optional for content requests)
             document.getElementById('ticket-assignee-select').parentElement.style.display = 'none';
             document.getElementById('view-resolved-by-container').style.display = 'none';
 
             document.getElementById('ticketModal').classList.add('open');
         }
 
-        // Override Save Ticket for Content Requests
         function saveTicket() {
             const id = document.getElementById('ticket-id').value;
             const status = document.getElementById('ticket-status-select').value;
             const note = document.getElementById('ticket-admin-note').value;
             
-            // Check if this is a Content Request or Support Ticket
             const isContentReq = contentReqCache.find(r => r.id === id);
             
             if(isContentReq) {
@@ -3003,13 +2982,11 @@
                 db.collection("content_requests").doc(id).update(updateData).then(() => {
                     closeModal('ticketModal');
                     showToast("Request updated", "success");
-                    // Reset modal for next use
                     document.getElementById('ticket-assignee-select').parentElement.style.display = 'block';
                     const priceInput = document.getElementById('content-req-price');
                     if(priceInput) priceInput.parentElement.remove();
                 }).catch(err => showToast(err.message, "error"));
             } else {
-                // Original Support Ticket Logic
                 const assignedTo = document.getElementById('ticket-assignee-select').value;
                 const updateData = { status: status, adminNote: note };
                 
@@ -3031,7 +3008,7 @@
             }
         }
 
-        // --- VOUCHERS (UPDATED WITH EXPIRY EDIT & MANUAL REDEEM) ---
+        // --- VOUCHERS (UPDATED WITH UNIFIED STATUS DROPDOWN) ---
         function renderVoucherTable() {
             const tbody = document.getElementById('voucher-table-body');
             const pendingTbody = document.getElementById('pending-vouchers-table-body');
@@ -3049,25 +3026,22 @@
             // Helper to check if voucher is expired
             const isExpired = (v) => v.expiryDate && now > v.expiryDate.toDate();
 
-            // Pending
             let pendingVouchers = usersWithVouchers.filter(u => u.personalVoucher.status === 'pending');
             
-            // Active Logic
             let activeVouchers = usersWithVouchers.filter(u => {
                 const v = u.personalVoucher;
-                // Must be active or undefined, not redeemed, and not expired
-                const isActive = (!v.status || v.status === 'active');
+                // Must be status 'active', not redeemed, and not expired by date
+                const isActive = (v.status === 'active');
                 const isRedeemed = !!v.isRedeemed;
                 const expired = isExpired(v);
                 
                 return isActive && !isRedeemed && !expired;
             });
 
-            // History Logic
             let historyVouchers = usersWithVouchers.filter(u => {
                 const v = u.personalVoucher;
                 const isRedeemed = !!v.isRedeemed;
-                const isActive = (!v.status || v.status === 'active');
+                const isActive = (v.status === 'active');
                 const expired = isExpired(v);
 
                 // History includes: Redeemed, Disabled, or Active but Expired
@@ -3100,14 +3074,12 @@
                 const v = u.personalVoucher;
                 const displayVal = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
                 
-                let statusHtml = '<span class="status-badge status-active">Active</span>';
-                
                 tbody.innerHTML += `
                     <tr>
                         <td style="font-weight:600;">${u.name}</td>
                         <td style="color:var(--accent-primary);">${v.code}</td>
                         <td style="color:var(--success);">${displayVal}</td>
-                        <td style="font-size:0.85rem;">${statusHtml}</td>
+                        <td style="font-size:0.85rem;"><span class="status-badge status-active">Active</span></td>
                         <td>
                             <button class="action-btn" onclick="openManageVoucher('${u.id}')">Manage</button>
                         </td>
@@ -3141,7 +3113,7 @@
                     </tr>`;
             });
 
-            // --- VOUCHER HISTORY TABLE (UPDATED) ---
+            // VOUCHER HISTORY TABLE
             if(historyVouchers.length === 0) {
                 historyBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-secondary);">No history found.</td></tr>';
             } else {
@@ -3156,7 +3128,6 @@
                     } else if(v.status === 'disabled') {
                         statusHtml = '<span class="status-badge status-cancelled">Disabled</span>';
                     } else if(isExpired(v)) {
-                        // If it's here because it's active but expired
                         statusHtml = '<span class="status-badge status-expired">Expired</span>';
                     } else {
                         statusHtml = '<span class="status-badge status-inactive">Unknown</span>';
@@ -3164,7 +3135,7 @@
 
                     let expiryDisplay = '-';
                     if(v.expiryDate) {
-                        expiryDisplay = formatDateTime(v.expiryDate).split(' ')[0]; // Date only
+                        expiryDisplay = formatDateTime(v.expiryDate).split(' ')[0]; 
                     }
 
                     historyBody.innerHTML += `
@@ -3193,7 +3164,6 @@
 
             const status = isSuperAdmin ? 'active' : 'pending';
             
-            // Handle Expiry
             let expiryTs = null;
             if(expiryDateInput) {
                 expiryTs = firebase.firestore.Timestamp.fromDate(new Date(expiryDateInput));
@@ -3233,7 +3203,7 @@
             if(confirm("Remove voucher?")) db.collection("users").doc(uid).update({ personalVoucher: firebase.firestore.FieldValue.delete() });
         }
 
-        // --- MANAGE VOUCHER MODAL (UPDATED LOGIC) ---
+        // --- MANAGE VOUCHER MODAL (UPDATED WITH UNIFIED DROPDOWN) ---
         function openManageVoucher(uid) {
             const user = allUsers.find(u => u.id === uid);
             if(!user || !user.personalVoucher) return;
@@ -3245,12 +3215,14 @@
             const valDisplay = v.type === 'fixed' ? `RM ${v.value}` : `${v.value * 100}%`;
             document.getElementById('manage-voucher-value-display').innerText = valDisplay;
             
-            document.getElementById('manage-voucher-status').value = v.status || 'active';
+            // Set Unified Status Dropdown Value
+            let dropdownValue = 'active';
+            if(v.isRedeemed) dropdownValue = 'redeemed';
+            else if(v.status === 'disabled') dropdownValue = 'disabled';
+            else if(v.status === 'expired') dropdownValue = 'expired';
             
-            // Set Redeemed Checkbox
-            document.getElementById('manage-voucher-redeemed').checked = !!v.isRedeemed;
+            document.getElementById('manage-voucher-status').value = dropdownValue;
             
-            // Format expiry for input (YYYY-MM-DD)
             if(v.expiryDate) {
                 const d = v.expiryDate.toDate();
                 const yyyy = d.getFullYear();
@@ -3261,7 +3233,6 @@
                 document.getElementById('manage-voucher-expiry').value = '';
             }
 
-            // NEW: Check if currently expired
             const warningBox = document.getElementById('voucher-expired-warning');
             if(v.expiryDate && !v.isRedeemed && v.status === 'active') {
                 const now = new Date();
@@ -3282,21 +3253,28 @@
             const uid = currentManageVoucherUID;
             if(!uid) return;
             
-            const newStatus = document.getElementById('manage-voucher-status').value;
-            const isRedeemed = document.getElementById('manage-voucher-redeemed').checked;
+            const statusValue = document.getElementById('manage-voucher-status').value;
             const newExpiryStr = document.getElementById('manage-voucher-expiry').value;
             
-            // We must fetch full user object to avoid overwriting other fields
             const user = allUsers.find(u => u.id === uid);
             if(!user) return;
             
-            const currentVoucher = user.personalVoucher;
+            const updates = {};
             
-            // Updates
-            const updates = {
-                "personalVoucher.status": newStatus,
-                "personalVoucher.isRedeemed": isRedeemed
-            };
+            // Logic based on Unified Dropdown
+            if (statusValue === 'active') {
+                updates["personalVoucher.status"] = 'active';
+                updates["personalVoucher.isRedeemed"] = false;
+            } else if (statusValue === 'redeemed') {
+                updates["personalVoucher.isRedeemed"] = true;
+                updates["personalVoucher.status"] = 'active'; // Keep active but redeemed
+            } else if (statusValue === 'disabled') {
+                updates["personalVoucher.status"] = 'disabled';
+                updates["personalVoucher.isRedeemed"] = false;
+            } else if (statusValue === 'expired') {
+                updates["personalVoucher.status"] = 'expired';
+                updates["personalVoucher.isRedeemed"] = false;
+            }
 
             if(newExpiryStr) {
                 updates["personalVoucher.expiryDate"] = firebase.firestore.Timestamp.fromDate(new Date(newExpiryStr));
@@ -3304,10 +3282,26 @@
                 updates["personalVoucher.expiryDate"] = firebase.firestore.FieldValue.delete();
             }
             
+            // TOAST MESSAGE FOR STATUS CHANGE
+            const v = user.personalVoucher;
+            let msg = "Voucher status updated";
+            if(v.isRedeemed && statusValue === 'active') {
+                msg = "Voucher restored and available again.";
+            } else if(!v.isRedeemed && statusValue === 'redeemed') {
+                msg = "Voucher marked as Redeemed.";
+            }
+
             db.collection("users").doc(uid).update(updates).then(() => {
-                showToast("Voucher updated", "success");
+                showToast(msg, "success");
                 closeModal('manageVoucherModal');
             }).catch(err => showToast(err.message, "error"));
+        }
+
+        function deleteVoucherFromModal() {
+            if(confirm("Are you sure you want to permanently DELETE this voucher? The user will no longer be able to use it.")) {
+                deleteUserVoucher(currentManageVoucherUID);
+                closeModal('manageVoucherModal');
+            }
         }
 
         // --- PROMOS (WITH APPROVAL) ---
@@ -3783,18 +3777,16 @@
         }
 
         function toggleCompanyField() {
-            // Logic to show/hide Company Name field based on role
             const role = document.getElementById('create-role').value;
             const wrapper = document.getElementById('create-company-name-wrapper');
             if (role === 'user') {
                 wrapper.style.display = 'block';
             } else {
                 wrapper.style.display = 'none';
-                document.getElementById('create-company-name').value = ''; // Clear if hidden
+                document.getElementById('create-company-name').value = '';
             }
         }
         
-        // Also add listener to Edit Modal role change
         document.getElementById('edit-role').addEventListener('change', function() {
             const role = this.value;
             const wrapper = document.getElementById('edit-company-name-wrapper');
@@ -4006,13 +3998,11 @@
             helperLabel.style.display = 'inline';
             restrictionMsg.style.display = 'none';
 
-            // Handle Company Name Visibility
             if (data.role === 'user') {
                 document.getElementById('edit-company-name-wrapper').style.display = 'block';
                 document.getElementById('edit-subscription-management').style.display = 'block';
             }
 
-            // Handle Website Link Display for Clients
             const linkSection = document.getElementById('client-website-management');
             const linkInput = document.getElementById('edit-website-link');
             const linkStatusDiv = document.getElementById('link-removal-status');
@@ -4042,12 +4032,10 @@
                 linkSection.style.display = 'none';
             }
 
-            // Handle Subscription Inputs
             if(data.role === 'user') {
                 document.getElementById('edit-plan-type').value = data.planType || 'frontend';
                 if(data.expiryDate) {
                     const date = data.expiryDate.toDate();
-                    // Format for date input (YYYY-MM-DD)
                     const yyyy = date.getFullYear();
                     const mm = String(date.getMonth() +1).padStart(2, '0');
                     const dd = String(date.getDate()).padStart(2, '0');
@@ -4090,7 +4078,6 @@
             if (role === 'user') {
                 updateData.companyName = companyName;
                 
-                // SUBSCRIPTION LOGIC
                 const planType = document.getElementById('edit-plan-type').value;
                 const expiryDateStr = document.getElementById('edit-expiry-date').value;
                 
@@ -4118,8 +4105,6 @@
         }
 
         function openTicketModal(ticketId) {
-            // This function is now handled by openContentReqModal if it's a content request
-            // But for standard tickets, we do this:
             const isContentReq = contentReqCache.find(r => r.id === ticketId);
             if(isContentReq) {
                 openContentReqModal(ticketId);
@@ -4134,7 +4119,6 @@
             document.getElementById('ticket-status-select').value = data.status || 'Open';
             document.getElementById('ticket-admin-note').value = data.adminNote || '';
             
-            // Populate Assignee Select
             const assignSelect = document.getElementById('ticket-assignee-select');
             assignSelect.value = data.assignedTo || "";
 
@@ -4158,11 +4142,9 @@
                 resolvedContainer.style.display = 'none';
             }
 
-            // Ensure Price Input is removed for standard tickets
             const priceInput = document.getElementById('content-req-price');
             if(priceInput) priceInput.parentElement.remove();
             
-            // Ensure Assignee is shown
             document.getElementById('ticket-assignee-select').parentElement.style.display = 'block';
 
             document.getElementById('ticketModal').classList.add('open');
