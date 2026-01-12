@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Portal v9.3 | DDNetwork One</title>
+    <title>Admin Portal v9.4 | DDNetwork One</title>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,8 +71,6 @@
         .text-center { text-align: center; }
         .text-sm { font-size: 0.85rem; }
         .font-bold { font-weight: 700; }
-        .text-muted { color: var(--text-muted); }
-        .text-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* SCROLLBAR */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -204,8 +202,6 @@
         .header-left { display: flex; align-items: center; gap: 0.75rem; }
         .header-brand { font-weight: 800; font-size: 1.1rem; color: white; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
         .header-brand img { height: 24px; filter: brightness(0) invert(1); }
-        
-        /* NOTIFICATIONS */
         .header-actions { display: flex; align-items: center; gap: 0.5rem; position: relative; }
         .notification-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%; border: 2px solid var(--bg-panel); }
         .notif-dropdown {
@@ -366,12 +362,12 @@
             gap: 1rem; 
             height: calc(100% - 60px); 
             min-height: 600px; 
-            overflow-x: auto; /* Allow horizontal scroll on mobile */
+            overflow-x: auto; 
             padding-bottom: 1rem;
         }
         .kanban-col { 
             min-width: 300px; 
-            width: 300px; /* Fixed width columns, scrollable container */
+            width: 300px; 
             background: var(--bg-panel); 
             border-radius: 16px; 
             padding: 1rem; 
@@ -525,27 +521,20 @@
         .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
         .gateway-card { background: var(--bg-input); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem; }
 
-        /* MOBILE RESPONSIVENESS TWEAKS */
-        @media (min-width: 1025px) {
+        /* --- MOBILE RESPONSIVENESS TWEAKS --- */
+        @media(min-width: 1025px) {
             aside { transform: translateX(0) !important; width: var(--sidebar-width); }
             main { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 2rem; }
             .sidebar-overlay { display: none !important; }
         }
 
-        @media (max-width: 1024px) {
+        @media(max-width: 1024px) {
             aside { transform: translateX(-100%); width: 280px; box-shadow: 20px 0 40px rgba(0,0,0,0.5); }
             aside.mobile-open { transform: translateX(0); }
             main { margin-left: 0 !important; width: 100% !important; padding: 1rem; padding-top: 5rem; }
             .stats-grid { grid-template-columns: 1fr; }
             .price-grid { grid-template-columns: 1fr; }
-            .header-brand span { display: none; } /* Hide text on very small screens if needed */
-        }
-
-        @media (max-width: 480px) {
-            .auth-card { padding: 1.5rem; }
-            .table-header { flex-direction: column; align-items: flex-start; }
-            .table-header input { width: 100%; margin-top: 0.5rem; }
-            .kanban-col { min-width: 85vw; } /* Kanban takes almost full width on mobile */
+            .header-brand span { display: none; }
         }
     </style>
 </head>
@@ -557,7 +546,7 @@
     <div id="auth-screen">
         <div class="auth-card">
             <img src="https://raw.githubusercontent.com/ddnetwork-ent/ddnetwork/refs/heads/main/DDN%20Logo%20NoBG.png" alt="Logo">
-            <h2 class="mb-4" style="color:white">Admin Portal v9.3</h2>
+            <h2 class="mb-4" style="color:white">Admin Portal v9.4</h2>
             <form id="loginForm">
                 <input type="text" id="loginInput" class="mb-4" placeholder="Email or Crew ID" required>
                 <input type="password" id="loginPass" class="mb-4" placeholder="Password" required>
@@ -576,7 +565,7 @@
                 <button class="btn-icon" onclick="toggleSidebar()"><i class="ri-menu-line" style="font-size: 1.5rem;"></i></button>
                 <div class="header-brand">
                     <img src="https://raw.githubusercontent.com/ddnetwork-ent/ddnetwork/refs/heads/main/DDN%20Logo%20NoBG.png">
-                    <span>DDN v9.3</span>
+                    <span>DDN v9.4</span>
                 </div>
             </div>
             <div class="header-actions">
@@ -654,6 +643,32 @@
         };
         let db, auth, currentUser, userData = null;
         try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); auth = firebase.auth(); } catch(e) { console.log("Firebase init error", e); }
+
+        // --- AUTO CREATE CONFIG ON LOAD ---
+        async function initializeDatabase() {
+            const configRef = db.collection("config").doc("site_settings");
+            const doc = await configRef.get();
+            
+            if (!doc.exists) {
+                console.log("Config not found, creating default...");
+                await configRef.set({
+                    maintenance_active: false,
+                    maintenance_message: "We are currently performing scheduled maintenance.",
+                    prices: { html: 199, frontend: 599 },
+                    packageDetails: {
+                        frontend: ["Up to 5 Pages", "Animations", "Contact Forms", "WhatsApp Integration"],
+                        ai: ["All Front-End Features", "AI Chatbot Integration", "Lead Auto-Response", "Smart Analytics"]
+                    },
+                    discountActive: false,
+                    discountPercent: 0.1,
+                    payment_methods: [
+                        { id: 'tng', name: 'TNG eWallet', url: 'https://payment.tngdigital.com.my/sc/bDLob7YcpG', active: true },
+                        { id: 'fpx', name: 'Online Banking (FPX)', url: 'https://toyyibpay.com', active: true }
+                    ]
+                });
+                showToast("Database initialized!", "success");
+            }
+        }
 
         // --- LOGGING HELPER ---
         function logActivity(msg) {
@@ -733,6 +748,7 @@
                         else document.getElementById('nav-crew').classList.remove('hidden');
 
                         nav('overview');
+                        initializeDatabase(); // Ensure DB is initialized
                     } else {
                         showToast("Access Denied", "error"); auth.signOut();
                     }
@@ -777,12 +793,10 @@
         function toggleSidebar() { 
             const sb = document.getElementById('sidebar');
             const ov = document.getElementById('sidebarOverlay');
-            // On mobile: toggle class and overlay
             if(window.innerWidth <= 1024) {
                 sb.classList.toggle('mobile-open');
                 ov.classList.toggle('active');
             } else {
-                // Desktop: standard collapse
                 const mn = document.getElementById('main');
                 sb.classList.toggle('collapsed');
                 mn.classList.toggle('expanded');
@@ -1527,7 +1541,7 @@
             });
         }
 
-        // --- 8. CONTENT & PACKAGES ---
+        // --- 8. CONTENT & PACKAGES (SYNCED) ---
         function renderContent() {
             if(!isAdmin()) return;
             
@@ -1583,7 +1597,7 @@
             });
         }
 
-        // --- 9. CONFIG ---
+        // --- 9. CONFIG (SYNCED) ---
         function renderConfig() {
             if(!isAdmin()) return;
             document.getElementById('main').innerHTML = `
