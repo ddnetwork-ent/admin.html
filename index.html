@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Portal v9.4 | DDNetwork One</title>
+    <title>Admin Portal v9.5 | DDNetwork One</title>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,6 +35,7 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --ticket: #8b5cf6; 
+            --info: #0ea5e9;
             
             --font: 'Inter', sans-serif;
             --sidebar-width: 260px;
@@ -71,6 +72,7 @@
         .text-center { text-align: center; }
         .text-sm { font-size: 0.85rem; }
         .font-bold { font-weight: 700; }
+        .text-muted { color: var(--text-muted); }
 
         /* SCROLLBAR */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -102,6 +104,7 @@
         .btn-primary { background: var(--primary); color: white; border: 1px solid var(--primary); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
         .btn-success { background: var(--success); color: white; border: 1px solid var(--success); }
         .btn-danger { background: var(--danger); color: white; border: 1px solid var(--danger); }
+        .btn-info { background: var(--info); color: white; border: 1px solid var(--info); }
         .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
         .btn-secondary:hover { border-color: white; background: rgba(255,255,255,0.05); }
         .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
@@ -117,6 +120,7 @@
             display: flex; align-items: center; justify-content: center;
         }
         .btn-icon:hover { color: white; background: rgba(255,255,255,0.1); }
+        .btn-icon.spin:hover i { animation: spin 1s linear infinite; }
 
         /* FORMS */
         input, select, textarea {
@@ -213,7 +217,7 @@
             z-index: 1000; max-height: 400px; overflow-y: auto;
         }
         .notif-dropdown.show { display: flex; }
-        .notif-item { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .notif-item { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
         .notif-item:hover { background: rgba(255,255,255,0.03); }
         .notif-item strong { color: white; display: block; margin-bottom: 2px; font-size: 0.85rem; }
         .notif-item div { color: var(--text-muted); font-size: 0.8rem; line-height: 1.4; }
@@ -312,7 +316,7 @@
         .stat-val { font-size: 1.5rem; font-weight: 800; color: white; line-height: 1; margin-bottom: 2px; }
         .stat-label { color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* LIST GROUP (Replacement for Chart) */
+        /* LIST GROUP */
         .list-group { background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); padding: 1.5rem; }
         .list-group h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
         .activity-item { display: flex; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
@@ -405,6 +409,7 @@
         .task-card.priority-Medium { border-left-color: var(--warning); }
         .task-card.priority-Low { border-left-color: var(--success); }
         .task-card.type-ticket { border-top: 3px solid var(--ticket); }
+        .task-card.type-task { border-top: 3px solid var(--info); }
         
         .task-title { font-weight: 600; margin-bottom: 4px; font-size: 0.9rem; color: white; line-height: 1.3; }
         .task-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -487,6 +492,7 @@
         .badge-admin { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
         .badge-crew { background: rgba(59, 130, 246, 0.15); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.3); }
         .badge-user { background: rgba(255,255,255,0.1); color: white; }
+        .badge-voucher { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
 
         /* CONFIG TAB SPECIFICS */
         .config-section { 
@@ -562,7 +568,7 @@
     <div id="auth-screen">
         <div class="auth-card">
             <img src="https://raw.githubusercontent.com/ddnetwork-ent/ddnetwork/refs/heads/main/DDN%20Logo%20NoBG.png" alt="Logo">
-            <h2 class="mb-4" style="color:white">Admin Portal v9.4</h2>
+            <h2 class="mb-4" style="color:white">Admin Portal v9.5</h2>
             <form id="loginForm">
                 <input type="text" id="loginInput" class="mb-4" placeholder="Email or Crew ID" required>
                 <input type="password" id="loginPass" class="mb-4" placeholder="Password" required>
@@ -581,10 +587,11 @@
                 <button class="btn-icon" onclick="toggleSidebar()"><i class="ri-menu-line" style="font-size: 1.5rem;"></i></button>
                 <div class="header-brand">
                     <img src="https://raw.githubusercontent.com/ddnetwork-ent/ddnetwork/refs/heads/main/DDN%20Logo%20NoBG.png">
-                    <span>DDN v9.4</span>
+                    <span>DDN v9.5</span>
                 </div>
             </div>
             <div class="header-actions">
+                <button class="btn-icon spin" onclick="location.reload()" title="Force Refresh"><i class="ri-refresh-line"></i></button>
                 <button class="btn-icon" onclick="toggleNotifications()">
                     <i class="ri-notification-3-line" style="font-size: 1.3rem;"></i>
                     <span class="notification-dot" id="notifDot"></span>
@@ -967,7 +974,7 @@
                     // Requirement 2: Show if customer used promo
                     let voucherBadge = '<span style="color:var(--text-dark)">None</span>';
                     if (d.voucherCode) {
-                        voucherBadge = `<span class="badge" style="background:rgba(245, 158, 11, 0.15); color:var(--warning); border:1px solid rgba(245, 158, 11, 0.3)"><i class="ri-coupon-line"></i> ${d.voucherCode}</span>`;
+                        voucherBadge = `<span class="badge badge-voucher"><i class="ri-coupon-line"></i> ${d.voucherCode}</span>`;
                     }
 
                     let statusColor = '#71717a';
@@ -1209,110 +1216,166 @@
             }
         }
 
-        // --- 5. TASKS ---
+        // --- 5. TASKS (IMPROVED) ---
         function renderTasks() {
+            // Fetch all relevant data
             const tasksPromise = db.collection("tasks").orderBy("timestamp", "desc").get();
-            const ticketsPromise = db.collection("tickets")
-                .where("assignedTo", "==", currentUser.uid)
-                .where("status", "in", ["Open", "In Progress"])
-                .get();
+            const ticketsPromise = db.collection("tickets").orderBy("timestamp", "desc").get();
 
             Promise.all([tasksPromise, ticketsPromise]).then(([tSnap, tkSnap]) => {
+                
+                // Helper to get badge color
+                const getPrioColor = (p) => p === 'High' ? 'var(--danger)' : (p === 'Medium' ? 'var(--warning)' : 'var(--success)');
+
+                // Initialize columns
+                const cols = {
+                    'available': [], // Unassigned tickets/tasks
+                    'my-tasks': [],   // Assigned to me
+                    'in-progress': [], // Assigned to me (In Progress)
+                    'done': []        // Closed/Done
+                };
+
+                // Process Tasks
+                tSnap.forEach(doc => {
+                    const t = doc.data();
+                    const item = { id: doc.id, ...t, type: 'task' };
+                    if(!t.assignedTo) cols['available'].push(item);
+                    else if(t.assignedTo === currentUser.uid) {
+                        if(t.status === 'Done') cols['done'].push(item);
+                        else if(t.status === 'In Progress') cols['in-progress'].push(item);
+                        else cols['my-tasks'].push(item);
+                    } else if(isAdmin()) {
+                         // Admins see everything in 'available' or correct columns, simplified here:
+                         // If assigned to others, admin sees in 'available' or a separate col. 
+                         // For this UI, let's put others' tasks in 'my-tasks' for Admin to view.
+                         if(t.status === 'Done') cols['done'].push(item);
+                         else cols['my-tasks'].push(item);
+                    }
+                });
+
+                // Process Tickets
+                tkSnap.forEach(doc => {
+                    const t = doc.data();
+                    const item = { id: doc.id, ...t, type: 'ticket' };
+                    if(!t.assignedTo) cols['available'].push(item);
+                    else if(t.assignedTo === currentUser.uid || isAdmin()) {
+                         const status = t.status; // Open, In Progress, Closed
+                         if(status === 'Closed') cols['done'].push(item);
+                         else if(status === 'In Progress') cols['in-progress'].push(item);
+                         else cols['my-tasks'].push(item);
+                    }
+                });
+
+                // Generate HTML
                 const boardHtml = `
                     <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
                         <h2 style="font-size:1.25rem; font-weight:700;">Task Board</h2>
                         <div class="flex gap-2">
                             <button class="btn btn-primary" onclick="createTask()"><i class="ri-add-line"></i> New Task</button>
+                            <button class="btn btn-secondary" onclick="renderTasks()"><i class="ri-refresh-line"></i></button>
                         </div>
                     </div>
-                    <div class="kanban-board" id="kanban">
+                    <div class="kanban-board">
+                        <!-- COL 1: AVAILABLE -->
                         <div class="kanban-col">
-                            <div class="kanban-header">To Do <span id="count-todo" class="badge" style="background:var(--bg-input)">0</span></div>
-                            <div class="task-list" id="list-todo"></div>
+                            <div class="kanban-header">Available Requests <span id="count-avail" class="badge" style="background:var(--bg-input)">0</span></div>
+                            <div class="task-list" id="list-avail"></div>
                         </div>
+                        <!-- COL 2: MY TASKS -->
+                        <div class="kanban-col">
+                            <div class="kanban-header">My Tasks (To Do) <span id="count-myt" class="badge" style="background:var(--bg-input)">0</span></div>
+                            <div class="task-list" id="list-myt"></div>
+                        </div>
+                        <!-- COL 3: IN PROGRESS -->
                         <div class="kanban-col">
                             <div class="kanban-header">In Progress <span id="count-prog" class="badge" style="background:var(--bg-input)">0</span></div>
                             <div class="task-list" id="list-prog"></div>
                         </div>
+                        <!-- COL 4: DONE -->
                         <div class="kanban-col">
-                            <div class="kanban-header">Done <span id="count-done" class="badge" style="background:var(--bg-input)">0</span></div>
+                            <div class="kanban-header">Done / Closed <span id="count-done" class="badge" style="background:var(--bg-input)">0</span></div>
                             <div class="task-list" id="list-done"></div>
                         </div>
                     </div>
                 `;
                 document.getElementById('main').innerHTML += boardHtml;
 
-                const cols = { 'To Do': [], 'In Progress': [], 'Done': [] };
-
-                tSnap.forEach(doc => {
-                    const t = doc.data();
-                    if(t.assignedTo === currentUser.uid || isAdmin()) {
-                        cols[t.status].push({id: doc.id, ...t, type: 'task'});
-                    }
-                });
-
-                tkSnap.forEach(doc => {
-                    const t = doc.data();
-                    const mapStatus = t.status === 'In Progress' ? 'In Progress' : 'To Do';
-                    cols[mapStatus].push({id: doc.id, ...t, type: 'ticket'});
-                });
-
-                const renderCol = (colName, listId, countId) => {
-                    const listEl = document.getElementById(listId);
-                    listEl.innerHTML = cols[colName].map(t => {
-                        const isTicket = t.type === 'ticket';
-                        const isDone = colName === 'Done';
-                        
-                        let actionButtons = '';
-                        if (colName === 'To Do') {
-                            actionButtons = `<button class="move-btn" onclick="moveTask('${t.type}', '${t.id}', 'In Progress')">Start <i class="ri-arrow-right-line"></i></button>`;
-                        } else if (colName === 'In Progress') {
-                            actionButtons = `
-                                <button class="move-btn" onclick="moveTask('${t.type}', '${t.id}', 'To Do')"><i class="ri-arrow-left-line"></i> Back</button>
-                                <button class="move-btn" onclick="moveTask('${t.type}', '${t.id}', 'Done')">Done <i class="ri-check-line"></i></button>
-                            `;
-                        } else if (colName === 'Done') {
-                            actionButtons = `<span style="font-size:0.7rem; color:var(--success)">Completed</span>`;
-                        }
-
-                        return `<div class="task-card priority-${t.priority || 'Medium'} ${isTicket?'type-ticket':''}">
-                            <div class="flex justify-between items-start">
-                                <div class="task-title">
-                                    ${isTicket ? '<i class="ri-customer-service-2-line" style="color:var(--ticket)"></i> ' : ''}
-                                    ${t.title || (t.type==='ticket' ? t.ticketId : '')}
-                                </div>
-                                ${isAdmin() && !isDone ? `<button class="btn-icon" style="padding:0;" onclick="deleteItem('${t.type}', '${t.id}')"><i class="ri-close-line"></i></button>` : ''}
-                            </div>
-                            <div class="task-desc">${t.desc || t.message || 'No description'}</div>
-                            <div class="task-meta">
-                                <span class="badge" style="background:#333">${isTicket?'Ticket':'Task'}</span>
-                                ${t.dueDate ? `<div class="task-due"><i class="ri-time-line"></i> ${new Date(t.dueDate).toLocaleDateString()}</div>` : ''}
-                            </div>
-                            <div class="task-actions">
-                                ${actionButtons}
-                            </div>
-                        </div>`;
-                    }).join('');
-                    document.getElementById(countId).innerText = cols[colName].length;
+                // Render Helper
+                const renderItem = (item, containerId, btnHtml) => {
+                    const div = document.createElement('div');
+                    div.className = `task-card priority-${item.priority || 'Medium'} type-${item.type}`;
+                    div.innerHTML = `
+                        <div class="task-title">
+                            ${item.type === 'ticket' ? '<i class="ri-customer-service-2-line" style="color:var(--ticket)"></i> ' : '<i class="ri-task-line" style="color:var(--info)"></i> '}
+                            ${item.title || (item.type==='ticket' ? item.ticketId : '')}
+                        </div>
+                        <div class="task-desc">${item.desc || item.message || 'No description'}</div>
+                        <div class="task-meta">
+                            <span class="badge" style="background:#333">${item.type}</span>
+                            <span style="color:${getPrioColor(item.priority)}">${item.priority || 'Med'}</span>
+                        </div>
+                        <div class="task-actions">
+                            ${btnHtml}
+                        </div>
+                    `;
+                    document.getElementById(containerId).appendChild(div);
                 };
 
-                renderCol('To Do', 'list-todo', 'count-todo');
-                renderCol('In Progress', 'list-prog', 'count-prog');
-                renderCol('Done', 'list-done', 'count-done');
+                // 1. Render Available (Accept Action)
+                document.getElementById('count-avail').innerText = cols['available'].length;
+                cols['available'].forEach(item => {
+                    renderItem(item, 'list-avail', `<button class="move-btn" style="background:var(--success)20; color:var(--success); border-color:var(--success)" onclick="acceptTask('${item.type}', '${item.id}')">Accept Task</button>`);
+                });
+
+                // 2. Render My Tasks (Start Action)
+                document.getElementById('count-myt').innerText = cols['my-tasks'].length;
+                cols['my-tasks'].forEach(item => {
+                    renderItem(item, 'list-myt', `
+                        <button class="move-btn" onclick="updateTaskStatus('${item.type}', '${item.id}', 'In Progress')">Start <i class="ri-arrow-right-line"></i></button>
+                    `);
+                });
+
+                // 3. Render In Progress (Done/Back Action)
+                document.getElementById('count-prog').innerText = cols['in-progress'].length;
+                cols['in-progress'].forEach(item => {
+                    renderItem(item, 'list-prog', `
+                        <button class="move-btn" onclick="updateTaskStatus('${item.type}', '${item.id}', 'To Do')"><i class="ri-arrow-left-line"></i></button>
+                        <button class="move-btn" onclick="updateTaskStatus('${item.type}', '${item.id}', 'Done')"><i class="ri-check-line"></i> Done</button>
+                    `);
+                });
+
+                // 4. Render Done (Archive/Delete)
+                document.getElementById('count-done').innerText = cols['done'].length;
+                cols['done'].forEach(item => {
+                    renderItem(item, 'list-done', `<small style="color:var(--success)">Completed</small>`);
+                });
+
             });
         }
 
-        function moveTask(type, id, status) {
-            if(confirm(`Move this ${type} to ${status}?`)) {
+        function acceptTask(type, id) {
+            if(confirm("Accept this task? It will be moved to your list.")) {
+                const updates = { assignedTo: currentUser.uid, assignedToName: userData.name };
                 if(type === 'task') {
-                    db.collection("tasks").doc(id).update({ status: status });
-                } else if (type === 'ticket') {
-                    const ticketStatus = status === 'Done' ? 'Closed' : status;
-                    db.collection("tickets").doc(id).update({ status: ticketStatus });
+                    updates.status = 'To Do';
+                    db.collection("tasks").doc(id).update(updates);
+                } else {
+                    updates.status = 'Open';
+                    db.collection("tickets").doc(id).update(updates);
                 }
-                logActivity(`Moved ${type} to ${status}`);
-                showToast(`Moved to ${status}`, "success");
+                showToast("Task Accepted", "success");
+                logActivity(`Accepted ${type} #${id}`);
             }
+        }
+
+        function updateTaskStatus(type, id, status) {
+            const dbStatus = status === 'Done' && type === 'ticket' ? 'Closed' : status;
+            db.collection(type === 'task' ? 'tasks' : 'tickets').doc(id).update({ 
+                status: dbStatus 
+            }).then(() => {
+                showToast(`Moved to ${dbStatus}`, "success");
+                logActivity(`Updated ${type} status to ${dbStatus}`);
+            });
         }
 
         function createTask() {
@@ -1320,32 +1383,22 @@
                 <label class="mb-4 block">Title</label><input id="t-title" class="mb-4">
                 <label class="mb-4 block">Description</label><textarea id="t-desc" class="mb-4" rows="3"></textarea>
                 <div class="flex gap-4 mb-4">
-                    <div style="flex:1"><label class="mb-2 block">Assign To</label><select id="t-assign"><option value="${currentUser.uid}">Me</option></select></div>
                     <div style="flex:1"><label class="mb-2 block">Priority</label><select id="t-prio"><option>Low</option><option>Medium</option><option>High</option></select></div>
                 </div>
-                <label class="mb-2 block">Due Date</label><input type="date" id="t-due" class="mb-4">
             `, `<button class="btn btn-primary" onclick="saveTask()">Create Task</button>`);
         }
         function saveTask() {
             db.collection("tasks").add({ 
                 title: document.getElementById('t-title').value, 
                 desc: document.getElementById('t-desc').value,
-                assignedTo: document.getElementById('t-assign').value, 
-                assignedToName: userData.name, 
+                assignedTo: null, // Unassigned initially
                 priority: document.getElementById('t-prio').value, 
-                dueDate: document.getElementById('t-due').value ? new Date(document.getElementById('t-due').value) : null,
                 status: 'To Do', 
                 timestamp: firebase.firestore.FieldValue.serverTimestamp() 
             }).then(() => { closeModal(); showToast("Task Created", "success"); logActivity("Created new task"); });
         }
-        function deleteItem(type, id) {
-            if(confirm("Delete this item?")) {
-                const col = type === 'task' ? 'tasks' : 'tickets';
-                db.collection(col).doc(id).delete().then(() => showToast(`${type} Deleted`, "success"));
-            }
-        }
 
-        // --- 6. SUPPORT ---
+        // --- 6. SUPPORT (LEGACY) ---
         function renderSupport() {
             document.getElementById('main').innerHTML += `
                 <button class="btn btn-secondary mb-4" onclick="openCreateTicket()"><i class="ri-add-line"></i> Create New Ticket</button>
@@ -1437,8 +1490,7 @@
             }).then(() => { closeModal(); showToast("Ticket Updated", "success"); logActivity(`Updated Ticket #${id}`); });
         }
 
-        // --- 7. VOUCHERS (IMPROVED LOGIC & UI) ---
-        // Global variable for current filter
+        // --- 7. VOUCHERS ---
         let currentVoucherFilter = 'All'; 
 
         async function renderVouchers() {
@@ -1483,10 +1535,8 @@
                 </div>
             `;
 
-            // 1. Run Improved Sync Logic (Read Status from DB)
             await syncVoucherLogic();
 
-            // 2. Render Lists
             document.getElementById('voucher-loader').parentElement.classList.add('hidden');
             document.getElementById('active-vouchers-container').classList.remove('hidden');
             document.getElementById('history-vouchers-container').classList.remove('hidden');
@@ -1499,11 +1549,7 @@
                 snap.forEach(doc => {
                     const u = doc.data();
                     const v = u.personalVoucher;
-                    
-                    // Only show Active/Suspended. 
-                    // Redeemed/Expired/Disabled are moved by sync logic.
                     const vStatus = v.status ? v.status : 'Active';
-                    
                     let statusColor = 'var(--success)';
                     const statusLower = vStatus.toLowerCase();
                     if (statusLower === 'suspended') statusColor = 'var(--danger)';
@@ -1527,7 +1573,7 @@
                 });
             });
 
-            // Render History (With Filter)
+            // Render History
             const updateHistoryListener = (filterVal) => {
                 db.collection("vouchers_history").orderBy("movedAt", "desc").limit(50).onSnapshot(snap => {
                     const tbody = document.getElementById('vouch-history');
@@ -1535,8 +1581,6 @@
                     tbody.innerHTML = '';
                     snap.forEach(doc => {
                         const v = doc.data();
-                        
-                        // Apply Filter
                         if(filterVal !== 'All' && v.status !== filterVal) return;
 
                         let actionBtn = '';
@@ -1545,7 +1589,7 @@
                         
                         let statusColor = 'var(--text-dark)';
                         if (v.status === 'Redeemed') statusColor = 'var(--success)';
-                        if (v.status === 'Expired') statusColor = 'var(--warning)'; // Orange for expired
+                        if (v.status === 'Expired') statusColor = 'var(--warning)'; 
                         if (v.status === 'Disabled') statusColor = 'var(--text-dark)';
 
                         tbody.innerHTML += `<tr>
@@ -1558,32 +1602,18 @@
                     });
                 });
             };
-
-            // Initial Render
             updateHistoryListener(currentVoucherFilter);
         }
 
-        // Expose filter update to global scope
         window.updateHistoryFilter = (val) => {
             currentVoucherFilter = val;
-            // Re-render listener logic (simplified for this demo by re-triggering manually via snapshot logic in real app, here we wait a tick)
-            // In a real React/Vue app this is state. Here we just update the global and re-render function logic.
-            // But since onSnapshot is live, I need to cancel the previous listener or filter inside it.
-            // For this HTML file, I will just force a refresh of the Vouchers tab to apply the filter cleanly.
-            // Or simpler: Re-call renderVouchers? No, that re-syncs.
-            // The onSnapshot callback handles display, so we just update the var used inside it.
         };
-        
-        // CORE LOGIC: Reads Status from Users Collection
+
         async function syncVoucherLogic() {
-            console.log("Syncing Vouchers based on DB Status...");
-            // 1. Get all users with vouchers
             const usersSnap = await db.collection("users").where("personalVoucher", "!=", null).get();
-            
             if(usersSnap.empty) return;
 
             let movedCount = 0;
-
             for (const userDoc of usersSnap.docs) {
                 const uid = userDoc.id;
                 const uData = userDoc.data();
@@ -1593,7 +1623,6 @@
                 let moveToHistory = false;
                 let statusReason = "";
 
-                // 1. Check Expiry Date (If expired, move to History as 'Expired')
                 if(vouch.expiryDate) {
                     const expDate = vouch.expiryDate.toDate ? vouch.expiryDate.toDate() : new Date(vouch.expiryDate);
                     if(new Date() > expDate) {
@@ -1602,26 +1631,16 @@
                     }
                 }
 
-                // 2. Check DB Status String (Requirement 1)
-                // If status is 'Redeemed' or 'Disabled', move to History.
-                // 'Redeemed' means it was used. 'Disabled' means manually revoked.
                 const currentStatus = (vouch.status || '').toLowerCase();
-                
                 if (currentStatus === 'redeemed' && !moveToHistory) {
                     moveToHistory = true;
                     statusReason = "Redeemed";
                 } else if (currentStatus === 'disabled' && !moveToHistory) {
                     moveToHistory = true;
                     statusReason = "Disabled";
-                } else if (currentStatus === 'suspended' && !moveToHistory) {
-                    // Suspended usually stays in user list but is inactive. 
-                    // We will keep it in User List as "Suspended".
-                    // But if we want it in history too, we can add logic here.
-                    // For now, let's keep Suspended in Active list but show status.
                 }
 
                 if(moveToHistory) {
-                    // Move to history collection
                     await db.collection("vouchers_history").doc(code).set({
                         ...vouch,
                         ownerUid: uid,
@@ -1629,7 +1648,6 @@
                         status: statusReason,
                         movedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    // Remove from user
                     await db.collection("users").doc(uid).update({
                         personalVoucher: firebase.firestore.FieldValue.delete()
                     });
@@ -1677,10 +1695,6 @@
             });
         }
 
-        // Action: Mark Redeemed (Moves to History -> Redeemed)
-        // This function essentially sets the status in User, so next Sync picks it up.
-        // Or moves it immediately? Prompt implies "read data... if under users (status... redeemed) automatically will move".
-        // To be instant, we move it now.
         async function markRedeem(uid, code) {
             if(!confirm(`Mark voucher ${code} as Redeemed? This will move it to History.`)) return;
             
@@ -1688,7 +1702,6 @@
             const uData = userDoc.data();
             const vouch = uData.personalVoucher;
 
-            // Move to History immediately with Status Redeemed
             await db.collection("vouchers_history").doc(code).set({
                 ...vouch,
                 ownerUid: uid,
@@ -1702,7 +1715,6 @@
             logActivity(`Marked voucher ${code} as Redeemed`);
         }
 
-        // Action: Disable (Moves to History -> Disabled)
         async function disableVoucher(uid, code) {
             if(!confirm(`Disable voucher ${code}? This will move it to History.`)) return;
             
@@ -1757,7 +1769,6 @@
             db.collection("vouchers_history").doc(code).get().then(hist => {
                 if(!hist.exists) return showToast("Error", "error");
                 const v = hist.data();
-                // Reset status to active on restore
                 db.collection("users").doc(ownerUid).update({ personalVoucher: { ...v, status: 'active' } }).then(() => {
                     db.collection("vouchers_history").doc(code).delete().then(() => { showToast("Voucher Restored", "success"); logActivity(`Restored voucher ${code}`); });
                 });
