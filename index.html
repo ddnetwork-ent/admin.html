@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Portal v9.9 | DDNetwork One</title>
+    <title>Admin Portal v9.10 | DDNetwork One</title>
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -555,7 +555,7 @@
     <div id="auth-screen">
         <div class="auth-card">
             <img src="https://raw.githubusercontent.com/ddnetwork-ent/ddnetwork/refs/heads/main/DDN%20Logo%20NoBG.png" alt="Logo">
-            <h2 class="mb-4" style="color:white; font-weight: 700; letter-spacing: -0.5px;">Admin Portal v9.9</h2>
+            <h2 class="mb-4" style="color:white; font-weight: 700; letter-spacing: -0.5px;">Admin Portal v9.10</h2>
             <form id="loginForm">
                 <input type="text" id="loginInput" class="mb-4" placeholder="Email or Crew ID" required>
                 <input type="password" id="loginPass" class="mb-4" placeholder="Password" required>
@@ -574,7 +574,7 @@
                 <button class="btn-icon" onclick="toggleSidebar()"><i class="ri-menu-line" style="font-size: 1.4rem;"></i></button>
                 <div class="header-brand">
                     <img src="https://raw.githubusercontent.com/ddnetwork-ent/ddnetwork/refs/heads/main/DDN%20Logo%20NoBG.png">
-                    <span>DDN v9.9</span>
+                    <span>DDN v9.10</span>
                 </div>
             </div>
             <div class="header-actions">
@@ -852,7 +852,7 @@
             '/vouchers': renderVouchers,
             '/content': renderContent,
             '/config': renderConfig,
-            '/portfolio': renderPortfolio, // NEW ROUTE
+            '/portfolio': renderPortfolio,
             '/my-profile': renderMyProfile
         };
 
@@ -1052,7 +1052,7 @@
                                 </tr>
                             </thead>
                             <tbody id="orders-tbody">
-                                <tr><td colspan="7" class="text-center"><div class="loading-spinner"></div></td></tr>
+                                <tr><td colspan="8" class="text-center"><div class="loading-spinner"></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1063,7 +1063,7 @@
                 if(!tbody) return;
                 
                 if(snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No orders found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No orders found</td></tr>';
                     return;
                 }
 
@@ -1326,14 +1326,14 @@
                 <div class="table-container">
                     <div class="table-responsive">
                         <table><thead><tr><th>ID</th><th>Date</th><th>Client</th><th>Issue</th><th>Assigned To</th><th>Status</th><th>Action</th></tr></thead><tbody id="supp-tbody">
-                        <tr><td colspan="7" class="text-center"><div class="loading-spinner"></div></td></tr>
+                        <tr><td colspan="8" class="text-center"><div class="loading-spinner"></div></td></tr>
                         </tbody></table>
                     </div>
                 </div>`;
             db.collection("tickets").orderBy("timestamp", "desc").onSnapshot(snap => {
                 const tbody = document.getElementById('supp-tbody');
                 if(!tbody) return;
-                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No tickets found</td></tr>'; return; }
+                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No tickets found</td></tr>'; return; }
 
                 tbody.innerHTML = snap.docs.map(doc => {
                     const d = doc.data();
@@ -1935,7 +1935,7 @@
             renderConfig();
         }
 
-        // --- 9. PORTFOLIO MANAGEMENT (NEW) ---
+        // --- 9. PORTFOLIO MANAGEMENT (UPDATED: AUTO ID) ---
         function renderPortfolio() {
             if(!isAdmin()) return;
 
@@ -1955,13 +1955,14 @@
                                 <tr>
                                     <th>Thumbnail</th>
                                     <th>Project Name</th>
+                                    <th>Document ID</th>
                                     <th>Website Link</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="portfolio-tbody">
-                                <tr><td colspan="5" class="text-center"><div class="loading-spinner"></div></td></tr>
+                                <tr><td colspan="7" class="text-center"><div class="loading-spinner"></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1974,7 +1975,7 @@
                 if(!tbody) return;
 
                 if(snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No portfolio projects found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No portfolio projects found.</td></tr>';
                     return;
                 }
 
@@ -1992,6 +1993,7 @@
                                  onerror="this.src='https://placehold.co/50?text=No+Img'">
                         </td>
                         <td><strong>${p.name}</strong></td>
+                        <td style="font-family:monospace; color:var(--text-muted); font-size:0.8rem;">${doc.id}</td>
                         <td>
                             <a href="${p.link}" target="_blank" class="btn btn-sm btn-secondary">
                                 <i class="ri-external-link-line"></i> Visit
@@ -2010,16 +2012,40 @@
             });
         }
 
+        // Helper: Slugify
+        function generateSlug(text) {
+            if (!text) return '';
+            return text.toString().toLowerCase()
+                .trim()
+                .replace(/[^\w\s-]/g, '')    // Remove non-word chars
+                .replace(/[\s_-]+/g, '-')      // Replace spaces/underscores with -
+                .replace(/^-+|-+$/g, '');      // Remove leading/trailing hyphens
+                .replace(/--+/g, '-');        // Remove double hyphens
+                .replace(/-+/g, '-');
+        }
+
+        // Auto-generate ID from Name input
+        function autoGenPortfolioId() {
+            const name = document.getElementById('p-name').value;
+            const slug = generateSlug(name);
+            document.getElementById('p-doc-id').value = slug;
+        }
+
         function openAddPortfolioModal() {
             showModal("Add New Project", `
                 <div class="mb-4">
                     <label>Project Name</label>
-                    <input type="text" id="p-name" placeholder="e.g. Clinic Azam">
+                    <input type="text" id="p-name" placeholder="e.g. Clinic Azam" oninput="autoGenPortfolioId()">
+                </div>
+                <div class="mb-4">
+                    <label>Document ID (Auto-generated)</label>
+                    <input type="text" id="p-doc-id" readonly style="font-family:monospace; color:var(--primary);">
+                    <small style="color:var(--text-faint)">ID based on name (spaces = hyphens).</small>
                 </div>
                 <div class="mb-4">
                     <label>Image URL</label>
                     <input type="text" id="p-img" placeholder="https://...">
-                    <small style="color:var(--text-faint)">Direct link to the image file.</small>
+                    <small style="color:var(--text-faint)">Direct link to image file.</small>
                 </div>
                 <div class="mb-4">
                     <label>Website Link</label>
@@ -2036,27 +2062,41 @@
         }
 
         function saveNewPortfolio() {
+            const docId = document.getElementById('p-doc-id').value.trim();
             const name = document.getElementById('p-name').value;
             const img = document.getElementById('p-img').value;
             const link = document.getElementById('p-link').value;
             const status = document.getElementById('p-status').checked;
 
+            if(!docId) {
+                return showToast("Invalid Document ID generated.", "error");
+            }
+
             if(!name || !img || !link) {
                 return showToast("Please fill in all fields.", "error");
             }
 
-            db.collection("clients_portfolio").add({
-                name,
-                img,
-                link,
-                status,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                closeModal();
-                showToast("Project added successfully", "success");
-                logActivity(`Added portfolio project: ${name}`);
-            }).catch(err => {
-                showToast("Error: " + err.message, "error");
+            // Check for Duplicate ID
+            db.collection("clients_portfolio").doc(docId).get().then(docSnap => {
+                if (docSnap.exists) {
+                    showToast("This Document ID already exists! Please change the Project Name slightly.", "error");
+                    return;
+                }
+
+                // Use .doc(id).set() instead of .add() to use custom ID
+                db.collection("clients_portfolio").doc(docId).set({
+                    name,
+                    img,
+                    link,
+                    status,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    closeModal();
+                    showToast("Project added successfully", "success");
+                    logActivity(`Added portfolio project: ${name} (ID: ${docId})`);
+                }).catch(err => {
+                    showToast("Error: " + err.message, "error");
+                });
             });
         }
 
@@ -2067,6 +2107,11 @@
                     <div class="mb-4">
                         <label>Project Name</label>
                         <input type="text" id="e-p-name" value="${p.name}">
+                    </div>
+                    <div class="mb-4">
+                        <label>Document ID (Read Only)</label>
+                        <input type="text" id="e-p-doc-id" value="${doc.id}" readonly style="font-family:monospace; color:var(--text-muted); background:var(--bg-input);">
+                        <small style="color:var(--text-faint)">IDs cannot be changed after creation to prevent data loss.</small>
                     </div>
                     <div class="mb-4">
                         <label>Image URL</label>
@@ -2083,11 +2128,12 @@
                         </label>
                         <span style="font-size:0.9rem; color:var(--text-main);">Visible on Main Site</span>
                     </div>
-                `, `<button class="btn btn-primary" onclick="updatePortfolio('${docId}')">Save Changes</button>`);
+                `, `<button class="btn btn-primary" onclick="updatePortfolio('${doc.id}')">Save Changes</button>`);
             });
         }
 
         function updatePortfolio(docId) {
+            // Note: We do NOT allow changing the ID in edit mode to avoid data loss logic
             const updates = {
                 name: document.getElementById('e-p-name').value,
                 img: document.getElementById('e-p-img').value,
