@@ -47,7 +47,7 @@
             --sidebar-width: 260px;
             --header-height: 64px;
 
-            /* Z-Index Layers (Fixes clicking issues) */
+            /* Z-Index Layers */
             --z-base: 1;
             --z-sidebar: 100;
             --z-header: 200;
@@ -94,14 +94,14 @@
         /* SCROLLBAR */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius:4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
 
         /* BUTTONS (SaaS Style) */
         .btn {
             padding: 0.55rem 1.1rem; 
-            border-radius: 8px; /* Slightly squarer but soft */
-            border: 1px solid transparent; 
+            border-radius: 8px; 
+            border:1px solid transparent; 
             cursor: pointer; 
             font-weight: 500; 
             font-size: 0.85rem; 
@@ -116,7 +116,7 @@
             background: var(--bg-surface-hover);
             box-shadow: 0 1px 2px rgba(0,0,0,0.2);
             position: relative;
-            z-index: 5; /* Ensure clickable */
+            z-index: 5;
         }
         .btn:hover { 
             transform: translateY(-1px); 
@@ -128,21 +128,21 @@
         .btn-primary { 
             background: var(--primary); 
             color: white; 
-            border: 1px solid var(--primary); 
+            border:1px solid var(--primary); 
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); 
         }
         .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
 
-        .btn-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border:1px solid rgba(16, 185, 129, 0.2); }
         .btn-success:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--success); }
 
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border:1px solid rgba(239, 68, 68, 0.2); }
         .btn-danger:hover { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); }
         
-        .btn-danger-solid { background: var(--danger); color: white; border: 1px solid var(--danger); }
+        .btn-danger-solid { background: var(--danger); color: white; border:1px solid var(--danger); }
         .btn-danger-solid:hover { background: #dc2626; }
 
-        .btn-info { background: rgba(14, 165, 233, 0.1); color: var(--info); border: 1px solid rgba(14, 165, 233, 0.2); }
+        .btn-info { background: rgba(14, 165, 233, 0.1); color: var(--info); border:1px solid rgba(14, 165, 233, 0.2); }
         .btn-secondary { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); }
         .btn-secondary:hover { border-color: var(--text-muted); }
         
@@ -164,10 +164,10 @@
 
         /* FORMS */
         input, select, textarea {
-            width: 100%; 
+            width:100%; 
             padding: 0.65rem 0.85rem; 
             background: var(--bg-input); 
-            border: 1px solid var(--border); 
+            border:1px solid var(--border); 
             border-radius: 8px; 
             color: white; 
             font-family: inherit; 
@@ -195,7 +195,7 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            padding: 1rem;
+            padding:1rem;
         }
         .auth-card { 
             width: 100%; max-width: 400px; 
@@ -203,7 +203,7 @@
             background: rgba(18, 18, 22, 0.8); 
             backdrop-filter: blur(20px);
             border-radius: 24px; 
-            border: 1px solid var(--border); 
+            border:1px solid var(--border); 
             text-align: center; 
             box-shadow: 0 40px 80px rgba(0,0,0,0.6);
         }
@@ -223,7 +223,7 @@
         aside { 
             width: var(--sidebar-width); 
             background: var(--bg-sidebar); 
-            border-right: 1px solid var(--border); 
+            border-right:1px solid var(--border); 
             display: flex; 
             flex-direction: column; 
             z-index: var(--z-sidebar); 
@@ -236,7 +236,7 @@
             height: var(--header-height);
             background: rgba(9, 9, 11, 0.85);
             backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
+            border-bottom:1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -253,7 +253,7 @@
         
         .notif-dropdown {
             position: absolute; top: 70px; right: 10px; width: 320px;
-            background: var(--bg-surface); border: 1px solid var(--border);
+            background: var(--bg-surface); border:1px solid var(--border);
             border-radius: 12px; 
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             display: none; flex-direction: column; padding: 0;
@@ -607,21 +607,21 @@
             </div>
             
             <div class="nav-scroll">
-                <div class="nav-item active" onclick="nav('overview')"><i class="ri-dashboard-line"></i> Overview</div>
+                <div class="nav-item active" onclick="navigateTo('/')"><i class="ri-dashboard-line"></i> Overview</div>
                 
                 <div class="nav-section-title">Operations</div>
-                <div class="nav-item" onclick="nav('orders')"><i class="ri-shopping-bag-3-line"></i> Orders</div>
-                <div class="nav-item" onclick="nav('clients')"><i class="ri-user-line"></i> Clients</div>
-                <div class="nav-item" id="nav-crew" onclick="nav('crew')"><i class="ri-team-line"></i> Internal Crew</div>
-                <div class="nav-item" onclick="nav('support')"><i class="ri-customer-service-2-line"></i> Support Tickets</div>
-                <div class="nav-item" onclick="nav('vouchers')"><i class="ri-ticket-2-line"></i> Vouchers</div>
+                <div class="nav-item" onclick="navigateTo('/orders')"><i class="ri-shopping-bag-3-line"></i> Orders</div>
+                <div class="nav-item" onclick="navigateTo('/clients')"><i class="ri-user-line"></i> Clients</div>
+                <div class="nav-item" id="nav-crew" onclick="navigateTo('/crew')"><i class="ri-team-line"></i> Internal Crew</div>
+                <div class="nav-item" onclick="navigateTo('/support')"><i class="ri-customer-service-2-line"></i> Support Tickets</div>
+                <div class="nav-item" onclick="navigateTo('/vouchers')"><i class="ri-ticket-2-line"></i> Vouchers</div>
                 
                 <div class="nav-section-title">Management</div>
-                <div class="nav-item" onclick="nav('content')"><i class="ri-layout-masonry-line"></i> Content & Pkg</div>
-                <div class="nav-item" id="nav-config" onclick="nav('config')"><i class="ri-settings-4-line"></i> System Config</div>
+                <div class="nav-item" onclick="navigateTo('/content')"><i class="ri-layout-masonry-line"></i> Content & Pkg</div>
+                <div class="nav-item" id="nav-config" onclick="navigateTo('/config')"><i class="ri-settings-4-line"></i> System Config</div>
                 
                 <div class="nav-section-title">Personal</div>
-                <div class="nav-item" onclick="nav('my-profile')"><i class="ri-user-settings-line"></i> My Profile</div>
+                <div class="nav-item" onclick="navigateTo('/my-profile')"><i class="ri-user-settings-line"></i> My Profile</div>
             </div>
 
             <div style="padding: 1.5rem; border-top: 1px solid var(--border);">
@@ -657,7 +657,7 @@
         let db, auth, currentUser, userData = null;
         try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); auth = firebase.auth(); } catch(e) { console.log("Firebase init error", e); }
 
-        // --- AUTO CREATE CONFIG ON LOAD ---
+        // --- AUTO CREATE CONFIG & PAYMENT METHODS ON LOAD ---
         async function initializeDatabase() {
             const configRef = db.collection("config").doc("site_settings");
             const doc = await configRef.get();
@@ -667,19 +667,26 @@
                 await configRef.set({
                     maintenance_active: false,
                     maintenance_message: "We are currently performing scheduled maintenance.",
-                    prices: { html: 199, frontend: 599 },
+                    prices: { html: 199, frontend:599 },
                     packageDetails: {
                         frontend: ["Up to 5 Pages", "Animations", "Contact Forms", "WhatsApp Integration"],
                         ai: ["All Front-End Features", "AI Chatbot Integration", "Lead Auto-Response", "Smart Analytics"]
                     },
                     discountActive: false,
-                    discountPercent: 0.1,
-                    payment_methods: [
-                        { id: 'tng', name: 'TNG eWallet', url: 'https://payment.tngdigital.com.my/sc/bDLob7YcpG', active: true },
-                        { id: 'fpx', name: 'Online Banking (FPX)', url: 'https://toyyibpay.com', active: true }
-                    ]
+                    discountPercent: 0.1
                 });
                 showToast("Database initialized!", "success");
+            }
+
+            // UPDATED: Initialize Dedicated Payment Methods Collection
+            const pmSnapshot = await db.collection("payment_methods").limit(1).get();
+            if (pmSnapshot.empty) {
+                console.log("Payment methods collection empty, adding defaults...");
+                const defaults = [
+                    { id: 'tng', name: 'TNG eWallet', link: 'https://payment.tngdigital.com.my/sc/bDLob7YcpG', active: true },
+                    { id: 'fpx', name: 'Online Banking (FPX)', link: 'https://toyyibpay.com', active: true }
+                ];
+                defaults.forEach(pm => db.collection("payment_methods").add(pm));
             }
         }
 
@@ -789,7 +796,8 @@
                             listenForNotifications(); 
                         }
 
-                        nav('overview');
+                        // Initialize Router after auth
+                        initRouter();
                         initializeDatabase(); 
                     } else {
                         showToast("Access Denied", "error"); auth.signOut();
@@ -805,7 +813,6 @@
             const el = document.getElementById('notifDropdown');
             el.classList.toggle('show');
         }
-        // Improved click outside logic
         document.addEventListener('click', (e) => {
             const dd = document.getElementById('notifDropdown');
             const btn = document.getElementById('notif-btn');
@@ -834,7 +841,66 @@
             });
         }
 
-        // --- NAVIGATION ---
+        // --- ROUTING SYSTEM (History Mode) ---
+        const routes = {
+            '/': renderOverview,
+            '/orders': renderOrders,
+            '/clients': renderClients,
+            '/crew': renderCrew,
+            '/support': renderSupport,
+            '/vouchers': renderVouchers,
+            '/content': renderContent,
+            '/config': renderConfig,
+            '/my-profile': renderMyProfile
+        };
+
+        function navigateTo(path) {
+            window.history.pushState({ path: path }, "", path);
+            loadRoute(path);
+        }
+
+        function loadRoute(path) {
+            const renderFn = routes[path];
+            if (renderFn) {
+                // Update Sidebar UI
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                const activeItem = document.querySelector(`.nav-item[onclick="navigateTo('${path}')"]`);
+                if(activeItem) activeItem.classList.add('active');
+                
+                // Render Content
+                renderFn();
+
+                // Close Mobile Drawer if open
+                if(window.innerWidth <= 1024) {
+                    document.getElementById('sidebar').classList.remove('mobile-open');
+                    document.getElementById('sidebarOverlay').classList.remove('active');
+                }
+            }
+        }
+
+        function initRouter() {
+            const path = window.location.pathname;
+            // Default to home if path is empty or just the filename
+            // Note: For deep linking to work on static hosts like GH Pages, server needs to redirect all to index.html
+            // We will assume base path is '/'
+            const basePath = path.replace(/\/[^/]+\.html$/, '') || '/';
+            
+            // Check if our routes object has the path
+            if (routes[basePath]) {
+                loadRoute(basePath);
+            } else {
+                // Fallback to home if route not found
+                navigateTo('/');
+            }
+        }
+
+        window.onpopstate = (event) => {
+            if (event.state && event.state.path) {
+                loadRoute(event.state.path);
+            }
+        };
+
+        // --- NAVIGATION HELPERS ---
         function toggleSidebar() { 
             const sb = document.getElementById('sidebar');
             const ov = document.getElementById('sidebarOverlay');
@@ -845,35 +911,6 @@
                 const mn = document.getElementById('main');
                 sb.classList.toggle('collapsed');
                 mn.classList.toggle('expanded');
-            }
-        }
-
-        function nav(page) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            const active = document.querySelector(`.nav-item[onclick="nav('${page}')"]`);
-            if(active) active.classList.add('active');
-            
-            // Close dropdowns or overlays if open
-            document.getElementById('notifDropdown').classList.remove('show');
-
-            if(window.innerWidth <= 1024) {
-                document.getElementById('sidebar').classList.remove('mobile-open');
-                document.getElementById('sidebarOverlay').classList.remove('active');
-            }
-            
-            const main = document.getElementById('main');
-            main.innerHTML = '<div class="page-loader"><div class="loading-spinner" style="width:40px;height:40px;"></div></div>';
-
-            switch(page) {
-                case 'overview': renderOverview(); break;
-                case 'orders': renderOrders(); break;
-                case 'clients': renderClients(); break;
-                case 'crew': renderCrew(); break;
-                case 'support': renderSupport(); break;
-                case 'vouchers': renderVouchers(); break;
-                case 'content': renderContent(); break;
-                case 'config': renderConfig(); break;
-                case 'my-profile': renderMyProfile(); break;
             }
         }
 
@@ -926,10 +963,10 @@
                     <div class="list-group">
                         <h3><i class="ri-pulse-line" style="color:var(--success)"></i> Quick Actions</h3>
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem;">
-                            <button class="btn btn-secondary" onclick="nav('orders')"><i class="ri-shopping-bag-line"></i> New Order</button>
-                            <button class="btn btn-secondary" onclick="nav('support')"><i class="ri-ticket-line"></i> Check Tickets</button>
-                            <button class="btn btn-secondary" onclick="nav('vouchers')"><i class="ri-gift-line"></i> Assign Voucher</button>
-                            ${isAdmin() ? `<button class="btn btn-secondary" onclick="nav('crew')"><i class="ri-user-add-line"></i> Add Crew</button>` : ''}
+                            <button class="btn btn-secondary" onclick="navigateTo('/orders')"><i class="ri-shopping-bag-line"></i> New Order</button>
+                            <button class="btn btn-secondary" onclick="navigateTo('/support')"><i class="ri-ticket-line"></i> Check Tickets</button>
+                            <button class="btn btn-secondary" onclick="navigateTo('/vouchers')"><i class="ri-gift-line"></i> Assign Voucher</button>
+                            ${isAdmin() ? `<button class="btn btn-secondary" onclick="navigateTo('/crew')"><i class="ri-user-add-line"></i> Add Crew</button>` : ''}
                         </div>
                     </div>
                     <div class="list-group">
@@ -1277,7 +1314,7 @@
             });
         }
 
-        // --- 5. SUPPORT (IMPROVED SMART ID) ---
+        // --- 5. SUPPORT ---
         function renderSupport() {
             document.getElementById('main').innerHTML = `
                 <div class="flex justify-between items-center mb-4">
@@ -1572,7 +1609,7 @@
 
         function saveEditVoucher(uid) {
             const newCode = document.getElementById('e-v-code').value.toUpperCase();
-            const newStatus = document.getElementById('e-v-status').value;
+            const newStatus = document.getElementById('e-v-status').value;            
             
             db.collection("users").doc(uid).get().then(doc => {
                 const v = doc.data().personalVoucher;
@@ -1691,13 +1728,13 @@
                 
                 <div class="config-section">
                     <h3 style="margin-bottom:1rem;">Frontend Package Features</h3>
-                    <p class="mb-4 text-sm text-muted">Edit the feature list displayed on the main website.</p>
+                    <p class="mb-4 text-sm text-muted">Edit feature list displayed on main website.</p>
                     <textarea id="content-frontend" rows="6">${frontendFeatures.join('\n')}</textarea>
                 </div>
 
                 <div class="config-section">
                     <h3 style="margin-bottom:1rem;">AI Package Features</h3>
-                    <p class="mb-4 text-sm text-muted">Edit the feature list displayed on the website.</p>
+                    <p class="mb-4 text-sm text-muted">Edit feature list displayed on website.</p>
                     <textarea id="content-ai" rows="6">${aiFeatures.join('\n')}</textarea>
                 </div>
             `;
@@ -1724,7 +1761,7 @@
             });
         }
 
-        // --- 8. CONFIG ---
+        // --- 8. CONFIG (UPDATED: Payment Methods Listener) ---
         function renderConfig() {
             if(!isAdmin()) return;
             document.getElementById('main').innerHTML = `
@@ -1776,7 +1813,7 @@
                     </div>
                 </div>
 
-                <!-- Payment Gateways -->
+                <!-- Payment Gateways (UPDATED) -->
                 <div class="config-section">
                     <div class="config-header flex justify-between">
                         <span>Payment Gateways</span>
@@ -1797,27 +1834,30 @@
                         if(d.prices.frontend) document.getElementById('price-fe').value = d.prices.frontend;
                         if(d.prices.ai) document.getElementById('price-ai').value = d.prices.ai;
                     }
-                    
-                    if(d.payment_methods) {
-                        const list = document.getElementById('gateway-list');
-                        list.innerHTML = '';
-                        d.payment_methods.forEach((gw, idx) => {
-                            list.innerHTML += `
-                            <div class="gateway-card">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <strong style="color:var(--primary)">${gw.name}</strong>
-                                    <span class="badge ${gw.active?'badge-success':'badge-danger'}" style="${gw.active?'background:rgba(16,185,129,0.1);color:#10b981':'background:rgba(239,68,68,0.1);color:#ef4444'}">${gw.active?'Active':'Inactive'}</span>
-                                </div>
-                                <div class="text-sm text-muted" style="word-break:break-all;">${gw.link || 'No Link'}</div>
-                                <div style="display:flex; gap:8px; margin-top:8px;">
-                                    <button class="btn btn-sm btn-secondary" onclick="editGateway(${idx})"><i class="ri-pencil-line"></i></button>
-                                    <button class="btn btn-sm btn-secondary" onclick="toggleGatewayStatus(${idx})"><i class="ri-refresh-line"></i></button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteGateway(${idx})"><i class="ri-delete-bin-line"></i></button>
-                                </div>
-                            </div>`;
-                        });
-                    }
                 }
+            });
+
+            // UPDATED: Listen to dedicated collection
+            db.collection("payment_methods").onSnapshot(snap => {
+                const list = document.getElementById('gateway-list');
+                if(!list) return;
+                list.innerHTML = '';
+                snap.forEach(doc => {
+                    const gw = doc.data();
+                    list.innerHTML += `
+                        <div class="gateway-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:var(--primary)">${gw.name}</strong>
+                                <span class="badge ${gw.active?'badge-success':'badge-danger'}" style="${gw.active?'background:rgba(16,185,129,0.1);color:#10b981':'background:rgba(239,68,68,0.1);color:#ef4444'}">${gw.active?'Active':'Inactive'}</span>
+                            </div>
+                            <div class="text-sm text-muted" style="word-break:break-all;">${gw.link || 'No Link'}</div>
+                            <div style="display:flex; gap:8px; margin-top:8px;">
+                                <button class="btn btn-sm btn-secondary" onclick="editGateway('${doc.id}')"><i class="ri-pencil-line"></i></button>
+                                <button class="btn btn-sm btn-secondary" onclick="toggleGatewayStatus('${doc.id}')"><i class="ri-refresh-line"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteGateway('${doc.id}')"><i class="ri-delete-bin-line"></i></button>
+                            </div>
+                        </div>`;
+                });
             });
         }
 
@@ -1843,58 +1883,53 @@
                 <label>Payment Link / URL</label><input id="gw-link" class="mb-4">
             `, `<button class="btn btn-primary" onclick="saveNewGateway()">Add</button>`);
         }
+        
+        // UPDATED: Add to dedicated collection
         async function saveNewGateway() {
             const name = document.getElementById('gw-name').value;
             const link = document.getElementById('gw-link').value;
-            const doc = await db.collection("config").doc("site_settings").get();
-            const list = doc.exists && doc.data().payment_methods ? doc.data().payment_methods : [];
-            list.push({ name, link, active: true });
-            await db.collection("config").doc("site_settings").update({ payment_methods: list });
+            
+            await db.collection("payment_methods").add({ name, link, active: true });
             closeModal();
-            renderConfig();
+            showToast("Gateway Added", "success");
+            logActivity(`Added payment gateway: ${name}`);
         }
         
-        function editGateway(idx) {
-            db.collection("config").doc("site_settings").get().then(doc => {
-                const list = doc.data().payment_methods;
-                const gw = list[idx];
+        function editGateway(docId) {
+            db.collection("payment_methods").doc(docId).get().then(doc => {
+                const gw = doc.data();
                 showModal("Edit Payment Gateway", `
                     <label>Gateway Name</label><input id="e-gw-name" value="${gw.name}" class="mb-4">
                     <label>Payment Link / URL</label><input id="e-gw-link" value="${gw.link}" class="mb-4">
-                `, `<button class="btn btn-primary" onclick="saveEditedGateway(${idx})">Save</button>`);
+                `, `<button class="btn btn-primary" onclick="saveEditedGateway('${docId}')">Save</button>`);
             });
         }
         
-        async function saveEditedGateway(idx) {
+        // UPDATED: Edit in dedicated collection
+        async function saveEditedGateway(docId) {
             const name = document.getElementById('e-gw-name').value;
             const link = document.getElementById('e-gw-link').value;
             
-            const doc = await db.collection("config").doc("site_settings").get();
-            const list = doc.data().payment_methods;
-            
-            list[idx].name = name;
-            list[idx].link = link;
-            
-            await db.collection("config").doc("site_settings").update({ payment_methods: list });
+            await db.collection("payment_methods").doc(docId).update({ name, link });
             closeModal();
             renderConfig();
             showToast("Gateway Updated", "success");
             logActivity(`Edited payment gateway: ${name}`);
         }
         
-        async function toggleGatewayStatus(idx) {
-            const doc = await db.collection("config").doc("site_settings").get();
-            const list = doc.data().payment_methods;
-            list[idx].active = !list[idx].active;
-            await db.collection("config").doc("site_settings").update({ payment_methods: list });
+        // UPDATED: Toggle in dedicated collection
+        async function toggleGatewayStatus(docId) {
+            const docRef = await db.collection("payment_methods").doc(docId).get();
+            const currentStatus = docRef.data().active;
+            
+            await db.collection("payment_methods").doc(docId).update({ active: !currentStatus });
             renderConfig();
         }
-        async function deleteGateway(idx) {
+        
+        // UPDATED: Delete from dedicated collection
+        async function deleteGateway(docId) {
             if(!confirm("Delete gateway?")) return;
-            const doc = await db.collection("config").doc("site_settings").get();
-            const list = doc.data().payment_methods;
-            list.splice(idx, 1);
-            await db.collection("config").doc("site_settings").update({ payment_methods: list });
+            await db.collection("payment_methods").doc(docId).delete();
             renderConfig();
         }
 
